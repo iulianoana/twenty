@@ -2,6 +2,14 @@
 # Incremental builds: work out which packages a commit range touches and rebuild only those
 # (plus their dependents), in dependency order. See bench/README.md "Build path".
 
+# Prints the useful part of a failed nx log: error lines with context, then the tail.
+show_failure() {
+  local logfile=$1
+  sed 's/\x1b\[[0-9;]*m//g' "$logfile" | grep -iE -B2 -A6 'error|failed|cannot|ENOENT|EACCES' | head -n 120 >&2 || true
+  echo "----- tail of $logfile" >&2
+  tail -n 30 "$logfile" >&2
+}
+
 tree_label() {
   if [[ $1 == "$REPO_DIR" ]]; then echo base; else basename "$(dirname "$1")"; fi
 }
@@ -53,9 +61,9 @@ prepare_catalogs() {
   if [[ $mode == extract ]] || strings_changed "$tree" "$pkg" "$base_sha"; then
     log "lingui extract+compile for $pkg"
     nx_in "$tree" run "$pkg:lingui:extract" --output-style=static >"$BUILD_LOG_DIR/lingui-$pkg.log" 2>&1 ||
-      { tail -n 40 "$BUILD_LOG_DIR/lingui-$pkg.log" >&2; die "lingui extract failed for $pkg"; }
+      { show_failure "$BUILD_LOG_DIR/lingui-$pkg.log"; die "lingui extract failed for $pkg"; }
     nx_in "$tree" run "$pkg:lingui:compile" --output-style=static >>"$BUILD_LOG_DIR/lingui-$pkg.log" 2>&1 ||
-      { tail -n 40 "$BUILD_LOG_DIR/lingui-$pkg.log" >&2; die "lingui compile failed for $pkg"; }
+      { show_failure "$BUILD_LOG_DIR/lingui-$pkg.log"; die "lingui compile failed for $pkg"; }
     timing "lingui_${pkg}" $(($(now_s) - start))
   elif [[ -d "$LINGUI_OVERLAY_DIR/$pkg" ]]; then
     # Catalogs extracted on the base build, so strings missing from the committed catalogs still render.
@@ -110,8 +118,7 @@ build_tree() {
   if ! (export NODE_OPTIONS="--max-old-space-size=${FRONT_BUILD_HEAP_MB:-7168}"
     nx_in "$tree" run-many -t build -p "$(IFS=,; echo "${targets[*]}")" --parallel=3 --output-style=static) >"$logfile" 2>&1; then
     release_slot
-    grep -E 'error|Error|ERR!' "$logfile" | tail -n 40 >&2 || true
-    tail -n 40 "$logfile" >&2
+    show_failure "$logfile"
     die "build failed: ${targets[*]}"
   fi
   release_slot
