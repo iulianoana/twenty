@@ -32,8 +32,8 @@ firewall_id() {
     return
   fi
   body=$(jq -nc --arg n "$TWENTY_FIREWALL_NAME" '{name:$n,labels:{"outqube-bench":"true",role:"twenty"},rules:
-    ([22,80,443] | map({direction:"in",protocol:"tcp",port:(tostring),source_ips:["0.0.0.0/0","::/0"]}))
-    + [{direction:"in",protocol:"icmp",source_ips:["0.0.0.0/0","::/0"]}]}')
+    (([22,80,443] | map({direction:"in",protocol:"tcp",port:(tostring),source_ips:["0.0.0.0/0","::/0"]}))
+    + [{direction:"in",protocol:"icmp",source_ips:["0.0.0.0/0","::/0"]}])}')
   resp=$(hcloud POST /firewalls "$body")
   id=$(jq -r '.firewall.id // empty' <<<"$resp")
   [[ -n $id ]] || die "firewall creation failed: $(jq -c '.error // .' <<<"$resp" | cut -c1-300)"
