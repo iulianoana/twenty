@@ -77,6 +77,8 @@ cmd_provision() {
 
 cmd_list() {
   require_secrets
+  hcloud GET '/server_types?per_page=50' | jq -r '.server_types[] | select(.deprecation == null and .cores >= 8 and .architecture == "x86")
+    | "type \(.name) \(.cpu_type) cores=\(.cores) mem=\(.memory)GB disk=\(.disk)GB eur_hourly=\(.prices[0].price_hourly.gross | tonumber * 1000 | round / 1000) locations=\([.prices[].location] | join(","))"'
   twenty_servers | jq -r '.[] | "server id=\(.id) name=\(.name) type=\(.server_type.name) ip=\(.public_net.ipv4.ip) labels=\(.labels|tojson) created=\(.created)"'
 }
 
