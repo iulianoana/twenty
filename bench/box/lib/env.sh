@@ -181,6 +181,7 @@ create_env() {
     lock_exclusive slots
     slot=$(allocate_slot "$name")
     mkdir -p "$dir"
+    chown "$BENCH_USER:" "$dir"
     local port=$((3100 + slot)) redis_port=$((6400 + slot))
     cat >"$dir/meta.new" <<EOF
 NAME=$name
