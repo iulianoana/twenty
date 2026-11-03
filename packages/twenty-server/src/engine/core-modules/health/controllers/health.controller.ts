@@ -16,3 +16,5 @@ export class HealthController {
     return this.health.check([]);
   }
 }
+
+// bench infra test: server-only change
