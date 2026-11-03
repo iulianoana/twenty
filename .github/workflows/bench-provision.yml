@@ -10,12 +10,12 @@ on:
       server_type:
         description: Hetzner server types to try in order (comma-separated), used only when the server has to be created
         type: string
-        default: cx53,cpx52,cx43
+        default: ccx33
       location:
         type: string
         default: fsn1
-      primary_ipv4_id:
-        description: Id of an approved parked Primary IPv4 to create the server with (empty = a new one)
+      primary_ipv4_name:
+        description: Name of an approved parked Primary IPv4 to create the server on (empty = a new one)
         type: string
         default: ""
       reseed:
@@ -53,7 +53,7 @@ jobs:
           SERVER_TYPE: ${{ inputs.server_type }}
           LOCATION: ${{ inputs.location }}
           RESEED: ${{ inputs.reseed && '1' || '' }}
-          PRIMARY_IPV4_ID: ${{ inputs.primary_ipv4_id }}
+          PRIMARY_IPV4_NAME: ${{ inputs.primary_ipv4_name }}
           CONFIRM_DESTROY: ${{ inputs.confirm_destroy }}
         run: |
           case "$OPERATION" in

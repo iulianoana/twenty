@@ -53,6 +53,12 @@ twenty_server_ip() {
   jq -r '.[0].public_net.ipv4.ip' <<<"$servers"
 }
 
+# Public fork logs: the server address and every <ip-dashed>.sslip.io name are masked.
+mask_ip() {
+  echo "::add-mask::$1"
+  echo "::add-mask::${1//./-}"
+}
+
 setup_ssh() {
   local ip=$1
   mkdir -p ~/.ssh
@@ -103,6 +109,7 @@ connect_bench() {
   require_secrets
   local ip
   ip=$(twenty_server_ip)
+  mask_ip "$ip"
   BENCH_IP=$ip
   setup_ssh "$ip"
   wait_for_ssh 120
