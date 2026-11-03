@@ -89,6 +89,27 @@ cmd_list() {
   twenty_servers | jq -r '.[] | "server id=\(.id) name=\(.name) type=\(.server_type.name) ip=\(.public_net.ipv4.ip) labels=\(.labels|tojson) created=\(.created)"'
 }
 
+# Read-only inventory of the whole Hetzner project (GET requests only).
+cmd_inventory() {
+  require_secrets
+  local servers ips snapshots
+  servers=$(hcloud GET '/servers?per_page=50')
+  ips=$(hcloud GET '/primary_ips?per_page=50')
+  snapshots=$(hcloud GET '/images?type=snapshot&per_page=50')
+  echo "== servers"
+  jq -r '.servers[] | "server name=\(.name) id=\(.id) type=\(.server_type.name) cpu=\(.server_type.cpu_type) cores=\(.server_type.cores) status=\(.status) ipv4=\(.public_net.ipv4.ip // "none") location=\(.datacenter.location.name) created=\(.created) labels=\(.labels|tojson)"' <<<"$servers"
+  echo "== primary IPs"
+  jq -r --argjson s "$servers" '($s.servers | map({key: (.id|tostring), value: .name}) | from_entries) as $names
+    | .primary_ips[] | "primary_ip name=\(.name) id=\(.id) type=\(.type) ip=\(.ip) assigned=\(.assignee_id != null) server=\(if .assignee_id then ($names[(.assignee_id|tostring)] // (.assignee_id|tostring)) else "-" end) auto_delete=\(.auto_delete) location=\(.datacenter.location.name // .location.name // "?") created=\(.created) labels=\(.labels|tojson)"' <<<"$ips"
+  echo "== snapshots by label"
+  jq -r '[.images[] | (.labels | to_entries | map("\(.key)=\(.value)") | join(",")) | if . == "" then "(no labels)" else . end] | group_by(.) | .[] | "snapshots \(length) labels=\(.[0])"' <<<"$snapshots"
+  echo "== totals"
+  jq -r '"servers=\(.servers|length) shared_cores=\([.servers[] | select(.server_type.cpu_type == "shared") | .server_type.cores] | add // 0) dedicated_cores=\([.servers[] | select(.server_type.cpu_type == "dedicated") | .server_type.cores] | add // 0)"' <<<"$servers"
+  jq -r '"primary_ipv4=\([.primary_ips[] | select(.type == "ipv4")] | length) assigned_ipv4=\([.primary_ips[] | select(.type == "ipv4" and .assignee_id != null)] | length) unassigned_ipv4=\([.primary_ips[] | select(.type == "ipv4" and .assignee_id == null)] | length) primary_ipv6=\([.primary_ips[] | select(.type == "ipv6")] | length)"' <<<"$ips"
+  jq -r '"pagination servers_total=\(.meta.pagination.total_entries // "?")"' <<<"$servers"
+  jq -r '"pagination primary_ips_total=\(.meta.pagination.total_entries // "?")"' <<<"$ips"
+}
+
 # Deletes the labelled server only when the operator types its exact name; always lists first.
 cmd_destroy() {
   local confirm=${1:-} servers count name id
@@ -110,6 +131,7 @@ cmd_destroy() {
 case ${1:-} in
   provision) shift; cmd_provision "$@" ;;
   list) cmd_list ;;
+  inventory) cmd_inventory ;;
   destroy) shift; cmd_destroy "$@" ;;
   *) die "usage: provision.sh provision|list|destroy" ;;
 esac

@@ -5,7 +5,7 @@ on:
     inputs:
       operation:
         type: choice
-        options: [provision, list, destroy]
+        options: [provision, list, inventory, destroy]
         default: provision
       server_type:
         description: Hetzner server types to try in order (comma-separated), used only when the server has to be created
@@ -54,5 +54,6 @@ jobs:
           case "$OPERATION" in
             provision) bash bench/ci/provision.sh provision "$SERVER_TYPE" "$LOCATION" ;;
             list) bash bench/ci/provision.sh list ;;
+            inventory) bash bench/ci/provision.sh inventory ;;
             destroy) bash bench/ci/provision.sh destroy "$CONFIRM_DESTROY" ;;
           esac
