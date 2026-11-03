@@ -1,0 +1,41 @@
+name: bench-preview
+
+on:
+  push:
+    branches: ["baseline/**", "phase-1/**"]
+  workflow_dispatch:
+    inputs:
+      pr_branch:
+        description: Fleet branch to re-deploy, e.g. baseline/pr20-members-directory
+        type: string
+        required: true
+
+run-name: "bench-preview ${{ github.event_name == 'push' && github.ref_name || inputs.pr_branch }}"
+
+concurrency:
+  group: bench-preview-${{ github.event_name == 'push' && github.ref_name || inputs.pr_branch }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      # Scripts always come from main, so infra fixes reach branches cut earlier.
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          sparse-checkout: bench
+          persist-credentials: false
+      - name: Deploy preview
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+          BENCH_SSH_PRIVATE_KEY: ${{ secrets.BENCH_SSH_PRIVATE_KEY }}
+          GH_TOKEN: ${{ github.token }}
+          PR_BRANCH: ${{ github.event_name == 'push' && github.ref_name || inputs.pr_branch }}
+          PUSH_SHA: ${{ github.event_name == 'push' && github.sha || '' }}
+        run: bash bench/ci/preview.sh deploy "$PR_BRANCH" "$PUSH_SHA"

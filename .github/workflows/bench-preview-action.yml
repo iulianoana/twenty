@@ -1,0 +1,42 @@
+name: bench-preview-action
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_branch:
+        type: string
+        required: true
+      action:
+        type: choice
+        options: [reset-db, rotate-auth-secret]
+        required: true
+      request_id:
+        type: string
+        required: true
+
+run-name: "bench-preview-action ${{ inputs.request_id }}"
+
+concurrency:
+  group: bench-preview-action-${{ inputs.pr_branch }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  action:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          sparse-checkout: bench
+          persist-credentials: false
+      - name: Run ${{ inputs.action }}
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+          BENCH_SSH_PRIVATE_KEY: ${{ secrets.BENCH_SSH_PRIVATE_KEY }}
+          PR_BRANCH: ${{ inputs.pr_branch }}
+          BENCH_ACTION: ${{ inputs.action }}
+        run: bash bench/ci/preview.sh action "$PR_BRANCH" "$BENCH_ACTION"

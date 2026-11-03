@@ -1,0 +1,12 @@
+[Unit]
+Description=Twenty bench redis (%i)
+After=network.target
+
+[Service]
+User=twenty
+EnvironmentFile=/opt/twenty-bench/secrets/env/%i.env
+ExecStart=/usr/bin/redis-server --port ${REDIS_PORT} --bind 127.0.0.1 --save "" --appendonly no --maxmemory-policy noeviction --dir /tmp
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

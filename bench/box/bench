@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC2153
+# Twenty bench box CLI. Runs as root on the bench server; called over SSH by the bench-* workflows.
+# Usage: bench <command> [args]   (see bench/README.md)
+set -Eeuo pipefail
+
+SELF_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# shellcheck source=lib/common.sh
+source "$SELF_DIR/lib/common.sh"
+# shellcheck source=lib/build.sh
+source "$SELF_DIR/lib/build.sh"
+# shellcheck source=lib/env.sh
+source "$SELF_DIR/lib/env.sh"
+# shellcheck source=lib/probe.sh
+source "$SELF_DIR/lib/probe.sh"
+# shellcheck source=lib/provision.sh
+source "$SELF_DIR/lib/provision.sh"
+
+usage() {
+  cat <<'EOF'
+bench provision [--ip IP] [--main-sha SHA] [--reseed]
+bench deploy <env> <branch> <sha>
+bench action <env> reset-db|rotate-auth-secret
+bench teardown <env>
+bench status
+bench logs <env> [lines]
+bench probe-login <env>
+bench probe-create <env> <marker>
+bench probe-find <env> <marker>
+EOF
+}
+
+cmd_provision() {
+  local ip="" main_sha="" reseed=0 start
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+      --ip) ip=$2; shift 2 ;;
+      --main-sha) main_sha=$2; shift 2 ;;
+      --reseed) reseed=1; shift ;;
+      *) die "unknown provision option $1" ;;
+    esac
+  done
+  start=$(now_s)
+  lock_exclusive provision
+  provision_system "$ip"
+  provision_base "$main_sha"
+  provision_template "$reseed"
+  main_sha=$(cat "$STATE_DIR/base.sha")
+  if [[ $reseed == 1 ]] && env_exists main; then
+    (
+      lock_exclusive env-main
+      services stop main
+      clone_database main
+      flush_redis main
+      services restart main
+      wait_ready main 300 || die "main did not become ready after reseed"
+    )
+  fi
+  deploy_env main main "$main_sha"
+  write_logins
+  probe_login main
+  timing provision_total $(($(now_s) - start))
+  record_event provision main "$main_sha"
+  cmd_status
+}
+
+cmd_status() {
+  load_config
+  local meta
+  echo "BENCH_STATUS ip=$PUBLIC_IP host_suffix=$HOST_SUFFIX cpus=${CPUS:-?} mem_gb=${MEM_GB:-?} front_build_slots=$FRONT_BUILD_SLOTS max_previews=$MAX_PREVIEWS"
+  echo "BENCH_STATUS base=$(cat "$STATE_DIR/base.sha" 2>/dev/null || echo none) template=$(cat "$STATE_DIR/template.ok" 2>/dev/null || echo none)"
+  for meta in "$ENVS_DIR"/*/meta; do
+    [[ -f $meta ]] || continue
+    (
+      # shellcheck disable=SC1090,SC2153
+      source "$meta"
+      local health
+      health=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 --resolve "$HOST:443:127.0.0.1" "https://$HOST/healthz" || true)
+      echo "BENCH_ENV name=$NAME slot=$SLOT url=https://$HOST built=$(cut -c1-12 "$(dirname "$meta")/built.sha" 2>/dev/null) healthz=$health server=$(systemctl is-active "twenty-server@$NAME") worker=$(systemctl is-active "twenty-worker@$NAME")"
+    )
+  done
+  free -g | sed 's/^/BENCH_MEM /'
+  df -h / | tail -n1 | sed 's/^/BENCH_DISK /'
+}
+
+main() {
+  require_root
+  local cmd=${1:-}
+  shift || true
+  case $cmd in
+    provision) cmd_provision "$@" ;;
+    deploy)
+      [[ $# == 3 ]] || { usage; exit 2; }
+      load_config
+      deploy_env "$1" "$2" "$3"
+      ;;
+    action)
+      [[ $# == 2 ]] || { usage; exit 2; }
+      load_config
+      [[ $1 != main ]] || die "runner actions are for previews only"
+      case $2 in
+        reset-db) action_reset_db "$1" ;;
+        rotate-auth-secret) action_rotate_auth_secret "$1" ;;
+        *) die "unknown action $2" ;;
+      esac
+      ;;
+    teardown)
+      [[ $# == 1 ]] || { usage; exit 2; }
+      load_config
+      teardown_env "$1"
+      ;;
+    status) cmd_status ;;
+    logs)
+      load_config
+      journalctl -u "twenty-server@$1" -u "twenty-worker@$1" -n "${2:-200}" --no-pager -o short-iso | cut -c1-400
+      ;;
+    probe-login) load_config; probe_login "$1" ;;
+    probe-create) load_config; probe_create_company "$1" "$2" ;;
+    probe-find) load_config; probe_find_company "$1" "$2" ;;
+    *) usage; exit 2 ;;
+  esac
+}
+
+main "$@"

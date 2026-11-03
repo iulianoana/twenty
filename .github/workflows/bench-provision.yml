@@ -1,0 +1,58 @@
+name: bench-provision
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        type: choice
+        options: [provision, list, destroy]
+        default: provision
+      server_type:
+        description: Hetzner server type, used only when the server has to be created
+        type: string
+        default: cx53
+      location:
+        type: string
+        default: fsn1
+      reseed:
+        description: Re-seed the template database and main's database
+        type: boolean
+        default: false
+      confirm_destroy:
+        description: For destroy, the exact server name (outqube-bench-twenty); anything else is a dry run
+        type: string
+        default: ""
+
+run-name: "bench-provision ${{ inputs.operation }}"
+
+concurrency:
+  group: bench-provision
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: bench
+          persist-credentials: false
+      - name: ${{ inputs.operation }}
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+          BENCH_SSH_PRIVATE_KEY: ${{ secrets.BENCH_SSH_PRIVATE_KEY }}
+          OPERATION: ${{ inputs.operation }}
+          SERVER_TYPE: ${{ inputs.server_type }}
+          LOCATION: ${{ inputs.location }}
+          RESEED: ${{ inputs.reseed && '1' || '' }}
+          CONFIRM_DESTROY: ${{ inputs.confirm_destroy }}
+        run: |
+          case "$OPERATION" in
+            provision) bash bench/ci/provision.sh provision "$SERVER_TYPE" "$LOCATION" ;;
+            list) bash bench/ci/provision.sh list ;;
+            destroy) bash bench/ci/provision.sh destroy "$CONFIRM_DESTROY" ;;
+          esac

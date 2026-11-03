@@ -1,0 +1,42 @@
+name: bench-preview-teardown
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      pr_branch:
+        type: string
+        required: true
+
+run-name: "bench-preview-teardown ${{ github.event_name == 'pull_request' && github.head_ref || inputs.pr_branch }}"
+
+concurrency:
+  group: bench-preview-${{ github.event_name == 'pull_request' && github.head_ref || inputs.pr_branch }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  teardown:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      startsWith(github.head_ref, 'baseline/') || startsWith(github.head_ref, 'phase-1/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          sparse-checkout: bench
+          persist-credentials: false
+      - name: Tear down preview
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+          BENCH_SSH_PRIVATE_KEY: ${{ secrets.BENCH_SSH_PRIVATE_KEY }}
+          GH_TOKEN: ${{ github.token }}
+          PR_BRANCH: ${{ github.event_name == 'pull_request' && github.head_ref || inputs.pr_branch }}
+        run: bash bench/ci/preview.sh teardown "$PR_BRANCH"

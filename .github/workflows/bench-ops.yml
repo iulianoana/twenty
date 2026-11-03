@@ -1,0 +1,43 @@
+name: bench-ops
+
+on:
+  workflow_dispatch:
+    inputs:
+      command:
+        type: choice
+        options: [status, logs, probe-login, probe-create, probe-find, deploy-main]
+        default: status
+      arg1:
+        description: Environment name (main or a preview slug)
+        type: string
+        default: main
+      arg2:
+        description: Second argument (marker name, or log lines)
+        type: string
+        default: ""
+      request_id:
+        type: string
+        default: ""
+
+run-name: "bench-ops ${{ inputs.command }} ${{ inputs.arg1 }} ${{ inputs.request_id }}"
+
+permissions:
+  contents: read
+
+jobs:
+  ops:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: bench
+          persist-credentials: false
+      - name: ${{ inputs.command }}
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+          BENCH_SSH_PRIVATE_KEY: ${{ secrets.BENCH_SSH_PRIVATE_KEY }}
+          OPS_COMMAND: ${{ inputs.command }}
+          OPS_ARG1: ${{ inputs.arg1 }}
+          OPS_ARG2: ${{ inputs.arg2 }}
+        run: bash bench/ci/preview.sh ops "$OPS_COMMAND" "$OPS_ARG1" "$OPS_ARG2"

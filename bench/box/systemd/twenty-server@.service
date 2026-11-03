@@ -1,0 +1,16 @@
+[Unit]
+Description=Twenty bench server (%i)
+After=network.target postgresql.service twenty-redis@%i.service
+Requires=twenty-redis@%i.service
+
+[Service]
+User=twenty
+EnvironmentFile=/opt/twenty-bench/secrets/env/%i.env
+WorkingDirectory=/opt/twenty-bench/envs/%i/src/packages/twenty-server
+ExecStart=/opt/twenty-bench/node/bin/node dist/main
+Restart=on-failure
+RestartSec=3
+MemoryMax=4G
+
+[Install]
+WantedBy=multi-user.target
