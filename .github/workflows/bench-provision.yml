@@ -14,6 +14,10 @@ on:
       location:
         type: string
         default: fsn1
+      primary_ipv4_id:
+        description: Id of an approved parked Primary IPv4 to create the server with (empty = a new one)
+        type: string
+        default: ""
       reseed:
         description: Re-seed the template database and main's database
         type: boolean
@@ -49,6 +53,7 @@ jobs:
           SERVER_TYPE: ${{ inputs.server_type }}
           LOCATION: ${{ inputs.location }}
           RESEED: ${{ inputs.reseed && '1' || '' }}
+          PRIMARY_IPV4_ID: ${{ inputs.primary_ipv4_id }}
           CONFIRM_DESTROY: ${{ inputs.confirm_destroy }}
         run: |
           case "$OPERATION" in

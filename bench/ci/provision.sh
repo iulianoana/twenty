@@ -21,12 +21,24 @@ ssh_key_id() {
 create_server() {
   local server_types=$1 first_location=$2 key_id server_type location body resp code
   key_id=$(ssh_key_id)
+  local public_net='{"enable_ipv4":true,"enable_ipv6":false}' locations=("$first_location" fsn1 nbg1 hel1)
+  if [[ -n ${PRIMARY_IPV4_ID:-} ]]; then
+    # Borrowed parked IP (operator-approved): only assigned through server creation, never modified,
+    # so deleting the server leaves it parked again (auto_delete stays false).
+    local primary_ip
+    primary_ip=$(hcloud GET "/primary_ips/$PRIMARY_IPV4_ID")
+    jq -e '.primary_ip.type == "ipv4" and .primary_ip.assignee_id == null and .primary_ip.auto_delete == false' <<<"$primary_ip" >/dev/null ||
+      die "primary IP $PRIMARY_IPV4_ID is not a parked IPv4 with auto_delete=false"
+    locations=("$(jq -r '.primary_ip.location.name // .primary_ip.datacenter.location.name' <<<"$primary_ip")")
+    public_net=$(jq -nc --argjson id "$PRIMARY_IPV4_ID" '{enable_ipv4:true,enable_ipv6:false,ipv4:$id}')
+    log "using parked primary IPv4 $PRIMARY_IPV4_ID in ${locations[0]}"
+  fi
   IFS=, read -ra types <<<"$server_types"
   for server_type in "${types[@]}"; do
-    for location in "$first_location" fsn1 nbg1 hel1; do
-      body=$(jq -nc --arg n "$TWENTY_SERVER_NAME" --arg t "$server_type" --arg l "$location" --argjson k "$key_id" \
+    for location in "${locations[@]}"; do
+      body=$(jq -nc --arg n "$TWENTY_SERVER_NAME" --arg t "$server_type" --arg l "$location" --argjson k "$key_id" --argjson p "$public_net" \
         '{name:$n,server_type:$t,image:"ubuntu-24.04",location:$l,ssh_keys:[$k],start_after_create:true,
-          labels:{"outqube-bench":"true",role:"twenty"},public_net:{enable_ipv4:true,enable_ipv6:true}}')
+          labels:{"outqube-bench":"true",role:"twenty"},public_net:$p}')
       log "creating $server_type in $location"
       resp=$(hcloud POST /servers "$body")
       if jq -e '.server.id' <<<"$resp" >/dev/null; then
