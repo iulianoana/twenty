@@ -100,7 +100,7 @@ load_bench_secrets() {
 as_bench() {
   runuser -u "$BENCH_USER" -- env \
     PATH="$PATH" HOME="/home/$BENCH_USER" \
-    NX_DAEMON=false NX_NO_CLOUD=true NX_TUI=false NX_SKIP_NX_CACHE=true \
+    NX_DAEMON=false NX_NO_CLOUD=true NX_TUI=false \
     NX_INTERACTIVE=false YARN_ENABLE_PROGRESS_BARS=false \
     "$@"
 }

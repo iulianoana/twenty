@@ -151,11 +151,12 @@ copy_build_state() {
   while IFS= read -r -d '' path; do
     path=${path%/}
     case $path in
-      .nx | .nx/* | */.local-storage | .local-storage | */logs | logs | .cache | */.cache) continue ;;
+      .nx | */.local-storage | .local-storage | */logs | logs | .cache | */.cache) continue ;;
     esac
     as_bench mkdir -p "$tree/$(dirname "$path")"
     case $path in
-      node_modules | */node_modules) as_bench cp -al "$REPO_DIR/$path" "$tree/$path" ;;
+      # Cache entries and installed packages are never modified in place, so hard links are safe.
+      node_modules | */node_modules | .nx/cache) as_bench cp -al "$REPO_DIR/$path" "$tree/$path" ;;
       *) as_bench cp -a "$REPO_DIR/$path" "$tree/$path" ;;
     esac
   done < <(git -C "$REPO_DIR" ls-files -z --others --ignored --exclude-standard --directory)

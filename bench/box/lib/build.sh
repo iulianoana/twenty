@@ -52,9 +52,9 @@ prepare_catalogs() {
   start=$(now_s)
   if [[ $mode == extract ]] || strings_changed "$tree" "$pkg" "$base_sha"; then
     log "lingui extract+compile for $pkg"
-    nx_in "$tree" run "$pkg:lingui:extract" --excludeTaskDependencies >"$BUILD_LOG_DIR/lingui-$pkg.log" 2>&1 ||
+    nx_in "$tree" run "$pkg:lingui:extract" --output-style=static >"$BUILD_LOG_DIR/lingui-$pkg.log" 2>&1 ||
       { tail -n 40 "$BUILD_LOG_DIR/lingui-$pkg.log" >&2; die "lingui extract failed for $pkg"; }
-    nx_in "$tree" run "$pkg:lingui:compile" --excludeTaskDependencies >>"$BUILD_LOG_DIR/lingui-$pkg.log" 2>&1 ||
+    nx_in "$tree" run "$pkg:lingui:compile" --output-style=static >>"$BUILD_LOG_DIR/lingui-$pkg.log" 2>&1 ||
       { tail -n 40 "$BUILD_LOG_DIR/lingui-$pkg.log" >&2; die "lingui compile failed for $pkg"; }
     timing "lingui_${pkg}" $(($(now_s) - start))
   elif [[ -d "$LINGUI_OVERLAY_DIR/$pkg" ]]; then
@@ -72,78 +72,51 @@ save_catalog_overlay() {
   done
 }
 
-build_one() {
-  local tree=$1 pkg=$2 logfile start
-  logfile="$BUILD_LOG_DIR/build-$pkg.log"
-  start=$(now_s)
-  local -a args=(run "$pkg:build")
-  # twenty-shared keeps its own generateBarrels dependency; it has no upstream package builds.
-  [[ $pkg == twenty-shared ]] || args+=(--excludeTaskDependencies)
-  if [[ $pkg == twenty-front ]]; then
-    (export NODE_OPTIONS="--max-old-space-size=${FRONT_BUILD_HEAP_MB:-7168}"; nx_in "$tree" "${args[@]}") >"$logfile" 2>&1
-  else
-    nx_in "$tree" "${args[@]}" >"$logfile" 2>&1
-  fi || { tail -n 60 "$logfile" >&2; return 1; }
-  timing "build_${pkg}" $(($(now_s) - start))
-}
-
 link_front_into_server() {
   local tree=$1
   as_bench mkdir -p "$tree/packages/twenty-server/dist"
   as_bench ln -sfn ../../twenty-front/build "$tree/packages/twenty-server/dist/front"
 }
 
-# Builds BUILD_SET in tree. mode=extract runs Lingui extraction for every catalog package.
+# Builds whatever BUILD_SET needs in tree. One nx run builds the server and/or front with their
+# dependency tasks; the worktree's nx cache (seeded from the base build) skips unchanged packages.
+# mode=extract runs Lingui extraction for every catalog package.
 build_tree() {
   local tree=$1 base_sha=$2 mode=$3
   shift 3
-  local -a set=("$@")
-  local pkg server_pid="" front_wanted=0 server_wanted=0
+  local -a set=("$@") targets=()
+  local pkg logfile start front=0
   BUILD_LOG_DIR="$LOG_DIR/build/$(tree_label "$tree")"
   mkdir -p "$BUILD_LOG_DIR"
   chown -R "$BENCH_USER" "$BUILD_LOG_DIR"
   [[ ${#set[@]} -gt 0 ]] || { log "nothing to build"; return 0; }
-  log "building: ${set[*]}"
-
+  log "changed packages: ${set[*]}"
   for pkg in "${set[@]}"; do
     case $pkg in
-      twenty-server) server_wanted=1 ;;
-      twenty-front) front_wanted=1 ;;
-      *)
-        prepare_catalogs "$tree" "$pkg" "$base_sha" "$mode"
-        build_one "$tree" "$pkg" || die "build failed: $pkg"
-        ;;
+      twenty-server) targets+=(twenty-server) ;;
+      twenty-front) targets+=(twenty-front) front=1 ;;
     esac
   done
-
-  # Server and front have no dependency on each other, so they build in parallel.
-  if [[ $server_wanted == 1 ]]; then
-    prepare_catalogs "$tree" twenty-server "$base_sha" "$mode"
-    build_one "$tree" twenty-server >"$BUILD_LOG_DIR/server-job.out" 2>&1 &
-    server_pid=$!
-  fi
-  if [[ $front_wanted == 1 ]]; then
-    local wait_start
-    wait_start=$(now_s)
+  if [[ $front == 1 ]]; then
+    start=$(now_s)
     acquire_slot front-build "$FRONT_BUILD_SLOTS"
-    timing front_build_queue $(($(now_s) - wait_start))
-    prepare_catalogs "$tree" twenty-front "$base_sha" "$mode"
-    if ! build_one "$tree" twenty-front; then
-      release_slot
-      [[ -z $server_pid ]] || wait "$server_pid" || true
-      die "build failed: twenty-front"
-    fi
+    timing front_build_queue $(($(now_s) - start))
+  fi
+  for pkg in "${set[@]}"; do
+    prepare_catalogs "$tree" "$pkg" "$base_sha" "$mode" || { release_slot; die "catalogs failed for $pkg"; }
+  done
+  start=$(now_s)
+  logfile="$BUILD_LOG_DIR/build.log"
+  if ! (export NODE_OPTIONS="--max-old-space-size=${FRONT_BUILD_HEAP_MB:-7168}"
+    nx_in "$tree" run-many -t build -p "$(IFS=,; echo "${targets[*]}")" --parallel=3 --output-style=static) >"$logfile" 2>&1; then
     release_slot
+    grep -E 'error|Error|ERR!' "$logfile" | tail -n 40 >&2 || true
+    tail -n 40 "$logfile" >&2
+    die "build failed: ${targets[*]}"
   fi
-  if [[ -n $server_pid ]]; then
-    if ! wait "$server_pid"; then
-      cat "$BUILD_LOG_DIR/server-job.out" >&2
-      die "build failed: twenty-server"
-    fi
-    grep -h '^\[bench' "$BUILD_LOG_DIR/server-job.out" >&2 || true
-    TIMINGS["build_twenty-server"]=$(sed -n 's/.*timing build_twenty-server=\([0-9]*\)s.*/\1/p' "$BUILD_LOG_DIR/server-job.out" | tail -n1)
-    TIMING_KEYS+=(build_twenty-server)
-  fi
+  release_slot
+  grep -E '^\s+Cache:|Successfully ran' "$logfile" | sed 's/^ */nx: /' >&2 || true
+  timing build_nx $(($(now_s) - start))
   link_front_into_server "$tree"
 }
 
