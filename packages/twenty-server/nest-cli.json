@@ -66,10 +66,6 @@
         "outDir": "dist"
       },
       {
-        "include": "engine/core-modules/code-interpreter/sandbox-scripts/**",
-        "outDir": "dist"
-      },
-      {
         "include": "engine/core-modules/dpa/constants/subprocessors.json",
         "outDir": "dist"
       },

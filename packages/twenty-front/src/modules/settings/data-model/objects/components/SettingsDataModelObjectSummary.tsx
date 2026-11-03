@@ -1,11 +1,12 @@
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
+
 import { ObjectMetadataIcon } from '@/object-metadata/components/ObjectMetadataIcon';
 import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
 import { SettingsItemTypeTag } from '@/settings/components/SettingsItemTypeTag';
 import { OverflowingTextWithTooltip } from 'twenty-ui/primitives/typography';
 import { IconBox } from 'twenty-ui/icon';
 import { useTheme, themeCssVariables } from 'twenty-ui/theme';
-import { useLingui } from '@lingui/react/macro';
 
 export type SettingsDataModelObjectPreviewProps = {
   className?: string;
@@ -110,7 +111,6 @@ const SettingsDataModelObjectPreviewOtherObjects = ({
 }: {
   selected: number;
 }) => {
-  const { t } = useLingui();
   const theme = useTheme();
 
   return (

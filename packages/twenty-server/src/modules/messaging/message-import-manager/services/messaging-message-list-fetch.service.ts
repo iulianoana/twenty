@@ -151,8 +151,9 @@ export class MessagingMessageListFetchService {
           );
 
           const messageChannelMessageAssociationRepository =
-            this.workspaceOrmManager.getRepositoryWithoutPermissionChecks<MessageChannelMessageAssociationWorkspaceEntity>(
+            this.workspaceOrmManager.getRepository<MessageChannelMessageAssociationWorkspaceEntity>(
               'messageChannelMessageAssociation',
+              { shouldBypassPermissionChecks: true },
             );
 
           const messageExternalIdsChunks = chunk(messageExternalIds, 200);
@@ -362,8 +363,9 @@ export class MessagingMessageListFetchService {
     messageExternalIds: string[],
   ) {
     const messageChannelMessageAssociationRepository =
-      this.workspaceOrmManager.getRepositoryWithoutPermissionChecks<MessageChannelMessageAssociationWorkspaceEntity>(
+      this.workspaceOrmManager.getRepository<MessageChannelMessageAssociationWorkspaceEntity>(
         'messageChannelMessageAssociation',
+        { shouldBypassPermissionChecks: true },
       );
 
     const fullSyncMessageChannelMessageAssociationsToDelete = [];

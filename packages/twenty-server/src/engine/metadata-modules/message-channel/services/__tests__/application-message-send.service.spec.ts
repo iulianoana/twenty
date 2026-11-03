@@ -77,7 +77,7 @@ describe('ApplicationMessageSendService', () => {
       { ingest } as unknown as ApplicationMessageIngestionService,
       {
         executeInWorkspaceContext: jest.fn((callback) => callback()),
-        getRepositoryWithoutPermissionChecks: jest.fn((objectName: string) => ({
+        getRepository: jest.fn((objectName: string) => ({
           find: jest.fn().mockResolvedValue(rowsByObjectName[objectName] ?? []),
         })),
       } as unknown as WorkspaceOrmManager,

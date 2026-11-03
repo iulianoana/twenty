@@ -1,11 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-import { type Context, type ProviderOptions } from '@ai-sdk/provider-utils';
+import { type ProviderOptions } from '@ai-sdk/provider-utils';
 import {
   isStepCount,
   type ModelMessage,
   NoOutputGeneratedError,
-  type OutputInterface,
   type StepResult,
   type StopCondition,
   streamText,
@@ -53,8 +52,6 @@ import {
 // chat and agent runs report to their own metric keys, so existing dashboards keep their series
 type AgentStepLoopMetricsScope = 'chat' | 'agent';
 
-type AgentStepLoopOutput = OutputInterface<unknown, unknown, never>;
-
 type ToolMetricKeys = {
   succeeded: MetricsKeys;
   failed: MetricsKeys;
@@ -100,7 +97,6 @@ export type AgentStepLoopInput = {
   messages: ModelMessage[];
   tools: ToolSet;
   toolChoice?: 'auto' | 'required';
-  output?: AgentStepLoopOutput;
   abortSignal?: AbortSignal;
   offeredPausingToolNames: string[];
   shouldStopAfterStep?: StopCondition<ToolSet>;
@@ -123,7 +119,7 @@ export type AgentStepLoopInput = {
 };
 
 export type AgentStepLoop = {
-  stream: ReturnType<typeof streamText<ToolSet, Context, AgentStepLoopOutput>>;
+  stream: ReturnType<typeof streamText<ToolSet>>;
   getStopReason: () => StepDebitResult['stopReason'];
 };
 
@@ -156,7 +152,6 @@ export class AgentStepLoopService {
     messages,
     tools,
     toolChoice = 'auto',
-    output,
     abortSignal,
     offeredPausingToolNames,
     shouldStopAfterStep,
@@ -255,13 +250,12 @@ export class AgentStepLoopService {
       providerOptions: getCacheProviderOptions(modelConfig),
     };
 
-    const stream = streamText<ToolSet, Context, AgentStepLoopOutput>({
+    const stream = streamText({
       model: registeredModel.model,
       instructions: [systemMessage, ...contextMessages],
       messages,
       tools,
       toolChoice,
-      output,
       abortSignal,
       streamRetries,
       stopWhen: async (step) =>

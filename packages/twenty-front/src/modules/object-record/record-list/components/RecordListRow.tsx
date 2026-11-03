@@ -22,13 +22,12 @@ import { useAtomComponentSelectorValue } from '@/ui/utilities/state/jotai/hooks/
 import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
 import { useAtomFamilyStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomFamilyStateValue';
 import { styled } from '@linaria/react';
-import { plural } from '@lingui/core/macro';
+import { plural, t } from '@lingui/core/macro';
 import { isNonEmptyString } from '@sniptt/guards';
 import { type MouseEvent, type Ref, useContext } from 'react';
 import { isDefined } from 'twenty-shared/utils';
 import { Chip } from 'twenty-ui/primitives/data-display';
 import { themeCssVariables } from 'twenty-ui/theme';
-import { useLingui } from '@lingui/react/macro';
 
 const StyledRowContainer = styled.div`
   cursor: pointer;
@@ -83,7 +82,6 @@ type RecordListRowProps = {
 };
 
 export const RecordListRow = ({ recordId, rowRef }: RecordListRowProps) => {
-  const { t } = useLingui();
   const { objectNameSingular } = useRecordIndexContextOrThrow();
   const {
     labelIdentifierFieldMetadataItem,

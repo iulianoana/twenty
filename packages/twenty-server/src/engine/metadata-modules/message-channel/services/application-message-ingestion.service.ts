@@ -326,10 +326,10 @@ export class ApplicationMessageIngestionService {
       return;
     }
 
-    const repository =
-      this.workspaceOrmManager.getRepositoryWithoutPermissionChecks(
-        objectMetadataName,
-      );
+    const repository = this.workspaceOrmManager.getRepository(
+      objectMetadataName,
+      { shouldBypassPermissionChecks: true },
+    );
 
     const found = await repository.find({
       where: { id: In([...ids]) },

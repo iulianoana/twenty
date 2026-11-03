@@ -1,5 +1,5 @@
 import { type ObjectPermissionAction } from '@/application/objectPermissionActionType';
-import { type RolePermissionGrants } from '@/application/rolePermissionGrantsSchema';
+import { type RoleManifest } from '@/application/roleManifestType';
 
 export type EffectiveObjectPermissions = Record<
   ObjectPermissionAction,
@@ -11,19 +11,13 @@ export const ROLE_LEVEL_FLAG_BY_OBJECT_PERMISSION_ACTION = {
   canUpdateObjectRecords: 'canUpdateAllObjectRecords',
   canSoftDeleteObjectRecords: 'canSoftDeleteAllObjectRecords',
   canDestroyObjectRecords: 'canDestroyAllObjectRecords',
-} as const satisfies Record<ObjectPermissionAction, keyof RolePermissionGrants>;
-
-export type ObjectRecordsPermissionGrants = Pick<
-  RolePermissionGrants,
-  | (typeof ROLE_LEVEL_FLAG_BY_OBJECT_PERMISSION_ACTION)[ObjectPermissionAction]
-  | 'objectPermissions'
->;
+} as const satisfies Record<ObjectPermissionAction, keyof RoleManifest>;
 
 export const getEffectiveObjectPermissionsFromRoleManifest = ({
   role,
   objectUniversalIdentifier,
 }: {
-  role: ObjectRecordsPermissionGrants;
+  role: RoleManifest;
   objectUniversalIdentifier: string;
 }): EffectiveObjectPermissions => {
   const objectPermission = role.objectPermissions?.find(

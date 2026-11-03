@@ -22,7 +22,9 @@ export class RecordPermissionsService {
       await this.workspaceOrmManager.executeInWorkspaceContext(
         () =>
           this.workspaceOrmManager
-            .getRepository(flatObjectMetadata.nameSingular)
+            .getRepositoryWithContextPermissions(
+              flatObjectMetadata.nameSingular,
+            )
             .findRecordIdsAllowedForOperations({
               recordIds,
               operationTypes: ['select', 'update', 'delete', 'soft-delete'],

@@ -303,8 +303,7 @@ export const MANIFEST_ENTITY_REGISTRY: Record<
   },
   validationRule: {
     entityKind: 'validation rule',
-    getCandidates: (manifest) =>
-      toCandidates(manifest.validationRules, (rule) => rule.name),
+    getCandidates: () => NO_MANIFEST_CANDIDATES,
   },
   agentChatChannel: {
     entityKind: 'chat channel',

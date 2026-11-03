@@ -1,4 +1,5 @@
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
 import { isNonEmptyString } from '@sniptt/guards';
 import {
   IconBellOff,
@@ -15,7 +16,6 @@ import { themeCssVariables } from 'twenty-ui/theme';
 import { useNumberFormat } from '@/localization/hooks/useNumberFormat';
 import { SettingsListItemCardContent } from '@/settings/components/SettingsListItemCardContent';
 import { type CampaignAudiencePreviewDto } from '~/generated-metadata/graphql';
-import { useLingui } from '@lingui/react/macro';
 
 const StyledCount = styled.span`
   color: ${themeCssVariables.font.color.tertiary};
@@ -34,7 +34,6 @@ export const SendCampaignRecipientsCard = ({
   listName,
   topicName,
 }: SendCampaignRecipientsCardProps) => {
-  const { t } = useLingui();
   const { formatNumber } = useNumberFormat();
 
   const exclusions = [

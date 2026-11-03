@@ -8,10 +8,10 @@ import { type StreamErrorPayload } from 'src/engine/metadata-modules/ai/ai-histo
 import { BaseWorkspaceEntity } from 'src/engine/twenty-orm/base.workspace-entity';
 
 export class AgentTurnWorkspaceEntity extends BaseWorkspaceEntity {
-  thread: EntityRelation<AgentChatThreadWorkspaceEntity> | null;
+  thread: EntityRelation<AgentChatThreadWorkspaceEntity>;
   messages: EntityRelation<AgentMessageWorkspaceEntity[]>;
 
-  threadId: string | null;
+  threadId: string;
   agentId: string | null;
   status: AgentTurnStatus;
   error: StreamErrorPayload | null;

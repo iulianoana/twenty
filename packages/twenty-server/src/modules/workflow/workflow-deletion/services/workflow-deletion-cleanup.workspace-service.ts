@@ -46,8 +46,9 @@ export class WorkflowDeletionCleanupWorkspaceService {
     where: { coreWorkflowId: string } | { coreWorkflowVersionId: string };
   }): Promise<void> {
     const workflowRunRepository =
-      this.workspaceOrmManager.getRepositoryWithoutPermissionChecks<WorkflowRunWorkspaceEntity>(
+      this.workspaceOrmManager.getRepository<WorkflowRunWorkspaceEntity>(
         'workflowRun',
+        { shouldBypassPermissionChecks: true },
       );
 
     const findRunBatch = () =>

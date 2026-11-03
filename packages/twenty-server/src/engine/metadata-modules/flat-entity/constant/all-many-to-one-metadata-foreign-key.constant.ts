@@ -185,7 +185,6 @@ export const ALL_MANY_TO_ONE_METADATA_FOREIGN_KEY = {
     webhook: {
       foreignKey: 'webhookId',
     },
-    targetApplication: null,
     workspace: null,
     application: null,
   },

@@ -1,4 +1,5 @@
 import { useMutation } from '@apollo/client/react';
+import { t } from '@lingui/core/macro';
 import { isDefined, isNonEmptyArray } from 'twenty-shared/utils';
 
 import { dispatchObjectRecordOperationBrowserEvent } from '@/browser-event/utils/dispatchObjectRecordOperationBrowserEvent';
@@ -22,10 +23,8 @@ import {
   type DeleteCoreWorkflowsMutationVariables,
 } from '~/generated/graphql';
 import { logError } from '~/utils/logError';
-import { useLingui } from '@lingui/react/macro';
 
 export const useDeleteSelectedCoreWorkflows = () => {
-  const { t } = useLingui();
   const apolloCoreClient = useApolloCoreClient();
 
   const { objectMetadataItem } = useObjectMetadataItem({

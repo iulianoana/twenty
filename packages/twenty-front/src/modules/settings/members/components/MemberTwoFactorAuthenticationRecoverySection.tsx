@@ -5,6 +5,7 @@ import { useGeneratedRecoveryCode } from '@/settings/two-factor-authentication/h
 import { useDialog } from '@/ui/layout/dialog/hooks/useDialog';
 import { useMutation, useQuery } from '@apollo/client/react';
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
 import { isNonEmptyString } from '@sniptt/guards';
 import { isDefined } from 'twenty-shared/utils';
 import { useToast } from 'twenty-ui/components/feedback';
@@ -18,7 +19,6 @@ import {
   TwoFactorAuthenticationRecoveryStatusDocument,
 } from '~/generated-metadata/graphql';
 import { beautifyExactDateTime } from '~/utils/date-utils';
-import { useLingui } from '@lingui/react/macro';
 
 const StyledContent = styled.div`
   display: flex;
@@ -46,7 +46,6 @@ export const MemberTwoFactorAuthenticationRecoverySection = ({
   userId,
   memberName,
 }: MemberTwoFactorAuthenticationRecoverySectionProps) => {
-  const { t } = useLingui();
   const generateRecoveryCodeDialogId = `member-two-factor-authentication-recovery-code-dialog-${userId}`;
   const { openDialog } = useDialog();
   const { enqueueToast } = useToast();

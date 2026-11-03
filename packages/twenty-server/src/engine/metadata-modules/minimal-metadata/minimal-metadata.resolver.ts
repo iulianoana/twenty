@@ -7,26 +7,25 @@ import { WorkspaceEntity } from 'src/engine/core-modules/workspace/workspace.ent
 import { AuthUserWorkspaceId } from 'src/engine/decorators/auth/auth-user-workspace-id.decorator';
 import { AuthWorkspace } from 'src/engine/decorators/auth/auth-workspace.decorator';
 import { AllowSuspendedWorkspace } from 'src/engine/decorators/auth/allow-suspended-workspace.decorator';
+import { NoPermissionGuard } from 'src/engine/guards/no-permission.guard';
+import { AuthPrincipalGuard } from 'src/engine/guards/auth-principal.guard';
 import { MinimalMetadataDTO } from 'src/engine/metadata-modules/minimal-metadata/dtos/minimal-metadata.dto';
 import { MinimalMetadataService } from 'src/engine/metadata-modules/minimal-metadata/minimal-metadata.service';
-import { AccessPolicyGuard } from 'src/engine/guards/access-policy.guard';
 
 @MetadataResolver(() => MinimalMetadataDTO)
 @UseGuards(
-  AccessPolicyGuard({
-    authPrincipals: {
-      userSession: {
-        standard: true,
-        impersonated: true,
-        playground: true,
-        workspaceAgnostic: false,
-      },
-      apiKey: true,
-      oauthClient: true,
-      application: true,
+  AuthPrincipalGuard({
+    userSession: {
+      standard: true,
+      impersonated: true,
+      playground: true,
+      workspaceAgnostic: false,
     },
-    requiredPermissionFlags: [],
+    apiKey: true,
+    oauthClient: true,
+    application: true,
   }),
+  NoPermissionGuard,
 )
 export class MinimalMetadataResolver {
   constructor(

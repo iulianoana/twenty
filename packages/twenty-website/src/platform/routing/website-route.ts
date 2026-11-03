@@ -3,7 +3,6 @@ import { type MetadataRoute } from 'next';
 
 export type WebsiteRouteId =
   | 'affiliatePartners'
-  | 'affiliatePartnersTerms'
   | 'apps'
   | 'comparePricingDynamics'
   | 'comparePricingHubspot'

@@ -42,18 +42,17 @@ export type CoreWorkflowFilterPredicate = {
   parameters: unknown[];
 };
 
-const requireExactTextValue = (rule: CoreWorkflowFilterRuleInput): string => {
-  if (!isNonEmptyString(rule.value) || rule.value.trim() === '') {
+const requireTextValue = (rule: CoreWorkflowFilterRuleInput): string => {
+  const trimmedValue = rule.value?.trim();
+
+  if (!isNonEmptyString(trimmedValue)) {
     throw new UserInputError(
       `Operand ${rule.operand} on field ${rule.fieldKey} requires a value`,
     );
   }
 
-  return rule.value;
+  return trimmedValue;
 };
-
-const requireTextValue = (rule: CoreWorkflowFilterRuleInput): string =>
-  requireExactTextValue(rule).trim();
 
 const parseJsonValue = (value: string): unknown => {
   try {
@@ -258,10 +257,8 @@ const PREDICATE_BUILDER_BY_OPERAND_BY_FIELD_KEY: Record<
         pattern: `%${escapeForIlike(requireTextValue(rule))}%`,
         negated: true,
       }),
-    [CoreWorkflowFilterOperand.IS]: ({ rule, bindParameter }) =>
-      `${NAME_COLUMN} = ${bindParameter(requireExactTextValue(rule))}`,
-    [CoreWorkflowFilterOperand.IS_NOT]: ({ rule, bindParameter }) =>
-      `(${NAME_COLUMN} IS NULL OR ${NAME_COLUMN} <> ${bindParameter(requireExactTextValue(rule))})`,
+    [CoreWorkflowFilterOperand.IS]: null,
+    [CoreWorkflowFilterOperand.IS_NOT]: null,
     [CoreWorkflowFilterOperand.IS_EMPTY]: () =>
       `(${NAME_COLUMN} IS NULL OR ${NAME_COLUMN} = '')`,
     [CoreWorkflowFilterOperand.IS_NOT_EMPTY]: () =>

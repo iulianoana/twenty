@@ -32,14 +32,18 @@ export const SettingsAccountGroupsEmptyState = ({
 
   return (
     <StyledCardsContainer>
-      {builtInAccountApps.map((app) => (
-        <SettingsCard
-          key={app.id}
-          Icon={<app.Icon size={theme.icon.size.md} />}
-          title={t(app.connectTitle)}
-          onClick={() => addBuiltInAccount(app)}
-        />
-      ))}
+      {builtInAccountApps.map((app) => {
+        const appName = t(app.name);
+
+        return (
+          <SettingsCard
+            key={app.id}
+            Icon={<app.Icon size={theme.icon.size.md} />}
+            title={t`Connect with ${appName}`}
+            onClick={() => addBuiltInAccount(app)}
+          />
+        );
+      })}
       {!isDefined(builtInAccountApp) && <SettingsApplicationConnectCards />}
     </StyledCardsContainer>
   );

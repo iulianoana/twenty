@@ -353,8 +353,9 @@ export class RecordShareStorageService {
       }
 
       return work(
-        transactionScope.getRepositoryWithoutPermissionChecks<RecordShare>(
+        transactionScope.getRepository<RecordShare>(
           RECORD_SHARE_OBJECT_METADATA_NAME,
+          { shouldBypassPermissionChecks: true },
           { shouldSkipEventEmission: true },
         ),
       );
@@ -363,8 +364,9 @@ export class RecordShareStorageService {
     return this.workspaceOrmManager.executeInWorkspaceContext(
       () =>
         work(
-          this.workspaceOrmManager.getRepositoryWithoutPermissionChecks<RecordShare>(
+          this.workspaceOrmManager.getRepository<RecordShare>(
             RECORD_SHARE_OBJECT_METADATA_NAME,
+            { shouldBypassPermissionChecks: true },
             { shouldSkipEventEmission: true },
           ),
         ),

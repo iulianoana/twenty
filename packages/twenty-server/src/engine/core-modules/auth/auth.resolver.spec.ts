@@ -38,7 +38,6 @@ import { UserWorkspaceService } from 'src/engine/core-modules/user-workspace/use
 import { UserService } from 'src/engine/core-modules/user/services/user.service';
 import { UserEntity } from 'src/engine/core-modules/user/user.entity';
 import { AuthProviderEnum } from 'src/engine/core-modules/workspace/types/workspace.type';
-import { AccessPolicyService } from 'src/engine/permissions/access-policy/access-policy.service';
 import { PermissionsService } from 'src/engine/permissions/permissions.service';
 
 import { AuthResolver } from './auth.resolver';
@@ -231,7 +230,6 @@ describe('AuthResolver', () => {
           provide: PermissionsService,
           useValue: {},
         },
-        AccessPolicyService,
         {
           provide: FeatureFlagService,
           useValue: {},

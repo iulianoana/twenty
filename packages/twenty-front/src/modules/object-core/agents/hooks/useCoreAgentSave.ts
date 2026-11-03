@@ -1,5 +1,6 @@
 import { CombinedGraphQLErrors } from '@apollo/client/errors';
 import { useMutation } from '@apollo/client/react';
+import { t } from '@lingui/core/macro';
 import { useEffect, useState } from 'react';
 import { isDefined } from 'twenty-shared/utils';
 import { useToast } from 'twenty-ui/components/feedback';
@@ -13,7 +14,6 @@ import {
 } from '~/generated-metadata/graphql';
 import { type CoreAgentFormValues } from '@/object-core/agents/validation-schemas/coreAgentFormSchema';
 import { isDeeplyEqual } from '~/utils/isDeeplyEqual';
-import { useLingui } from '@lingui/react/macro';
 
 export const useCoreAgentSave = ({
   agent,
@@ -30,7 +30,6 @@ export const useCoreAgentSave = ({
   isRoleDirty: boolean;
   validateForm: () => boolean;
 }) => {
-  const { t } = useLingui();
   const { enqueueToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [originalFormValues, setOriginalFormValues] =

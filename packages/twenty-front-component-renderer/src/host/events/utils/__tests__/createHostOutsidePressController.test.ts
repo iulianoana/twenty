@@ -1,4 +1,3 @@
-import { FRONT_COMPONENT_HOST_UI_CLASS_NAME } from '@/constants/FrontComponentHostUiClassName';
 import { createHostOutsidePressController } from '@/host/events/utils/createHostOutsidePressController';
 import { wrapEventHandler } from '@/host/events/utils/wrapEventHandler';
 import { createGeometryTracker } from '@/host/geometry/utils/createGeometryTracker';
@@ -163,45 +162,6 @@ describe('createHostOutsidePressController', () => {
 
       expect(remoteListener).toHaveBeenCalledTimes(1);
       expect(pressEventTransport.pushOwnedPressEvent).not.toHaveBeenCalled();
-    } finally {
-      controller.reset();
-    }
-  });
-
-  it('does not forward host UI presses through an owned ancestor', () => {
-    const {
-      ownedButton,
-      pointerCaptureController,
-      controller,
-      pressEventTransport,
-    } = createOutsidePressControllerFixture();
-    const remoteListener = jest.fn();
-    const hostUi = document.createElement('span');
-    const hostUiLabel = document.createElement('span');
-
-    hostUi.className = FRONT_COMPONENT_HOST_UI_CLASS_NAME;
-    hostUi.append(hostUiLabel);
-    ownedButton.append(hostUi);
-
-    const hostEvent = {
-      type: 'click',
-      bubbles: true,
-      target: hostUiLabel,
-      nativeEvent: { target: hostUiLabel },
-    };
-
-    try {
-      controller.setPressEventTransport(pressEventTransport);
-      controller.observeOutsidePresses();
-      controller.forwardUnhandledOwnedPress(hostEvent);
-      wrapEventHandler({ remoteListener })(hostEvent);
-      controller.forwardUnhandledOwnedPress(hostEvent);
-
-      expect(remoteListener).not.toHaveBeenCalled();
-      expect(pressEventTransport.pushOwnedPressEvent).not.toHaveBeenCalled();
-      expect(
-        pointerCaptureController.claimPointerEventForwarding,
-      ).not.toHaveBeenCalled();
     } finally {
       controller.reset();
     }

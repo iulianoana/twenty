@@ -3,7 +3,7 @@ import { useComputeRecordRelationFilterDisplayValue } from '@/views/hooks/useCom
 import { useGetRecordFilterChipLabelValue } from '@/views/hooks/useGetRecordFilterChipLabelValue';
 
 import { isNonEmptyString } from '@sniptt/guards';
-import { useLingui } from '@lingui/react/macro';
+import { t } from '@lingui/core/macro';
 
 type ObjectFilterDropdownRecordSelectProps = {
   recordFilter: RecordFilter;
@@ -13,7 +13,6 @@ type ObjectFilterDropdownRecordSelectProps = {
 export const useComputeRecordRelationFilterLabelValue = ({
   recordFilter,
 }: ObjectFilterDropdownRecordSelectProps) => {
-  const { t } = useLingui();
   const { getRecordFilterChipLabelValue } = useGetRecordFilterChipLabelValue();
 
   const { displayValue, loading } = useComputeRecordRelationFilterDisplayValue({

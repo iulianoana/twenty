@@ -4,6 +4,7 @@ import { widgetHeaderCountComponentFamilyState } from '@/page-layout/widgets/sta
 import { WidgetCardHeaderActionsRenderer } from '@/page-layout/widgets/widget-card/components/WidgetCardHeaderActionsRenderer';
 import { useAtomComponentFamilyStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentFamilyStateValue';
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
 import { type ReactNode } from 'react';
 import { IconButton } from 'twenty-ui/components/input';
 import { OverflowingTextWithTooltip } from 'twenty-ui/primitives/typography';
@@ -14,8 +15,6 @@ import { WidgetGrip } from '@/page-layout/widgets/widget-card/components/WidgetG
 import { AnimatePresence, motion } from 'framer-motion';
 import { isDefined } from 'twenty-shared/utils';
 import { useTheme, themeCssVariables } from 'twenty-ui/theme';
-import { useLingui } from '@lingui/react/macro';
-
 export type WidgetCardHeaderProps = {
   variant: WidgetCardVariant;
   widgetId: string;
@@ -87,7 +86,6 @@ export const WidgetCardHeader = ({
   forbiddenDisplay,
   className,
 }: WidgetCardHeaderProps) => {
-  const { t } = useLingui();
   const theme = useTheme();
   const { formatNumber } = useNumberFormat();
   const widgetCardHovered = useAtomComponentFamilyStateValue(

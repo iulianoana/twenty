@@ -119,7 +119,7 @@ export class AddPeopleToMessageListService {
         await this.workspaceOrmManager.executeInWorkspaceContext(
           () =>
             this.workspaceOrmManager
-              .getRepository<MessageListMemberWorkspaceEntity>(
+              .getRepositoryWithContextPermissions<MessageListMemberWorkspaceEntity>(
                 'messageListMember',
               )
               .insert(members, { onConflictDoNothing: true }),

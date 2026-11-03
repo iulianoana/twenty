@@ -1,4 +1,5 @@
 import { Command } from 'nest-commander';
+import { FeatureFlagKey } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 import { type QueryRunner } from 'typeorm';
 
@@ -109,7 +110,7 @@ export class MakeRestrictedRecordsPrivateCommand extends ProvisionedWorkspaceCom
         `INSERT INTO core."featureFlag" ("workspaceId", key, value)
            VALUES ($1, $2, true)
            ON CONFLICT ("workspaceId", key) DO UPDATE SET value = true`,
-        [workspaceId, 'IS_PRIVATE_RECORD_ENABLED'],
+        [workspaceId, FeatureFlagKey.IS_PRIVATE_RECORD_ENABLED],
       );
     } finally {
       if (isQueryRunnerConnected) {

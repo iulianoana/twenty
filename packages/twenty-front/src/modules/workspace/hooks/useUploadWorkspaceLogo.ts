@@ -1,4 +1,5 @@
 import { useDirectFileUpload } from '@/file/hooks/useDirectFileUpload';
+import { t } from '@lingui/core/macro';
 import { useMutation } from '@apollo/client/react';
 import { isDefined } from 'twenty-shared/utils';
 import {
@@ -6,10 +7,8 @@ import {
   FileFolder,
   type FileWithSignedUrl,
 } from '~/generated-metadata/graphql';
-import { useLingui } from '@lingui/react/macro';
 
 export const useUploadWorkspaceLogo = () => {
-  const { t } = useLingui();
   const { createFileUploadAndPutFile } = useDirectFileUpload();
   const [completeWorkspaceLogoUpload] = useMutation(
     CompleteWorkspaceLogoUploadDocument,

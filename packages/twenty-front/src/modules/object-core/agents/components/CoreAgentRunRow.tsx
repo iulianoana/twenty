@@ -1,3 +1,4 @@
+import { t } from '@lingui/core/macro';
 import { isDefined } from 'twenty-shared/utils';
 import { OverflowingTextWithTooltip } from 'twenty-ui/primitives/typography';
 import { themeCssVariables } from 'twenty-ui/theme';
@@ -13,7 +14,6 @@ import { TableRow } from '@/ui/layout/table/components/TableRow';
 import { formatDuration } from '~/utils/format/formatDuration';
 import { beautifyPastDateRelativeToNow } from '~/utils/date-utils';
 import { formatNumber } from '@/localization/utils/formatNumber';
-import { useLingui } from '@lingui/react/macro';
 
 type CoreAgentRunRowProps = {
   run: CoreAgentRun;
@@ -38,7 +38,6 @@ export const CoreAgentRunRow = ({
   onToggle,
   isNested = false,
 }: CoreAgentRunRowProps) => {
-  const { t } = useLingui();
   const tokens = getRunTokens(run);
   const durationMs = getRunDurationMs(run);
 

@@ -271,9 +271,9 @@ export class ApplicationMessageSendService {
       await this.workspaceOrmManager.executeInWorkspaceContext(
         async () => {
           const threadMessages = await this.workspaceOrmManager
-            .getRepositoryWithoutPermissionChecks<MessageWorkspaceEntity>(
-              'message',
-            )
+            .getRepository<MessageWorkspaceEntity>('message', {
+              shouldBypassPermissionChecks: true,
+            })
             .find({ where: { messageThreadId }, select: { id: true } });
 
           const threadMessageIds = threadMessages.map((message) => message.id);
@@ -283,8 +283,9 @@ export class ApplicationMessageSendService {
           }
 
           const associations = await this.workspaceOrmManager
-            .getRepositoryWithoutPermissionChecks<MessageChannelMessageAssociationWorkspaceEntity>(
+            .getRepository<MessageChannelMessageAssociationWorkspaceEntity>(
               'messageChannelMessageAssociation',
+              { shouldBypassPermissionChecks: true },
             )
             .find({
               where: {
@@ -299,9 +300,9 @@ export class ApplicationMessageSendService {
           }
 
           const latestMessages = await this.workspaceOrmManager
-            .getRepositoryWithoutPermissionChecks<MessageWorkspaceEntity>(
-              'message',
-            )
+            .getRepository<MessageWorkspaceEntity>('message', {
+              shouldBypassPermissionChecks: true,
+            })
             .find({
               where: {
                 id: In(
@@ -316,8 +317,9 @@ export class ApplicationMessageSendService {
           const messageIds = latestMessages.map((message) => message.id);
 
           const participants = await this.workspaceOrmManager
-            .getRepositoryWithoutPermissionChecks<MessageParticipantWorkspaceEntity>(
+            .getRepository<MessageParticipantWorkspaceEntity>(
               'messageParticipant',
+              { shouldBypassPermissionChecks: true },
             )
             .find({
               where: { messageId: In(messageIds) },
@@ -420,7 +422,7 @@ export class ApplicationMessageSendService {
     }
 
     const records = await this.workspaceOrmManager
-      .getRepositoryWithoutPermissionChecks(objectMetadataName)
+      .getRepository(objectMetadataName, { shouldBypassPermissionChecks: true })
       .find({ where: { id: In(definedIds) }, select: { id: true } });
 
     return new Set(records.map((record) => record.id));

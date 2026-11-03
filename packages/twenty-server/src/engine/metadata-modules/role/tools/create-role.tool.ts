@@ -1,4 +1,5 @@
 import { ToolCategory } from 'twenty-shared/ai';
+import { PermissionFlagType } from 'twenty-shared/constants';
 import { z } from 'zod';
 
 import { ApplicationService } from 'src/engine/core-modules/application/application.service';
@@ -6,7 +7,6 @@ import { DefineTool } from 'src/engine/core-modules/tool-provider/decorators/def
 import { BaseTool } from 'src/engine/core-modules/tool-provider/interfaces/base-tool.interface';
 import { type ToolExecuteArgs } from 'src/engine/core-modules/tool-provider/types/tool-execute-args.type';
 import { type ToolOutput } from 'src/engine/core-modules/tool/types/tool-output.type';
-import { ROLE_WRITE_ACCESS_POLICY } from 'src/engine/metadata-modules/role/constants/role-write-access-policy.constant';
 import { RoleService } from 'src/engine/metadata-modules/role/role.service';
 import { rolePermissionsSchema } from 'src/engine/metadata-modules/role/tools/schemas/role-permissions.schema';
 import { toRoleSummary } from 'src/engine/metadata-modules/role/tools/utils/to-role-summary.util';
@@ -23,7 +23,7 @@ const createRoleInputSchema = rolePermissionsSchema.extend({
 @DefineTool({
   name: 'create_role',
   category: ToolCategory.ROLE,
-  accessPolicy: ROLE_WRITE_ACCESS_POLICY,
+  requiredPermissionFlags: [PermissionFlagType.ROLES],
   description: `Create a new role in this workspace.
 
 Global record permissions (canReadAllObjectRecords, canUpdateAllObjectRecords, ...) and settings access default to false; assignability to users, agents and API keys defaults to true.

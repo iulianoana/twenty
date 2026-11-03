@@ -5,8 +5,6 @@ import {
   convertToModelMessages,
   generateText,
   jsonSchema,
-  NoObjectGeneratedError,
-  NoOutputGeneratedError,
   Output,
   type TextStreamPart,
   type ToolSet,
@@ -14,11 +12,13 @@ import {
 import { type RunAgentMessage } from 'twenty-shared/application';
 import {
   type AgentResponseFormat,
-  type AgentResponseSchema,
   type ExtendedUIMessage,
-  ToolCategory,
 } from 'twenty-shared/ai';
-import { isDefined, isNonEmptyArray, isPlainObject } from 'twenty-shared/utils';
+import {
+  isDefined,
+  isNonEmptyArray,
+  tipTapDocumentToMarkdown,
+} from 'twenty-shared/utils';
 import { type Repository } from 'typeorm';
 
 import { isUserAuthContext } from 'src/engine/core-modules/auth/guards/is-user-auth-context.guard';
@@ -32,9 +32,7 @@ import { WorkspaceEntity } from 'src/engine/core-modules/workspace/workspace.ent
 import { AGENT_RUN_EXCLUDED_TOOL_NAMES } from 'src/engine/metadata-modules/ai/ai-agent-execution/constants/agent-run-excluded-tool-names.const';
 import { OPEN_ENDED_AGENT_REGISTRY_TOOL_CATEGORIES } from 'src/engine/metadata-modules/ai/ai-agent-execution/constants/open-ended-agent-registry-tool-categories.const';
 import { PRELOADED_AGENT_REGISTRY_TOOL_CATEGORIES } from 'src/engine/metadata-modules/ai/ai-agent-execution/constants/preloaded-agent-registry-tool-categories.const';
-import { SCOPED_AGENT_RUN_ACTION_TOOL_NAMES } from 'src/engine/metadata-modules/ai/ai-agent-execution/constants/scoped-agent-run-action-tool-names.const';
 import { endsOnPausingToolCall } from 'src/engine/metadata-modules/ai/ai-agent-execution/pausing-tools/utils/ends-on-pausing-tool-call.util';
-import { AgentRunPersonaService } from 'src/engine/metadata-modules/ai/ai-agent-execution/services/agent-run-persona.service';
 import { type AgentRegistryAccess } from 'src/engine/metadata-modules/ai/ai-agent-execution/services/agent-toolset.service';
 import {
   type AgentTurn,
@@ -43,13 +41,15 @@ import {
 import { RunAgentAttachmentService } from 'src/engine/metadata-modules/ai/ai-agent-execution/services/run-agent-attachment.service';
 import { type AgentExecutionResult } from 'src/engine/metadata-modules/ai/ai-agent-execution/types/agent-execution-result.type';
 import { type AgentRunExecutionContext } from 'src/engine/metadata-modules/ai/ai-agent-execution/types/agent-run-execution-context.type';
-import { type ResolvedAgentRunPersona } from 'src/engine/metadata-modules/ai/ai-agent-execution/types/resolved-agent-run-persona.type';
 import { type AgentToolLoadingStrategy } from 'src/engine/metadata-modules/ai/ai-agent-execution/types/agent-tool-loading-strategy.type';
 import { assertAgentResponseFormatHasOutputFieldsOrThrow } from 'src/engine/metadata-modules/ai/ai-agent-execution/utils/assert-agent-response-format-has-output-fields-or-throw.util';
+import { buildAgentRolePermissionConfig } from 'src/engine/metadata-modules/ai/ai-agent-execution/utils/build-agent-role-permission-config.util';
 import { buildStrictAgentResponseSchema } from 'src/engine/metadata-modules/ai/ai-agent-execution/utils/build-strict-agent-response-schema.util';
 import { getCallLevelProviderOptions } from 'src/engine/metadata-modules/ai/ai-agent-execution/utils/provider-options.util';
 import { replaceUnsupportedFileParts } from 'src/engine/metadata-modules/ai/ai-agent-execution/utils/replace-unsupported-file-parts.util';
+import { AiAgentRoleService } from 'src/engine/metadata-modules/ai/ai-agent-role/ai-agent-role.service';
 import { STRUCTURED_OUTPUT_SYSTEM_PROMPT } from 'src/engine/metadata-modules/ai/ai-agent/constants/structured-output-system-prompt.const';
+import { type AgentEntity } from 'src/engine/metadata-modules/ai/ai-agent/entities/agent.entity';
 import { NATIVE_WEB_SEARCH_COST_PER_CALL_DOLLARS } from 'src/engine/metadata-modules/ai/ai-billing/constants/native-web-search-cost-per-call-dollars';
 import { AiBillingService } from 'src/engine/metadata-modules/ai/ai-billing/services/ai-billing.service';
 import { type AgentTurnUsageStep } from 'src/engine/metadata-modules/ai/ai-billing/utils/add-step-to-agent-turn-usage.util';
@@ -65,7 +65,7 @@ import {
 } from 'src/engine/metadata-modules/ai/ai.exception';
 
 type AgentRunTurnInput = {
-  persona: ResolvedAgentRunPersona;
+  agent: AgentEntity;
   responseFormat?: AgentResponseFormat;
   messages: RunAgentMessage[];
   // a continued conversation, with the tool calls and results plain run messages cannot carry
@@ -83,27 +83,20 @@ type AgentRunTurnInput = {
 export type StartedAgentRunTurn = {
   turn: AgentTurn;
   source: AgentTurnStreamSource;
-  // some models refuse a JSON response format alongside tools, so only a turn without any asks for it upfront
-  isStructuredOutputInSameRequest: boolean;
 };
 
 export type CompletedAgentRunTurn = AgentExecutionResult & {
-  // a follow-up structured output request is not part of the stream, so the turn's usage must add it
+  // the structured output request is not part of the stream, so the turn's usage must add it
   structuredOutputSteps: AgentTurnUsageStep[];
 };
 
-const buildStructuredOutput = (schema: AgentResponseSchema) =>
-  Output.object({
-    schema: jsonSchema(buildStrictAgentResponseSchema(schema)),
-  });
-
 const buildSpenders = ({
-  persona,
+  agent,
   executionContext,
-}: Pick<AgentRunTurnInput, 'persona' | 'executionContext'>): UsageSpenders => ({
+}: Pick<AgentRunTurnInput, 'agent' | 'executionContext'>): UsageSpenders => ({
   userWorkspaceId: executionContext.userWorkspaceId,
-  agentId: persona.agentId,
-  applicationId: persona.applicationId,
+  agentId: agent.id,
+  applicationId: agent.applicationId,
 });
 
 @Injectable()
@@ -111,14 +104,14 @@ export class AgentRunTurnService {
   constructor(
     private readonly agentTurnService: AgentTurnService,
     private readonly aiBillingService: AiBillingService,
-    private readonly agentRunPersonaService: AgentRunPersonaService,
+    private readonly aiAgentRoleService: AiAgentRoleService,
     private readonly runAgentAttachmentService: RunAgentAttachmentService,
     @InjectRepository(WorkspaceEntity)
     private readonly workspaceRepository: Repository<WorkspaceEntity>,
   ) {}
 
   async startTurn({
-    persona,
+    agent,
     responseFormat,
     messages,
     baseSystemPrompt,
@@ -140,12 +133,12 @@ export class AgentRunTurnService {
 
     assertAgentResponseFormatHasOutputFieldsOrThrow(responseFormat);
 
-    const { userWorkspaceId } = executionContext;
-    const spenders = buildSpenders({ persona, executionContext });
+    const { userWorkspaceId, usageOperationType } = executionContext;
+    const spenders = buildSpenders({ agent, executionContext });
 
     await this.aiBillingService.assertAiExecutionAllowed({
       workspaceId,
-      operationType: UsageOperationType.AI_WORKFLOW_TOKEN,
+      operationType: usageOperationType,
       spenders,
     });
 
@@ -153,35 +146,27 @@ export class AgentRunTurnService {
       id: workspaceId,
     });
     const registryAccess = await this.buildAgentRegistryAccess({
-      persona,
-      workspaceId,
+      agent,
       executionContext,
       additionalExcludedToolNames,
       toolLoadingStrategy,
     });
 
-    const hasTools =
-      registryAccess.type !== 'none' ||
-      canAskHumans ||
-      isNonEmptyArray(Object.keys(pausingTools)) ||
-      (persona.modelConfiguration?.webSearch?.enabled ?? false) ||
-      (persona.modelConfiguration?.twitterSearch?.enabled ?? false);
-
     const turn = await this.agentTurnService.start({
       workspace: workspace ?? undefined,
-      modelId: persona.modelId,
+      modelId: agent.modelId,
       toolset: {
         registryAccess,
         nativeToolOptions: {
-          webSearch: persona.modelConfiguration?.webSearch?.enabled ?? false,
+          webSearch: agent.modelConfiguration?.webSearch?.enabled === true,
           twitterSearch:
-            persona.modelConfiguration?.twitterSearch?.enabled ?? false,
+            agent.modelConfiguration?.twitterSearch?.enabled === true,
         },
         canAskHumans,
         waitTools: pausingTools,
       },
       buildContext: async ({ modelConfig, toolset }) => ({
-        systemPrompt: `${baseSystemPrompt}\n\n${persona.instructions}${
+        systemPrompt: `${baseSystemPrompt}\n\n${tipTapDocumentToMarkdown(agent.prompt)}${
           registryAccess.type === 'catalog'
             ? buildToolCatalogSection(toolset.toolCatalog, [])
             : ''
@@ -201,15 +186,11 @@ export class AgentRunTurnService {
           })),
         ],
       }),
-      promptCacheKey: persona.promptCacheKey,
-      output:
-        !hasTools && responseFormat?.type === 'json'
-          ? buildStructuredOutput(responseFormat.schema)
-          : undefined,
+      promptCacheKey: agent.id,
       abortSignal,
       billing: {
         workspaceId,
-        operationType: UsageOperationType.AI_WORKFLOW_TOKEN,
+        operationType: usageOperationType,
         webSearchOperationType: UsageOperationType.AI_WORKFLOW_WEB_SEARCH,
         spenders,
       },
@@ -217,7 +198,7 @@ export class AgentRunTurnService {
         functionId: 'agent-execution',
         workspaceId,
         userWorkspaceId,
-        agentId: persona.agentId ?? undefined,
+        agentId: agent.id,
       },
       // nobody resends a background run, so a provider error after streaming started is retried here
       streamRetries: 2,
@@ -246,21 +227,20 @@ export class AgentRunTurnService {
         modelConfig: turn.modelConfig,
         getStreamError: () => streamError,
       },
-      isStructuredOutputInSameRequest: !hasTools,
     };
   }
 
-  // a follow-up structured output request is not part of the stream, so its usage is added to the turn's here
+  // the structured output request is not part of the stream, so its usage is added to the turn's here
   async completeTurn({
-    started: { turn, isStructuredOutputInSameRequest },
-    persona,
+    started: { turn },
+    agent,
     responseFormat,
     workspaceId,
     executionContext,
     abortSignal,
   }: Pick<
     AgentRunTurnInput,
-    | 'persona'
+    | 'agent'
     | 'responseFormat'
     | 'workspaceId'
     | 'executionContext'
@@ -268,8 +248,8 @@ export class AgentRunTurnService {
   > & {
     started: StartedAgentRunTurn;
   }): Promise<CompletedAgentRunTurn> {
-    const { userWorkspaceId } = executionContext;
-    const spenders = buildSpenders({ persona, executionContext });
+    const { userWorkspaceId, usageOperationType } = executionContext;
+    const spenders = buildSpenders({ agent, executionContext });
     const [text, loopUsage, loopSteps] = await Promise.all([
       turn.stream.text,
       turn.stream.usage,
@@ -289,13 +269,7 @@ export class AgentRunTurnService {
     let steps = loopSteps;
     let structuredOutputSteps: AgentTurnUsageStep[] = [];
 
-    // a stopped run fails whatever it returned, so it spends no request on its output
-    const isStructuredOutputExpected =
-      isDefined(agentSchema) && !isPaused && !isDefined(stopReason);
-
-    if (isStructuredOutputExpected && isStructuredOutputInSameRequest) {
-      result = await this.readSameRequestOutputOrThrow(turn);
-    } else if (isStructuredOutputExpected) {
+    if (isDefined(agentSchema) && !isPaused) {
       const structuredResult = await generateText({
         instructions: STRUCTURED_OUTPUT_SYSTEM_PROMPT,
         model: registeredModel.model,
@@ -304,18 +278,20 @@ export class AgentRunTurnService {
                  Execution Results: ${text}
 
                  Please generate the structured output based on the execution results and context above.`,
-        output: buildStructuredOutput(agentSchema),
+        output: Output.object({
+          schema: jsonSchema(buildStrictAgentResponseSchema(agentSchema)),
+        }),
         abortSignal,
         providerOptions: getCallLevelProviderOptions({
           sdkPackage: registeredModel.sdkPackage,
           providerOptions: undefined,
-          promptCacheKey: persona.promptCacheKey,
+          promptCacheKey: agent.id,
         }),
         ...buildAiTelemetry({
           functionId: 'agent-structured-output',
           workspaceId,
           userWorkspaceId,
-          agentId: persona.agentId ?? undefined,
+          agentId: agent.id,
         }),
       });
 
@@ -328,7 +304,7 @@ export class AgentRunTurnService {
           ),
         },
         workspaceId,
-        operationType: UsageOperationType.AI_WORKFLOW_TOKEN,
+        operationType: usageOperationType,
         spenders,
       });
 
@@ -367,74 +343,37 @@ export class AgentRunTurnService {
     };
   }
 
-  private async readSameRequestOutputOrThrow(
-    turn: Pick<AgentTurn, 'stream'>,
-  ): Promise<object> {
-    let formatError: unknown;
-    const output: unknown = await Promise.resolve(turn.stream.output).catch(
-      (error: unknown) => {
-        // only a reply that parses into no object is a format failure; anything else keeps its own cause
-        if (
-          NoObjectGeneratedError.isInstance(error) ||
-          NoOutputGeneratedError.isInstance(error)
-        ) {
-          formatError = error;
-
-          return undefined;
-        }
-
-        throw error;
-      },
-    );
-
-    if (!isPlainObject(output)) {
-      // the generation error keeps the text the model returned, which a failed parse is diagnosed from
-      throw Object.assign(
-        new AiException(
-          'The model did not return an object matching the response format',
-          AiExceptionCode.AGENT_EXECUTION_FAILED,
-        ),
-        { cause: formatError },
-      );
-    }
-
-    return output;
-  }
-
   private async buildAgentRegistryAccess({
-    persona,
-    workspaceId,
-    executionContext: { authContext, actorContext },
+    agent,
+    executionContext: { authContext, actorContext, agentRunRoleIds },
     additionalExcludedToolNames,
     toolLoadingStrategy,
   }: Pick<
     Required<AgentRunTurnInput>,
-    | 'persona'
-    | 'workspaceId'
+    | 'agent'
     | 'executionContext'
     | 'additionalExcludedToolNames'
     | 'toolLoadingStrategy'
   >): Promise<AgentRegistryAccess> {
-    const runAuthContext =
-      await this.agentRunPersonaService.resolveRunAuthContext({
-        workspaceId,
-        persona,
-        authContext,
-      });
+    const agentRoleId = await this.aiAgentRoleService.findAgentRoleId({
+      workspaceId: agent.workspaceId,
+      agentId: agent.id,
+    });
 
-    if (
-      !isDefined(runAuthContext) ||
-      !isDefined(persona.permissions.explicitObjectGrants)
-    ) {
+    if (!isDefined(agentRoleId)) {
       return { type: 'none' };
     }
 
     const toolContext: ToolContext = {
-      workspaceId,
-      agentId: persona.agentId ?? undefined,
-      authContext: runAuthContext,
-      application: getAuthContextApplication(runAuthContext),
+      workspaceId: agent.workspaceId,
+      agentId: agent.id,
+      authContext,
+      application: getAuthContextApplication(authContext),
       actorContext,
+      rolePermissionConfig: buildAgentRolePermissionConfig({
+        agentRoleId,
+        agentRunRoleIds,
+      }),
       ...(isDefined(authContext) && isUserAuthContext(authContext)
         ? {
             userId: authContext.user.id,
@@ -448,10 +387,8 @@ export class AgentRunTurnService {
       ...additionalExcludedToolNames,
     ];
 
-    const isScoped = isDefined(persona.permissions.scope);
-
     // open-ended agents reach too many tools to send them all; a few granted ones are cheaper sent than learned
-    return toolLoadingStrategy === 'lazy' && !isScoped
+    return toolLoadingStrategy === 'lazy'
       ? {
           type: 'catalog',
           toolContext,
@@ -461,13 +398,9 @@ export class AgentRunTurnService {
       : {
           type: 'granted',
           toolContext,
-          explicitObjectGrants: persona.permissions.explicitObjectGrants,
+          agentRoleId,
           categories: PRELOADED_AGENT_REGISTRY_TOOL_CATEGORIES,
-          isToolOffered: ({ name, category }) =>
-            !excludedToolNames.includes(name) &&
-            (!isScoped ||
-              category === ToolCategory.DATABASE_CRUD ||
-              SCOPED_AGENT_RUN_ACTION_TOOL_NAMES.has(name)),
+          excludedToolNames,
         };
   }
 }

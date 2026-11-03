@@ -40,6 +40,7 @@ export class CommonUpdateManyQueryRunnerService extends CommonBaseQueryRunnerSer
   ): Promise<ObjectRecord[]> {
     const {
       authContext,
+      rolePermissionConfig,
       flatObjectMetadataMaps,
       flatFieldMetadataMaps,
       flatObjectMetadata,
@@ -73,6 +74,7 @@ export class CommonUpdateManyQueryRunnerService extends CommonBaseQueryRunnerSer
         >,
         limit: QUERY_MAX_RECORDS_FROM_RELATION,
         authContext,
+        rolePermissionConfig,
         selectedFields: args.selectedFieldsResult.select,
         ...this.getNestedRelationsReadPathOptions(),
       });

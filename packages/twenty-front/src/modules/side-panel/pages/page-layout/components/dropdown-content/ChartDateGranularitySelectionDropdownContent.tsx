@@ -1,4 +1,5 @@
 import { ChartSettingsDropdownSection } from '@/side-panel/pages/page-layout/components/chart-settings/ChartSettingsDropdownSection';
+import { t } from '@lingui/core/macro';
 import { Dropdown } from 'twenty-ui/components/navigation';
 import { usePageLayoutSidePanelTarget } from '@/side-panel/pages/page-layout/hooks/usePageLayoutSidePanelTarget';
 import { useUpdateCurrentWidgetConfig } from '@/side-panel/pages/page-layout/hooks/useUpdateCurrentWidgetConfig';
@@ -14,7 +15,6 @@ import {
   type FieldsConfiguration,
   type WidgetConfiguration,
 } from '~/generated-metadata/graphql';
-import { useLingui } from '@lingui/react/macro';
 
 type ChartDateGranularitySelectionDropdownContentProps = {
   axis?: 'primary' | 'secondary';
@@ -69,7 +69,6 @@ const isChartConfiguration = (
 export const ChartDateGranularitySelectionDropdownContent = ({
   axis,
 }: ChartDateGranularitySelectionDropdownContentProps) => {
-  const { t } = useLingui();
   const { pageLayoutId } = usePageLayoutSidePanelTarget();
   const { widgetInEditMode } = useWidgetInEditMode(pageLayoutId);
 

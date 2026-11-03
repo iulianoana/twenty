@@ -17,6 +17,7 @@ export const createPublishFrontComponentTool = ({
     | 'threadId'
     | 'authContext'
     | 'approvedToolName'
+    | 'rolePermissionConfig'
   >;
 }) =>
   tool({

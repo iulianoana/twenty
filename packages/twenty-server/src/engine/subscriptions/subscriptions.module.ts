@@ -1,4 +1,3 @@
-import { UserWorkspaceModule } from 'src/engine/core-modules/user-workspace/user-workspace.module';
 import { Global, Module } from '@nestjs/common';
 
 import { ProcessNestedRelationsHelper } from 'src/engine/api/common/common-nested-relations-processor/process-nested-relations.helper';
@@ -31,7 +30,6 @@ import { WorkspaceCacheModule } from 'src/engine/workspace-cache/workspace-cache
     NavigationMenuItemModule,
     ApplicationTranslationCatalogModule,
     RecordShareModule,
-    UserWorkspaceModule,
   ],
   providers: [
     SubscriptionService,

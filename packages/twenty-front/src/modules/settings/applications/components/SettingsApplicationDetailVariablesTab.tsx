@@ -1,4 +1,5 @@
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
 import { isNonEmptyString } from '@sniptt/guards';
 import { type ApplicationVariableOption } from 'twenty-shared/application';
 import { LightButton } from 'twenty-ui/components/input';
@@ -7,7 +8,6 @@ import { themeCssVariables } from 'twenty-ui/theme';
 import { type ApplicationVariable } from '~/generated-metadata/graphql';
 import { SettingsApplicationVariableInput } from '@/settings/applications/components/SettingsApplicationVariableInput';
 import { SettingsApplicationVariableLabelRow } from '@/settings/applications/components/SettingsApplicationVariableLabelRow';
-import { useLingui } from '@lingui/react/macro';
 
 const StyledContainer = styled.div`
   display: flex;
@@ -41,7 +41,6 @@ export const SettingsApplicationDetailVariablesTab = ({
   onVariableChange,
   onVariableClear,
 }: SettingsApplicationDetailVariablesTabProps) => {
-  const { t } = useLingui();
   const sectionDescription =
     applicationVariables.length > 0
       ? t`Set your application configuration variables`

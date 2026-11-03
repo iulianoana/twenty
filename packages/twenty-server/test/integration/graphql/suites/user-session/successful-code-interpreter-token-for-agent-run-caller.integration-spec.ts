@@ -33,6 +33,11 @@ const captureSandboxTokenForAgentRun = async ({
         token,
       })
     ).executionContext.authContext,
+    rolePermissionConfig: {
+      intersectionOf: {
+        applicationRoleId: globalTestContext.applicationRoleId,
+      },
+    },
   });
 
 describe('Code interpreter sandbox token for an agent run should follow the caller', () => {

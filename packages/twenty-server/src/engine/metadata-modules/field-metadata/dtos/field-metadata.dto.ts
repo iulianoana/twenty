@@ -92,11 +92,6 @@ export class FieldMetadataDTO<T extends FieldMetadataType = FieldMetadataType> {
   @Field({ nullable: true })
   isUIEditable?: boolean;
 
-  @IsBoolean()
-  @IsOptional()
-  @Field({ nullable: true })
-  isSystemSideEffect?: boolean;
-
   @Field(() => [String], { nullable: true })
   disabledFieldPermissionActions?: FieldPermissionAction[] | null;
 

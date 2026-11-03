@@ -498,7 +498,7 @@ export class ParticipantTargetReconciliationService {
       objectMetadataName,
       transactionScope,
       workspaceOrmManager: this.workspaceOrmManager,
-      shouldBypassPermissionChecks: true,
+      rolePermissionConfig: { shouldBypassPermissionChecks: true },
     });
   }
 }

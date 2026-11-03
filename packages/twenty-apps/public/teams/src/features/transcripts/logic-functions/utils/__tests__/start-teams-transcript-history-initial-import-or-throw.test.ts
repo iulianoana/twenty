@@ -3,13 +3,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TRANSCRIPTS_ENABLED_APPLICATION_VARIABLE_KEY } from 'src/features/transcripts/constants/transcripts-enabled-application-variable-key';
 import { startTeamsTranscriptHistoryInitialImportOrThrow } from 'src/features/transcripts/logic-functions/utils/start-teams-transcript-history-initial-import-or-throw';
 
-const { kvStore, enqueueJobsMock, listTeamsConnectionsMock } = vi.hoisted(
-  () => ({
-    kvStore: new Map<string, unknown>(),
-    enqueueJobsMock: vi.fn(),
-    listTeamsConnectionsMock: vi.fn(),
-  }),
-);
+const { kvStore, enqueueJobsMock, listConnectionsMock } = vi.hoisted(() => ({
+  kvStore: new Map<string, unknown>(),
+  enqueueJobsMock: vi.fn(),
+  listConnectionsMock: vi.fn(),
+}));
 
 vi.mock('twenty-sdk/logic-function', async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
@@ -23,12 +21,8 @@ vi.mock('twenty-sdk/logic-function', async (importOriginal) => ({
     },
   },
   enqueueJobs: enqueueJobsMock,
+  listConnections: listConnectionsMock,
 }));
-
-vi.mock(
-  'src/features/transcripts/logic-functions/utils/list-teams-connections',
-  () => ({ listTeamsConnections: listTeamsConnectionsMock }),
-);
 
 const CONNECTED_ACCOUNT_ID = 'connected-account-1';
 
@@ -59,7 +53,7 @@ describe('startTeamsTranscriptHistoryInitialImportOrThrow', () => {
     kvStore.clear();
     process.env[TRANSCRIPTS_ENABLED_APPLICATION_VARIABLE_KEY] = 'true';
     enqueueJobsMock.mockResolvedValue(undefined);
-    listTeamsConnectionsMock.mockResolvedValue([{ id: CONNECTED_ACCOUNT_ID }]);
+    listConnectionsMock.mockResolvedValue([{ id: CONNECTED_ACCOUNT_ID }]);
   });
 
   afterEach(() => {
@@ -155,7 +149,7 @@ describe('startTeamsTranscriptHistoryInitialImportOrThrow', () => {
   });
 
   it('should remove the import state of a connection removed while it started', async () => {
-    listTeamsConnectionsMock.mockResolvedValue([]);
+    listConnectionsMock.mockResolvedValue([]);
 
     await startInitialImport();
 

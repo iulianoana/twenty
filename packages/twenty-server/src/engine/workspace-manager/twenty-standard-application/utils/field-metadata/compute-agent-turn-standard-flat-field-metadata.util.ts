@@ -440,8 +440,7 @@ export const buildAgentTurnStandardFlatFieldMetadatas = (
         ),
         icon: 'IconRelationOneToMany',
         isUIEditable: false,
-        // a one-shot AI call records its turn without a conversation
-        isNullable: true,
+        isNullable: false,
         targetObjectName: 'agentChatThread',
         targetFieldName: 'turns',
         morphId: null,

@@ -154,8 +154,9 @@ export class ApplicationMessageFoldersService {
     await this.workspaceOrmManager.executeInWorkspaceContext(
       async () => {
         const messageFolderAssociationRepository =
-          this.workspaceOrmManager.getRepositoryWithoutPermissionChecks<MessageChannelMessageAssociationMessageFolderWorkspaceEntity>(
+          this.workspaceOrmManager.getRepository<MessageChannelMessageAssociationMessageFolderWorkspaceEntity>(
             'messageChannelMessageAssociationMessageFolder',
+            { shouldBypassPermissionChecks: true },
           );
 
         await messageFolderAssociationRepository.delete({

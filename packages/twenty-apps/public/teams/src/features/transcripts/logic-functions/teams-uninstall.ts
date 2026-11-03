@@ -1,13 +1,16 @@
 import { defineUninstallLogicFunction } from 'twenty-sdk/define';
+import { listConnections } from 'twenty-sdk/logic-function';
 
+import { TEAMS_PROVIDER_NAME } from 'src/features/transcripts/constants/teams-provider-name';
 import { TEAMS_UNINSTALL_UNIVERSAL_IDENTIFIER } from 'src/features/transcripts/constants/universal-identifiers';
-import { listTeamsConnections } from 'src/features/transcripts/logic-functions/utils/list-teams-connections';
 import { unregisterTeamsTranscriptSubscription } from 'src/features/transcripts/logic-functions/utils/unregister-teams-transcript-subscription';
 
 export const teamsUninstallHandler = async (): Promise<{
   failedConnectionCount: number;
 }> => {
-  const connections = await listTeamsConnections();
+  const connections = await listConnections({
+    providerName: TEAMS_PROVIDER_NAME,
+  });
   const results = await Promise.allSettled(
     connections.map((connection) =>
       unregisterTeamsTranscriptSubscription({

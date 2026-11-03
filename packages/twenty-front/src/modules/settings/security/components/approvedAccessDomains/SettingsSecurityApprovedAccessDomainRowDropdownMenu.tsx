@@ -3,6 +3,7 @@ import { DropdownContent } from '@/ui/layout/dropdown/components/DropdownContent
 import { approvedAccessDomainsState } from '@/settings/security/states/ApprovedAccessDomainsState';
 import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
 import { useMutation } from '@apollo/client/react';
+import { t } from '@lingui/core/macro';
 import { isDefined } from 'twenty-shared/utils';
 import { useToast } from 'twenty-ui/components/feedback';
 import { LightIconButton } from 'twenty-ui/components/input';
@@ -12,7 +13,6 @@ import {
   type ApprovedAccessDomain,
   DeleteApprovedAccessDomainDocument,
 } from '~/generated-metadata/graphql';
-import { useLingui } from '@lingui/react/macro';
 
 type SettingsSecurityApprovedAccessDomainRowDropdownMenuProps = {
   approvedAccessDomain: Omit<ApprovedAccessDomain, '__typename'>;
@@ -21,7 +21,6 @@ type SettingsSecurityApprovedAccessDomainRowDropdownMenuProps = {
 export const SettingsSecurityApprovedAccessDomainRowDropdownMenu = ({
   approvedAccessDomain,
 }: SettingsSecurityApprovedAccessDomainRowDropdownMenuProps) => {
-  const { t } = useLingui();
   const dropdownId = `settings-approved-access-domain-row-${approvedAccessDomain.id}`;
   const setApprovedAccessDomains = useSetAtomState(approvedAccessDomainsState);
 

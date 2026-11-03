@@ -1,4 +1,5 @@
 import { getAvatarButtonRender } from '@/ui/field/display/utils/getAvatarButtonRender';
+import { t } from '@lingui/core/macro';
 import { css } from '@linaria/core';
 import { isNonEmptyString } from '@sniptt/guards';
 
@@ -6,7 +7,6 @@ import { Avatar } from 'twenty-ui/primitives/data-display';
 import { useTheme } from 'twenty-ui/theme';
 import { type AvatarOrIconProps } from './types/AvatarOrIconProps';
 import { isDefined } from 'twenty-shared/utils';
-import { useLingui } from '@lingui/react/macro';
 
 const styles = {
   iconWithBackgroundContainer: css`
@@ -59,7 +59,6 @@ export const AvatarOrIcon = ({
   IconBackgroundColor,
   onClick,
 }: AvatarOrIconProps) => {
-  const { t } = useLingui();
   const theme = useTheme();
 
   if (!isDefined(Icon)) {

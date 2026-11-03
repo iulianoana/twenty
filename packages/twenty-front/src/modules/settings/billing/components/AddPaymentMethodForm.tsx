@@ -7,6 +7,7 @@ import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomState
 import { CombinedGraphQLErrors } from '@apollo/client/errors';
 import { useMutation } from '@apollo/client/react';
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
 import {
   Elements,
   PaymentElement,
@@ -20,7 +21,6 @@ import { InlineBanner, useToast } from 'twenty-ui/components/feedback';
 import { Button } from 'twenty-ui/primitives/input';
 import { themeCssVariables } from 'twenty-ui/theme';
 import { CreateBillingPaymentMethodSetupIntentDocument } from '~/generated-metadata/graphql';
-import { useLingui } from '@lingui/react/macro';
 
 type AddPaymentMethodFormContentProps = {
   finalRedirectPath?: string;
@@ -42,7 +42,6 @@ const AddPaymentMethodFormContent = ({
   onPaymentMethodAdded,
   shouldStartSubscriptionAfterPaymentMethod = true,
 }: AddPaymentMethodFormContentProps) => {
-  const { t } = useLingui();
   const stripe = useStripe();
   const elements = useElements();
   const { enqueueToast } = useToast();
@@ -165,7 +164,6 @@ export const AddPaymentMethodForm = ({
   onPaymentMethodAdded,
   shouldStartSubscriptionAfterPaymentMethod,
 }: AddPaymentMethodFormProps) => {
-  const { t } = useLingui();
   const stripePromise = useStripePromise();
   const appearance = useStripeAppearance();
 

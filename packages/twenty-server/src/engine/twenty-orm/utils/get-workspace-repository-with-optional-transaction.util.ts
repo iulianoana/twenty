@@ -1,6 +1,8 @@
+import { isDefined } from 'twenty-shared/utils';
 import { type ObjectLiteral } from 'typeorm';
 
 import { type WorkspaceRepository } from 'src/engine/twenty-orm/repository/workspace-repository';
+import { type RolePermissionConfig } from 'src/engine/permissions/principal/types/role-permission-config.type';
 import { type WorkspaceTransactionScope } from 'src/engine/twenty-orm/types/workspace-transaction-scope.type';
 import { type WorkspaceOrmManager } from 'src/engine/twenty-orm/workspace-orm.manager';
 
@@ -10,18 +12,19 @@ export const getWorkspaceRepositoryWithOptionalTransaction = <
   objectMetadataName,
   transactionScope,
   workspaceOrmManager,
-  shouldBypassPermissionChecks = false,
+  rolePermissionConfig,
 }: {
   objectMetadataName: string;
   transactionScope?: WorkspaceTransactionScope;
   workspaceOrmManager: WorkspaceOrmManager;
-  shouldBypassPermissionChecks?: boolean;
-}): WorkspaceRepository<Entity> => {
-  const repositorySource = transactionScope ?? workspaceOrmManager;
-
-  return shouldBypassPermissionChecks
-    ? repositorySource.getRepositoryWithoutPermissionChecks<Entity>(
+  rolePermissionConfig?: RolePermissionConfig;
+}): WorkspaceRepository<Entity> =>
+  isDefined(transactionScope)
+    ? transactionScope.getRepository<Entity>(
         objectMetadataName,
+        rolePermissionConfig,
       )
-    : repositorySource.getRepository<Entity>(objectMetadataName);
-};
+    : workspaceOrmManager.getRepository<Entity>(
+        objectMetadataName,
+        rolePermissionConfig,
+      );

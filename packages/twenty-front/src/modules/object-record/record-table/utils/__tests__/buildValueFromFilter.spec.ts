@@ -48,16 +48,6 @@ describe('buildValueFromFilter', () => {
         expected: undefined,
       },
       {
-        operand: ViewFilterOperand.IS,
-        value: 'test',
-        expected: 'test',
-      },
-      {
-        operand: ViewFilterOperand.IS_NOT,
-        value: 'test',
-        expected: undefined,
-      },
-      {
         operand: ViewFilterOperand.IS_NOT_EMPTY,
         value: 'test',
         expected: 'test',

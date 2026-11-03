@@ -13,17 +13,10 @@ vi.mock('twenty-sdk/logic-function', async (importOriginal) => ({
 
 const buildConnection = (id: string, userWorkspaceId: string) => ({
   id,
-  providerName: 'fathom-user',
-  scope: 'USER',
+  visibility: 'user',
   userWorkspaceId,
   accessToken: `token-${id}`,
 });
-
-const SHARED_CONNECTION = {
-  ...buildConnection('connection-shared', 'user-workspace-1'),
-  providerName: 'fathom',
-  scope: 'WORKSPACE',
-};
 
 const CONNECTIONS = [
   buildConnection('connection-1', 'user-workspace-1'),
@@ -33,41 +26,22 @@ const CONNECTIONS = [
 describe('listFathomConnectionsForRequest', () => {
   beforeEach(() => {
     vi.resetAllMocks();
-    sdkMocks.listConnections.mockResolvedValue([
-      SHARED_CONNECTION,
-      ...CONNECTIONS,
-    ]);
+    sdkMocks.listConnections.mockResolvedValue(CONNECTIONS);
   });
 
   it('returns every connected account for a run with nobody behind it', async () => {
-    expect(
-      await listFathomConnectionsForRequest({ userWorkspaceId: null }),
-    ).toEqual([SHARED_CONNECTION, ...CONNECTIONS]);
-  });
+    const sharedConnection = {
+      ...buildConnection('connection-shared', 'user-workspace-1'),
+      visibility: 'workspace',
+    };
 
-  it('returns only the personal connection of the requesting member', async () => {
-    expect(
-      await listFathomConnectionsForRequest({
-        userWorkspaceId: 'user-workspace-2',
-      }),
-    ).toEqual([CONNECTIONS[1]]);
-  });
-
-  it('falls back to the workspace-shared connection for a member without one', async () => {
-    expect(
-      await listFathomConnectionsForRequest({
-        userWorkspaceId: 'user-workspace-3',
-      }),
-    ).toEqual([SHARED_CONNECTION]);
-  });
-
-  it('ignores connections of other providers', async () => {
     sdkMocks.listConnections.mockResolvedValue([
-      { ...SHARED_CONNECTION, providerName: 'other-provider' },
+      sharedConnection,
+      ...CONNECTIONS,
     ]);
 
     expect(
       await listFathomConnectionsForRequest({ userWorkspaceId: null }),
-    ).toEqual([]);
+    ).toEqual([sharedConnection, ...CONNECTIONS]);
   });
 });

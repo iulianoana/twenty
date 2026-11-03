@@ -3,6 +3,7 @@ import { useUpdateMetadataStoreDraft } from '@/metadata-store/hooks/useUpdateMet
 import { type FlatPageLayoutWidget } from '@/metadata-store/types/FlatPageLayoutWidget';
 import { useMutation } from '@apollo/client/react';
 import { CombinedGraphQLErrors } from '@apollo/client/errors';
+import { t } from '@lingui/core/macro';
 import { CrudOperationType } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 import { useToast } from 'twenty-ui/components/feedback';
@@ -10,7 +11,6 @@ import {
   type PageLayoutWidgetVerticalListPosition,
   UpdatePageLayoutWidgetDocument,
 } from '~/generated-metadata/graphql';
-import { useLingui } from '@lingui/react/macro';
 
 export type PageLayoutWidgetUpdate = {
   widgetId: string;
@@ -19,7 +19,6 @@ export type PageLayoutWidgetUpdate = {
 };
 
 export const useUpdatePageLayoutWidgets = () => {
-  const { t } = useLingui();
   const [updatePageLayoutWidgetMutation] = useMutation(
     UpdatePageLayoutWidgetDocument,
   );

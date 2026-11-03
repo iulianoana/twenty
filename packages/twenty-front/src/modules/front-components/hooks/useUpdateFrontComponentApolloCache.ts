@@ -44,9 +44,6 @@ export const useUpdateFrontComponentApolloCache = ({
           frontComponent: {
             ...existingData.frontComponent,
             ...updatedRecord,
-            applicationGrantedIframeMediaPermissions:
-              existingData.frontComponent
-                .applicationGrantedIframeMediaPermissions,
           },
         };
       },

@@ -20,6 +20,7 @@ import { MessageCampaignWorkspaceEntity } from 'src/modules/emailing/standard-ob
 import { computeCampaignTerminalStatus } from 'src/modules/emailing/utils/compute-campaign-terminal-status.util';
 import { MessageCampaignStatus } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
+import { buildEmailingRolePermissionConfig } from 'src/modules/emailing/utils/build-emailing-role-permission-config.util';
 
 type CampaignStatusTransition = {
   workspaceId: string;
@@ -67,6 +68,9 @@ export class MessageCampaignLifecycleService {
       async () => {
         const campaignRepository = this.workspaceOrmManager.getRepository(
           MessageCampaignWorkspaceEntity,
+          isDefined(roleId)
+            ? buildEmailingRolePermissionConfig(roleId)
+            : { shouldBypassPermissionChecks: true },
         );
 
         const { affected } = await campaignRepository.update(criteria, update);
@@ -87,10 +91,10 @@ export class MessageCampaignLifecycleService {
     scheduledAt: Date;
   }): Promise<boolean> {
     return this.workspaceOrmManager.executeInWorkspaceContext(async () => {
-      const campaignRepository =
-        this.workspaceOrmManager.getRepositoryWithoutPermissionChecks(
-          MessageCampaignWorkspaceEntity,
-        );
+      const campaignRepository = this.workspaceOrmManager.getRepository(
+        MessageCampaignWorkspaceEntity,
+        { shouldBypassPermissionChecks: true },
+      );
 
       return campaignRepository.existsBy({
         id: campaignId,
@@ -105,10 +109,10 @@ export class MessageCampaignLifecycleService {
   async findRunningCampaign(
     campaignId: string,
   ): Promise<MessageCampaignWorkspaceEntity | null> {
-    const campaignRepository =
-      this.workspaceOrmManager.getRepositoryWithoutPermissionChecks(
-        MessageCampaignWorkspaceEntity,
-      );
+    const campaignRepository = this.workspaceOrmManager.getRepository(
+      MessageCampaignWorkspaceEntity,
+      { shouldBypassPermissionChecks: true },
+    );
 
     const campaign = await campaignRepository.findOne({
       where: { id: campaignId },
@@ -263,8 +267,9 @@ export class MessageCampaignLifecycleService {
     const { generatedMaps: settledDeliveries } =
       await this.workspaceOrmManager.executeInWorkspaceContext(async () => {
         const campaignDeliveryRepository =
-          this.workspaceOrmManager.getRepositoryWithoutPermissionChecks(
+          this.workspaceOrmManager.getRepository(
             CampaignDeliveryWorkspaceEntity,
+            { shouldBypassPermissionChecks: true },
             { shouldSkipEventEmission: true },
           );
         return campaignDeliveryRepository.update(criteria, update);
@@ -286,8 +291,9 @@ export class MessageCampaignLifecycleService {
     const hasUnfinishedDelivery =
       await this.workspaceOrmManager.executeInWorkspaceContext(async () => {
         const campaignDeliveryRepository =
-          this.workspaceOrmManager.getRepositoryWithoutPermissionChecks(
+          this.workspaceOrmManager.getRepository(
             CampaignDeliveryWorkspaceEntity,
+            { shouldBypassPermissionChecks: true },
             { shouldSkipEventEmission: true },
           );
         return campaignDeliveryRepository.existsBy({
@@ -321,10 +327,10 @@ export class MessageCampaignLifecycleService {
         : [MessageCampaignStatus.SENDING];
 
     await this.workspaceOrmManager.executeInWorkspaceContext(async () => {
-      const campaignRepository =
-        this.workspaceOrmManager.getRepositoryWithoutPermissionChecks(
-          MessageCampaignWorkspaceEntity,
-        );
+      const campaignRepository = this.workspaceOrmManager.getRepository(
+        MessageCampaignWorkspaceEntity,
+        { shouldBypassPermissionChecks: true },
+      );
 
       await campaignRepository.update(
         { id: campaignId, status: In(correctableStatuses) },

@@ -1,4 +1,5 @@
 import { css, cx } from '@linaria/core';
+import { t } from '@lingui/core/macro';
 import { FormFieldInputContainer } from '@/ui/input/components/FormFieldInputContainer';
 import { FormFieldInputInnerContainer } from '@/object-record/record-field/ui/form-types/components/FormFieldInputInnerContainer';
 import { FormFieldInputRowContainer } from '@/object-record/record-field/ui/form-types/components/FormFieldInputRowContainer';
@@ -10,7 +11,6 @@ import { useId } from 'react';
 import { isDefined } from 'twenty-shared/utils';
 import { doNotTranslate } from 'twenty-shared/i18n';
 import { turnIntoEmptyStringIfWhitespacesOnly } from '~/utils/string/turnIntoEmptyStringIfWhitespacesOnly';
-import { useLingui } from '@lingui/react/macro';
 
 type FormRawJsonFieldInputProps = {
   label?: string;
@@ -41,7 +41,6 @@ export const FormRawJsonFieldInput = ({
   className,
   fullHeight = false,
 }: FormRawJsonFieldInputProps) => {
-  const { t } = useLingui();
   const instanceId = useId();
 
   const editor = useTextVariableEditor({

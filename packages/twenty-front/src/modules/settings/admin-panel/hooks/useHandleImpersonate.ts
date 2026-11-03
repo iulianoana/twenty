@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { useMutation } from '@apollo/client/react';
+import { t } from '@lingui/core/macro';
 import { AppPath } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 
@@ -12,10 +13,8 @@ import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomState
 import { useToast } from 'twenty-ui/components/feedback';
 import { ImpersonateDocument } from '~/generated-metadata/graphql';
 import { getWorkspaceUrl } from '~/utils/getWorkspaceUrl';
-import { useLingui } from '@lingui/react/macro';
 
 export const useHandleImpersonate = () => {
-  const { t } = useLingui();
   const currentUser = useAtomStateValue(currentUserState);
   const currentWorkspace = useAtomStateValue(currentWorkspaceState);
   const { enqueueToast } = useToast();

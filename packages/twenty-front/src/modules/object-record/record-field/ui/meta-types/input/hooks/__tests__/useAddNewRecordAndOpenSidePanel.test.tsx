@@ -1,3 +1,4 @@
+import { useObjectMetadataItems } from '@/object-metadata/hooks/useObjectMetadataItems';
 import { useAddNewRecordAndOpenSidePanel } from '@/object-record/record-field/ui/meta-types/input/hooks/useAddNewRecordAndOpenSidePanel';
 import { RecordCreationFormProvider } from '@/object-record/record-form/components/RecordCreationFormProvider';
 import { useRecordCreationFormContextOrThrow } from '@/object-record/record-form/contexts/RecordCreationFormContext';
@@ -13,6 +14,7 @@ import { createStore, Provider } from 'jotai';
 import { type ReactNode } from 'react';
 import { getMockFieldMetadataItemOrThrow } from '~/testing/utils/getMockFieldMetadataItemOrThrow';
 import { getMockObjectMetadataItemOrThrow } from '~/testing/utils/getMockObjectMetadataItemOrThrow';
+import { getTestEnrichedObjectMetadataItemsMock } from '~/testing/utils/getTestEnrichedObjectMetadataItemsMock';
 
 const mockCreateOneRecord = jest.fn(
   async (recordInput: Partial<ObjectRecord>) => recordInput,
@@ -20,7 +22,9 @@ const mockCreateOneRecord = jest.fn(
 const mockUpdateOneRecord = jest.fn();
 const mockOpenRecordInSidePanel = jest.fn();
 const mockNavigateSidePanelMenu = jest.fn();
+let mockIsFeatureEnabled = true;
 
+jest.mock('@/object-metadata/hooks/useObjectMetadataItems');
 jest.mock('@/object-record/hooks/useCreateOneRecord', () => ({
   useCreateOneRecord: () => ({ createOneRecord: mockCreateOneRecord }),
 }));
@@ -48,6 +52,9 @@ jest.mock('@/side-panel/hooks/useSidePanelMenu', () => ({
     navigateSidePanelMenu: mockNavigateSidePanelMenu,
     closeSidePanelMenu: jest.fn(),
   }),
+}));
+jest.mock('@/workspace/hooks/useIsFeatureEnabled', () => ({
+  useIsFeatureEnabled: () => mockIsFeatureEnabled,
 }));
 
 type Relation = {
@@ -153,6 +160,10 @@ const setup = (relation: Relation) => {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockIsFeatureEnabled = true;
+  jest.mocked(useObjectMetadataItems).mockReturnValue({
+    objectMetadataItems: getTestEnrichedObjectMetadataItemsMock(),
+  });
 });
 
 it('creates nothing when the form is cancelled', async () => {
@@ -283,16 +294,18 @@ it.each([
     },
   },
 ])(
-  'opens the creation form for $relationLabel without a feature flag',
+  'creates and opens the record right away for $relationLabel when the form flag is off',
   async ({ relation, searchInput, expectedRecordInput }) => {
-    const { start, submit } = setup(relation);
-    const creation = start(searchInput);
+    mockIsFeatureEnabled = false;
+    const { result } = setup(relation);
 
-    expect(mockNavigateSidePanelMenu).toHaveBeenCalled();
-    expect(mockCreateOneRecord).not.toHaveBeenCalled();
+    let createdRecordId: string | undefined;
+    await act(async () => {
+      createdRecordId =
+        await result.current.createNewRecordAndOpenSidePanel?.(searchInput);
+    });
 
-    await submit({ draftRecord: expectedRecordInput });
-    const createdRecordId = await creation;
+    expect(mockNavigateSidePanelMenu).not.toHaveBeenCalled();
     expect(mockCreateOneRecord).toHaveBeenCalledWith({
       id: createdRecordId,
       ...expectedRecordInput,

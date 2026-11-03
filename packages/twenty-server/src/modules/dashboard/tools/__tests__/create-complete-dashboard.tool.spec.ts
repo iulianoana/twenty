@@ -1,12 +1,8 @@
-import { type WorkspaceAuthContext } from 'src/engine/core-modules/auth/types/workspace-auth-context.type';
 import { createCreateCompleteDashboardTool } from 'src/modules/dashboard/tools/create-complete-dashboard.tool';
 import { type DashboardToolDependencies } from 'src/modules/dashboard/tools/types/dashboard-tool-dependencies.type';
 
 const WORKSPACE_ID = '20202020-aaaa-4d02-bf25-6aeccf7ea419';
-const AUTH_CONTEXT = {
-  type: 'user',
-  workspace: { id: WORKSPACE_ID },
-} as WorkspaceAuthContext;
+const ROLE_ID = '20202020-bbbb-4d02-bf25-6aeccf7ea419';
 const PAGE_LAYOUT_ID = '20202020-cccc-4d02-bf25-6aeccf7ea419';
 
 const buildDeps = ({ insert }: { insert: jest.Mock }) => {
@@ -42,7 +38,9 @@ describe('createCreateCompleteDashboardTool', () => {
 
     const tool = createCreateCompleteDashboardTool(deps, {
       workspaceId: WORKSPACE_ID,
-      authContext: AUTH_CONTEXT,
+      rolePermissionConfig: {
+        intersectionOf: { userWorkspaceRoleId: ROLE_ID },
+      },
     });
 
     const result = await tool.execute({ title: 'Revenue' });
@@ -62,7 +60,9 @@ describe('createCreateCompleteDashboardTool', () => {
 
     const tool = createCreateCompleteDashboardTool(deps, {
       workspaceId: WORKSPACE_ID,
-      authContext: AUTH_CONTEXT,
+      rolePermissionConfig: {
+        intersectionOf: { userWorkspaceRoleId: ROLE_ID },
+      },
     });
 
     const result = await tool.execute({ title: 'Revenue' });

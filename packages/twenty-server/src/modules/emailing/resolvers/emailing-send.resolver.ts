@@ -121,12 +121,13 @@ export class EmailingSendResolver {
   async previewMessageCampaignAudience(
     @Args('input') input: PreviewMessageCampaignAudienceInput,
     @AuthWorkspace() currentWorkspace: WorkspaceEntity,
-    @AuthUserWorkspaceId() _userWorkspaceId: string,
+    @AuthUserWorkspaceId() userWorkspaceId: string,
   ): Promise<CampaignAudiencePreviewDTO> {
     this.emailGroupAccessService.validateEmailGroupAccessOrThrow();
 
     return this.messageCampaignAudienceService.previewAudience({
       workspaceId: currentWorkspace.id,
+      userWorkspaceId,
       listId: input.listId,
       unsubscribeTopicId: input.unsubscribeTopicId,
     });

@@ -7,7 +7,6 @@ import {
   RecordSharePrincipalType,
   RecordShareRowCause,
 } from 'twenty-shared/types';
-import { EVERYONE_PRINCIPAL_ID } from 'twenty-shared/constants';
 import { isDefined } from 'twenty-shared/utils';
 
 import { type UserWorkspaceAuthContext } from 'src/engine/core-modules/auth/types/workspace-auth-context.type';
@@ -28,6 +27,7 @@ import {
   type ObjectSharing,
   resolveObjectSharing,
 } from 'src/engine/permissions/record-share/utils/resolve-object-sharing.util';
+import { assertPrivateRecordEnabledOrThrow } from 'src/engine/permissions/private-record/utils/assert-private-record-enabled-or-throw.util';
 import { hasCreatedByField } from 'src/engine/permissions/private-record/utils/has-created-by-field.util';
 import { resolveRecordSharePrincipalOrThrow } from 'src/engine/permissions/record-share/utils/resolve-record-share-principal-or-throw.util';
 import { resolveViewerRecordShareAccessLevel } from 'src/engine/permissions/record-share/utils/resolve-viewer-record-share-access-level.util';
@@ -39,10 +39,10 @@ import { type RecordPermissionsDTO } from 'src/engine/permissions/record-permiss
 import { type RecordTargetInput } from 'src/engine/permissions/record-permissions/dtos/record-target.input';
 import { RecordPermissionsService } from 'src/engine/permissions/record-permissions/services/record-permissions.service';
 import { type WorkspaceTransactionScope } from 'src/engine/twenty-orm/types/workspace-transaction-scope.type';
+import { getRoleIdsFromRolePermissionConfig } from 'src/engine/permissions/principal/utils/get-role-ids-from-role-permission-config.util';
+import { resolvePrincipalIdsFromAuthContext } from 'src/engine/permissions/principal/utils/resolve-principal-ids-from-auth-context.util';
+import { resolveRolePermissionConfig } from 'src/engine/permissions/principal/utils/resolve-role-permission-config.util';
 import { WorkspaceOrmManager } from 'src/engine/twenty-orm/workspace-orm.manager';
-import { getPermissionsPrincipalsRoleIds } from 'src/engine/permissions/principal/utils/get-permissions-principals-role-ids.util';
-import { getPermissionsPrincipalsShareKeys } from 'src/engine/permissions/principal/utils/get-permissions-principals-share-keys.util';
-import { PermissionsPrincipalsService } from 'src/engine/permissions/principal/services/permissions-principals.service';
 import { WorkspaceCacheService } from 'src/engine/workspace-cache/services/workspace-cache.service';
 import { getWorkspaceSchemaName } from 'src/engine/workspace-datasource/utils/get-workspace-schema-name.util';
 import { escapeIdentifier } from 'src/engine/workspace-manager/workspace-migration/utils/remove-sql-injection.util';
@@ -71,7 +71,6 @@ export class RecordSharingService {
     private readonly privateRecordStorageService: PrivateRecordStorageService,
     private readonly recordSharePrincipalService: RecordSharePrincipalService,
     private readonly recordPermissionsService: RecordPermissionsService,
-    private readonly permissionsPrincipalsService: PermissionsPrincipalsService,
   ) {}
 
   async getSharing(args: RecordSharingArgs): Promise<RecordSharingDTO> {
@@ -188,9 +187,11 @@ export class RecordSharingService {
               `SELECT id FROM ${escapeIdentifier(getWorkspaceSchemaName(workspaceId))}.${escapeIdentifier(computeObjectTargetTable(flatObjectMetadata))} WHERE id = $1 FOR UPDATE`,
               [args.recordId],
             );
-            const repository = transactionScope.getRepository(
-              flatObjectMetadata.nameSingular,
-            );
+            const repository =
+              this.workspaceOrmManager.getRepositoryWithContextPermissions(
+                flatObjectMetadata.nameSingular,
+                transactionScope,
+              );
             const writableIds =
               await repository.findRecordIdsAllowedForOperation({
                 recordIds: [args.recordId],
@@ -253,10 +254,15 @@ export class RecordSharingService {
     args: RecordSharingArgs & { isPrivate: boolean };
   }): Promise<void> {
     const { isPrivate } = args;
-    const { flatFieldMetadataMaps } =
+    const { featureFlagsMap, flatFieldMetadataMaps } =
       await this.workspaceCacheService.getOrRecompute(workspaceId, [
+        'featureFlagsMap',
         'flatFieldMetadataMaps',
       ]);
+
+    if (isPrivate) {
+      assertPrivateRecordEnabledOrThrow(featureFlagsMap);
+    }
 
     await this.privateRecordStorageService.setPrivate({
       workspaceId,
@@ -456,18 +462,29 @@ export class RecordSharingService {
   }) {
     const workspaceId = authContext.workspace.id;
     const { flatObjectMetadata, isShareable } = sharingObject;
-    const { roleIdsWithAllRecordsAccess } =
-      await this.workspaceCacheService.getOrRecompute(workspaceId, [
-        'roleIdsWithAllRecordsAccess',
-      ]);
-    const principals =
-      await this.permissionsPrincipalsService.findPrincipalsWithRoles(
-        authContext,
-      );
+    const {
+      userWorkspaceRoleMap,
+      apiKeyRoleMap,
+      flatRoleTargetByAgentIdMaps,
+      roleIdsWithAllRecordsAccess,
+    } = await this.workspaceCacheService.getOrRecompute(workspaceId, [
+      'userWorkspaceRoleMap',
+      'apiKeyRoleMap',
+      'flatRoleTargetByAgentIdMaps',
+      'roleIdsWithAllRecordsAccess',
+    ]);
+    const roleMaps = {
+      authContext,
+      userWorkspaceRoleMap,
+      apiKeyRoleMap,
+      flatRoleTargetByAgentIdMaps,
+    };
+    const principalIds = resolvePrincipalIdsFromAuthContext(roleMaps) ?? [];
+    const rolePermissionConfig = resolveRolePermissionConfig(roleMaps);
     const canAccessAllRecords =
-      isDefined(principals) &&
+      isDefined(rolePermissionConfig) &&
       canRolesAccessAllRecords({
-        roleIds: getPermissionsPrincipalsRoleIds(principals),
+        roleIds: getRoleIdsFromRolePermissionConfig(rolePermissionConfig),
         roleIdsWithAllRecordsAccess,
       });
     const shares = await this.recordShareStorageService.findByRecordIds({
@@ -488,12 +505,7 @@ export class RecordSharingService {
       privateRecordState?.createdByWorkspaceMemberId ?? undefined;
     const viewerAccessLevel = resolveViewerRecordShareAccessLevel({
       recordShares: shares,
-      principalIds: [
-        EVERYONE_PRINCIPAL_ID,
-        ...(isDefined(principals)
-          ? getPermissionsPrincipalsShareKeys(principals)
-          : []),
-      ],
+      principalIds,
       implicitAccessLevels: isShareable
         ? [
             isPrivate ? null : RecordShareAccessLevel.READ_WRITE,
@@ -563,7 +575,7 @@ export class RecordSharingService {
     return this.workspaceOrmManager.executeInWorkspaceContext(
       () =>
         this.workspaceOrmManager
-          .getRepository(flatObjectMetadata.nameSingular)
+          .getRepositoryWithContextPermissions(flatObjectMetadata.nameSingular)
           .isObjectOperationPermittedByRole('update'),
       authContext,
     );

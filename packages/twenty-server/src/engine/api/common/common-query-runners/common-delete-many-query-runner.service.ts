@@ -40,6 +40,7 @@ export class CommonDeleteManyQueryRunnerService extends CommonBaseQueryRunnerSer
   ): Promise<ObjectRecord[]> {
     const {
       authContext,
+      rolePermissionConfig,
       flatObjectMetadataMaps,
       flatFieldMetadataMaps,
       flatObjectMetadata,
@@ -72,6 +73,7 @@ export class CommonDeleteManyQueryRunnerService extends CommonBaseQueryRunnerSer
         >,
         limit: QUERY_MAX_RECORDS_FROM_RELATION,
         authContext,
+        rolePermissionConfig,
         selectedFields: args.selectedFieldsResult.select,
         ...this.getNestedRelationsReadPathOptions(),
       });

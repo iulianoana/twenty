@@ -1,4 +1,5 @@
 import { useDirectFileUpload } from '@/file/hooks/useDirectFileUpload';
+import { t } from '@lingui/core/macro';
 import { useMutation } from '@apollo/client/react';
 import { isDefined } from 'twenty-shared/utils';
 import {
@@ -6,14 +7,12 @@ import {
   FileFolder,
   type FileWithSignedUrl,
 } from '~/generated-metadata/graphql';
-import { useLingui } from '@lingui/react/macro';
 
 type UploadWorkspaceMemberProfilePictureOptions = {
   signal?: AbortSignal;
 };
 
 export const useUploadWorkspaceMemberProfilePicture = () => {
-  const { t } = useLingui();
   const { createFileUploadAndPutFile } = useDirectFileUpload();
   const [completeWorkspaceMemberProfilePictureUpload] = useMutation(
     CompleteWorkspaceMemberProfilePictureUploadDocument,

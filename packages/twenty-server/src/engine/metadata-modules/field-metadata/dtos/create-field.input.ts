@@ -20,7 +20,6 @@ export class CreateFieldInput extends OmitType(
     'morphId',
     'universalIdentifier',
     'disabledFieldPermissionActions',
-    'isSystemSideEffect',
   ] as const,
   InputType,
 ) {

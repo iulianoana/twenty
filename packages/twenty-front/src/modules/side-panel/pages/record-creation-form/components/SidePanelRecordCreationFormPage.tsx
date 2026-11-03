@@ -36,6 +36,7 @@ import { useStore } from 'jotai';
 import { useId, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
 import { Key } from 'ts-key-enum';
 import { type JsonValue } from 'type-fest';
 import { PermissionFlagType } from 'twenty-shared/constants';
@@ -51,7 +52,6 @@ import {
 } from 'twenty-ui/icon';
 import { Button } from 'twenty-ui/primitives/input';
 import { useTheme, themeCssVariables } from 'twenty-ui/theme';
-import { useLingui } from '@lingui/react/macro';
 
 const StyledContainer = styled.div`
   display: flex;
@@ -114,7 +114,6 @@ const SidePanelRecordCreationForm = ({
   initialDraftRecord: Partial<ObjectRecord>;
   canCreateAnother: boolean;
 }) => {
-  const { t } = useLingui();
   const { objectMetadataItem } = useObjectMetadataItemById({
     objectId: objectMetadataId,
   });

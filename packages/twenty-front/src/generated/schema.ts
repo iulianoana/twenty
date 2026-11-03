@@ -360,13 +360,6 @@ export type LinksMetadata = {
   secondaryLinks?: Maybe<Array<LinkMetadata>>;
 };
 
-export enum MessageChannelType {
-  APP = 'APP',
-  EMAIL = 'EMAIL',
-  EMAIL_GROUP = 'EMAIL_GROUP',
-  SMS = 'SMS'
-}
-
 export enum MessageChannelVisibility {
   METADATA = 'METADATA',
   SHARE_EVERYTHING = 'SHARE_EVERYTHING',
@@ -562,7 +555,6 @@ export type Query = {
   coreWorkflowsWithCurrentVersions: Array<CoreWorkflowWithCurrentVersionDto>;
   dpaAgreements: Array<DpaAgreement>;
   dpaPreview: DpaDocument;
-  getMessageThreadChannel?: Maybe<TimelineThreadChannel>;
   /** @deprecated Use getTimelineCalendarEventsFromObjectRecord instead */
   getTimelineCalendarEventsFromCompanyId: TimelineCalendarEventsWithTotal;
   getTimelineCalendarEventsFromObjectRecord: TimelineCalendarEventsWithTotal;
@@ -626,11 +618,6 @@ export type QueryCoreWorkflowsArgs = {
 
 export type QueryCoreWorkflowsWithCurrentVersionsArgs = {
   input: CoreWorkflowsWithCurrentVersionsInput;
-};
-
-
-export type QueryGetMessageThreadChannelArgs = {
-  messageThreadId: Scalars['UUID']['input'];
 };
 
 
@@ -851,7 +838,6 @@ export type TimelineCalendarEventsWithTotal = {
 
 export type TimelineThread = {
   __typename?: 'TimelineThread';
-  channel?: Maybe<TimelineThreadChannel>;
   firstParticipant: TimelineThreadParticipant;
   id: Scalars['UUID']['output'];
   lastMessageBody: Scalars['String']['output'];
@@ -863,13 +849,6 @@ export type TimelineThread = {
   read: Scalars['Boolean']['output'];
   subject: Scalars['String']['output'];
   visibility: MessageChannelVisibility;
-};
-
-export type TimelineThreadChannel = {
-  __typename?: 'TimelineThreadChannel';
-  applicationId?: Maybe<Scalars['UUID']['output']>;
-  provider: Scalars['String']['output'];
-  type: MessageChannelType;
 };
 
 export type TimelineThreadParticipant = {

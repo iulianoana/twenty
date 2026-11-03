@@ -1,4 +1,5 @@
 import { useMutation } from '@apollo/client/react';
+import { t } from '@lingui/core/macro';
 import { useState } from 'react';
 import { useToast } from 'twenty-ui/components/feedback';
 import {
@@ -6,14 +7,12 @@ import {
   UpdateTimelineActivityTypeIsActiveDocument,
 } from '~/generated-metadata/graphql';
 import { useInstalledTimelineActivityTypes } from '~/pages/settings/applications/hooks/useInstalledTimelineActivityTypes';
-import { useLingui } from '@lingui/react/macro';
 
 export const useApplicationTimelineActivityTypes = ({
   isInstalledApplication,
 }: {
   isInstalledApplication: boolean;
 }) => {
-  const { t } = useLingui();
   const { enqueueToast } = useToast();
   const [mutatingTimelineActivityTypeIds, setMutatingTimelineActivityTypeIds] =
     useState<ReadonlySet<string>>(new Set());

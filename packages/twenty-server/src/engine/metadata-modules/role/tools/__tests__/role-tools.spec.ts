@@ -1,5 +1,3 @@
-import { type WorkspaceAuthContext } from 'src/engine/core-modules/auth/types/workspace-auth-context.type';
-import { type PermissionsService } from 'src/engine/permissions/permissions.service';
 import {
   FieldActorSource,
   RowLevelPermissionPredicateGroupLogicalOperator,
@@ -33,9 +31,6 @@ const workspaceMemberIdFieldMetadataId = '5e6f7a8b-9c0d-4e1f-8a3b-4c5d6e7f8091';
 const predicateGroupId = '6f7a8b9c-0d1e-4f2a-9b4c-5d6e7f8091a2';
 
 const buildServices = () => ({
-  permissionsService: {
-    getRoleIds: jest.fn().mockResolvedValue([callerRoleId]),
-  },
   roleService: {
     getWorkspaceRoles: jest.fn().mockResolvedValue([]),
     createRole: jest.fn(),
@@ -85,13 +80,10 @@ const buildListRolesTool = (services: ReturnType<typeof buildServices>) =>
 
 const context: ToolProviderContext = {
   workspaceId,
+  rolePermissionConfig: {
+    intersectionOf: { userWorkspaceRoleId: callerRoleId },
+  },
   userWorkspaceId: callerUserWorkspaceId,
-  authContext: {
-    type: 'user',
-    workspace: { id: workspaceId },
-    userWorkspaceId: callerUserWorkspaceId,
-    userSessionVariant: 'standard',
-  } as WorkspaceAuthContext,
   actorContext: {
     source: FieldActorSource.MANUAL,
     workspaceMemberId: 'caller-workspace-member-id',
@@ -234,7 +226,6 @@ describe('Role tools', () => {
 
       const output = await new UpdateRoleTool(
         services.roleService as unknown as RoleService,
-        services.permissionsService as unknown as PermissionsService,
       ).execute({
         input: {
           roleId: otherRoleId,
@@ -252,26 +243,26 @@ describe('Role tools', () => {
         },
         actingRoleIds: [callerRoleId],
       });
-      expect(services.permissionsService.getRoleIds).toHaveBeenCalledWith(
-        context.authContext,
-      );
     });
 
-    it('forwards every role of the caller for lockout protection', async () => {
+    it('forwards every role of the caller config for lockout protection', async () => {
       const services = buildServices();
 
       services.roleService.updateRole.mockResolvedValue({ id: otherRoleId });
-      services.permissionsService.getRoleIds.mockResolvedValue([
-        callerRoleId,
-        'application-role-id',
-      ]);
 
       await new UpdateRoleTool(
         services.roleService as unknown as RoleService,
-        services.permissionsService as unknown as PermissionsService,
       ).execute({
         input: { roleId: otherRoleId, update: { canUpdateAllSettings: false } },
-        context,
+        context: {
+          ...context,
+          rolePermissionConfig: {
+            intersectionOf: {
+              userWorkspaceRoleId: callerRoleId,
+              applicationRoleId: 'application-role-id',
+            },
+          },
+        },
       });
 
       expect(services.roleService.updateRole).toHaveBeenCalledTimes(1);
@@ -282,18 +273,19 @@ describe('Role tools', () => {
       );
     });
 
-    it('forwards no caller role for the system', async () => {
+    it('forwards no caller role when the config bypasses permission checks', async () => {
       const services = buildServices();
 
       services.roleService.updateRole.mockResolvedValue({ id: otherRoleId });
-      services.permissionsService.getRoleIds.mockResolvedValue([]);
 
       await new UpdateRoleTool(
         services.roleService as unknown as RoleService,
-        services.permissionsService as unknown as PermissionsService,
       ).execute({
         input: { roleId: otherRoleId, update: { canUpdateAllSettings: false } },
-        context,
+        context: {
+          ...context,
+          rolePermissionConfig: { shouldBypassPermissionChecks: true },
+        },
       });
 
       expect(services.roleService.updateRole).toHaveBeenCalledTimes(1);
@@ -314,7 +306,6 @@ describe('Role tools', () => {
 
       const output = await new DeleteRoleTool(
         services.roleService as unknown as RoleService,
-        services.permissionsService as unknown as PermissionsService,
       ).execute({ input: { roleId: otherRoleId }, context });
 
       expect(output.success).toBe(true);

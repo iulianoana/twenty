@@ -30,10 +30,4 @@ describe('buildAiAgentStepLog', () => {
       sizeBytes: 0,
     });
   });
-
-  it('logs no conversation for a run without one', () => {
-    expect(
-      buildAiAgentStepLog({ summary: SUMMARY, threadId: null }).details,
-    ).toEqual({ type: 'AI_AGENT', ...SUMMARY });
-  });
 });

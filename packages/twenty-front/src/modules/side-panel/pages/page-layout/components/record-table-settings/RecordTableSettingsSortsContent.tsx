@@ -2,6 +2,7 @@ import { type RecordSort } from '@/object-record/record-sort/types/RecordSort';
 import { currentRecordSortsComponentState } from '@/object-record/record-sort/states/currentRecordSortsComponentState';
 import { useAtomComponentState } from '@/ui/utilities/state/jotai/hooks/useAtomComponentState';
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
 import { isDefined } from 'twenty-shared/utils';
 import { IconArrowsSort, IconTrash } from 'twenty-ui/icon';
 import { Button, type SelectOption } from 'twenty-ui/primitives/input';
@@ -9,7 +10,6 @@ import { Select } from '@/ui/input/components/Select';
 import { themeCssVariables } from 'twenty-ui/theme';
 import { v4 as uuidv4 } from 'uuid';
 import { ViewSortDirection } from '~/generated-metadata/graphql';
-import { useLingui } from '@lingui/react/macro';
 
 const StyledSortItemContainer = styled.div`
   align-items: center;
@@ -32,7 +32,6 @@ export const RecordTableSettingsSortsContent = ({
   directionOptions,
   onUpdate,
 }: RecordTableSettingsSortsContentProps) => {
-  const { t } = useLingui();
   const [currentRecordSorts, setCurrentRecordSorts] = useAtomComponentState(
     currentRecordSortsComponentState,
   );

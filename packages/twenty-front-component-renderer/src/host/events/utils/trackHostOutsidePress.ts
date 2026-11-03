@@ -4,7 +4,6 @@ import { isDefined } from 'twenty-shared/utils';
 import { OUTSIDE_PRESS_EVENT_TYPES } from '@/constants/OutsidePressEventTypes';
 import { type PushOutsidePressEvent } from '@/host/events/types/PushOutsidePressEvent';
 import { createCapturedGestureEventFilter } from '@/host/events/utils/createCapturedGestureEventFilter';
-import { isHostUiEvent } from '@/host/events/utils/isHostUiEvent';
 import { isPressLessClick } from '@/host/events/utils/isPressLessClick';
 import { isScrollbarPress } from '@/host/events/utils/isScrollbarPress';
 import { type FindRemoteElementIdContainingNode } from '@/host/geometry/types/FindRemoteElementIdContainingNode';
@@ -26,7 +25,6 @@ export const trackHostOutsidePress = ({
   const handleOutsidePress = (event: MouseEvent) => {
     if (
       !isOutsidePressEventType(event.type) ||
-      isHostUiEvent(event) ||
       isCapturedGestureEvent(event) ||
       isPressLessClick(event) ||
       event

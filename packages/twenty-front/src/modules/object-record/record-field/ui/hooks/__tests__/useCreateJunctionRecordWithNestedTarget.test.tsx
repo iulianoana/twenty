@@ -19,6 +19,7 @@ import {
   sidePanelNavigationStackState,
   type SidePanelNavigationStackItem,
 } from '@/side-panel/states/sidePanelNavigationStackState';
+import { useIsFeatureEnabled } from '@/workspace/hooks/useIsFeatureEnabled';
 import { getMockFieldMetadataItemOrThrow } from '~/testing/utils/getMockFieldMetadataItemOrThrow';
 import { getMockObjectMetadataItemOrThrow } from '~/testing/utils/getMockObjectMetadataItemOrThrow';
 import { getTestEnrichedObjectMetadataItemsMock } from '~/testing/utils/getTestEnrichedObjectMetadataItemsMock';
@@ -28,6 +29,7 @@ jest.mock('@/object-record/hooks/useBuildRecordInputFromRLSPredicates');
 jest.mock('@/object-record/hooks/useCreateOneRecord', () => ({
   useCreateOneRecord: jest.fn(),
 }));
+jest.mock('@/workspace/hooks/useIsFeatureEnabled');
 
 const mockNavigateSidePanelMenu = jest.fn();
 
@@ -123,6 +125,7 @@ const setup = () => {
 beforeEach(() => {
   jest.clearAllMocks();
   jest.mocked(useObjectMetadataItems).mockReturnValue({ objectMetadataItems });
+  jest.mocked(useIsFeatureEnabled).mockReturnValue(true);
   jest.mocked(useBuildRecordInputFromRLSPredicates).mockReturnValue({
     buildRecordInputFromRLSPredicates: () => ({}),
   });
@@ -202,5 +205,24 @@ it('creates and links a target for each submission, including Create another', a
     objectMetadataId: taskMetadata.id,
     isSelected: true,
     isMatchingSearchFilter: true,
+  });
+});
+
+it('creates and links the target right away when the form flag is off', async () => {
+  jest.mocked(useIsFeatureEnabled).mockReturnValue(false);
+  const { result } = setup();
+
+  await act(async () => {
+    await result.current.createJunctionRecordWithNestedTarget({
+      searchInput: 'Quick task',
+      targetObjectMetadataItemId: taskMetadata.id,
+    });
+  });
+
+  expect(mockNavigateSidePanelMenu).not.toHaveBeenCalled();
+  expect(mockCreateJunctionRecord).toHaveBeenCalledWith({
+    id: expect.any(String),
+    targetRocketId: 'rocket-id',
+    task: { create: { id: expect.any(String), title: 'Quick task' } },
   });
 });

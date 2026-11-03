@@ -118,7 +118,6 @@ const buildFlatRoleTarget = ({
     roleId: `${roleUniversalIdentifier}-id`,
     agentId: `${agentUniversalIdentifier}-id`,
     webhookId: null,
-    targetApplicationId: null,
   };
 };
 

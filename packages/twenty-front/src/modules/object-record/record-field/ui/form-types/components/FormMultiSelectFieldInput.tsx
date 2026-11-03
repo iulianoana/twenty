@@ -1,5 +1,7 @@
 import { hasFullFormFieldBorder } from '@/ui/input/utils/hasFullFormFieldBorder';
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
+
 import { FormFieldInputContainer } from '@/ui/input/components/FormFieldInputContainer';
 import { FormFieldInputInnerContainer } from '@/object-record/record-field/ui/form-types/components/FormFieldInputInnerContainer';
 import { FormFieldInputRowContainer } from '@/object-record/record-field/ui/form-types/components/FormFieldInputRowContainer';
@@ -23,7 +25,6 @@ import { useCloseDropdown } from '@/ui/layout/dropdown/hooks/useCloseDropdown';
 import { preventDropdownDismissOnInputElement } from '@/ui/layout/dropdown/utils/preventDropdownDismissOnInputElement';
 import { IconChevronDown } from 'twenty-ui/icon';
 import { useTheme, themeCssVariables } from 'twenty-ui/theme';
-import { useLingui } from '@lingui/react/macro';
 
 type FormMultiSelectFieldInputProps = {
   label?: string;
@@ -90,7 +91,6 @@ export const FormMultiSelectFieldInput = ({
   hint,
   dropdownWidth,
 }: FormMultiSelectFieldInputProps) => {
-  const { t } = useLingui();
   const theme = useTheme();
   const instanceId = useId();
   const { closeDropdown } = useCloseDropdown();

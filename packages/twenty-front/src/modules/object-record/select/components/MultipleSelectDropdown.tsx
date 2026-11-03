@@ -11,7 +11,7 @@ import { useSelectableList } from '@/ui/layout/selectable-list/hooks/useSelectab
 import { selectedItemIdComponentState } from '@/ui/layout/selectable-list/states/selectedItemIdComponentState';
 import { useHotkeysOnFocusedElement } from '@/ui/utilities/hotkey/hooks/useHotkeysOnFocusedElement';
 import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
-import { useLingui } from '@lingui/react/macro';
+import { t } from '@lingui/core/macro';
 
 export const MultipleSelectDropdown = ({
   selectableListId,
@@ -34,7 +34,6 @@ export const MultipleSelectDropdown = ({
   ) => void;
   loadingItems: boolean;
 }) => {
-  const { t } = useLingui();
   const { closeDropdown } = useCloseDropdown();
 
   const { resetSelectedItem } = useSelectableList(selectableListId);

@@ -2,12 +2,12 @@ import { ManagedIframeEnableButton } from '@/media-access/components/ManagedIfra
 import { ManagedIframeMediaAccessSessionEffect } from '@/media-access/components/ManagedIframeMediaAccessSessionEffect';
 import { type ManagedIframeElementProps } from '@/media-access/types/ManagedIframeElementProps';
 import { getDelegatedIframeMediaPermission } from '@/media-access/utils/getDelegatedIframeMediaPermission';
-import { isIframeMediaPermissionCovered } from '@/media-access/utils/isIframeMediaPermissionCovered';
+import { getIframeMediaAllow } from '@/media-access/utils/getIframeMediaAllow';
 import { t } from '@lingui/core/macro';
 import { isNonEmptyString } from '@sniptt/guards';
-import { Fragment, useCallback, useId, useState } from 'react';
+import { useCallback, useId, useState } from 'react';
 import { type IframeMediaPermission } from 'twenty-shared/types';
-import { getIframeMediaAllow, isDefined } from 'twenty-shared/utils';
+import { isDefined } from 'twenty-shared/utils';
 
 type ManagedIframeSessionProps = ManagedIframeElementProps & {
   ownerId: string;
@@ -41,15 +41,14 @@ export const ManagedIframeSession = ({
   sandbox,
   allow,
   allowFullScreen,
-  renderIframe,
-  iframeElement,
   ownerId,
   ownerName,
   permission,
 }: ManagedIframeSessionProps) => {
   const mediaAccessSessionId = useId();
-  const [nativeIframeElement, setNativeIframeElement] =
-    useState<HTMLIFrameElement | null>(null);
+  const [iframeElement, setIframeElement] = useState<HTMLIFrameElement | null>(
+    null,
+  );
   const [activatedPermission, setActivatedPermission] =
     useState<IframeMediaPermission | null>(null);
   const delegatedPermission = getDelegatedIframeMediaPermission({
@@ -57,38 +56,15 @@ export const ManagedIframeSession = ({
     permission,
   });
   const isActivated = isDefined(delegatedPermission);
-  const isAvailablePermissionActivated =
-    isDefined(permission) &&
-    isIframeMediaPermissionCovered({
-      permission,
-      coveringPermission: delegatedPermission,
-    });
 
   if (isDefined(activatedPermission) && !isActivated) {
     setActivatedPermission(null);
   }
 
-  const anchorElement = iframeElement ?? nativeIframeElement;
   const handleDeactivate = useCallback(() => {
     setActivatedPermission(null);
   }, []);
   const handleEnable = () => {
-    if (!isDefined(permission)) {
-      return;
-    }
-
-    if (
-      !window.confirm(
-        [
-          t`Enable media access for ${ownerName}?`,
-          getEnableLabel(permission),
-          permission.origin,
-        ].join('\n'),
-      )
-    ) {
-      return;
-    }
-
     setActivatedPermission(permission);
   };
   const iframeAllow = getIframeMediaAllow({
@@ -116,34 +92,29 @@ export const ManagedIframeSession = ({
           onStop={handleDeactivate}
         />
       )}
-      <Fragment key={iframeAllow}>
-        {isDefined(renderIframe) ? (
-          renderIframe({ allow: iframeAllow, sandbox: iframeSandbox })
-        ) : (
-          <iframe
-            ref={setNativeIframeElement}
-            src={src}
-            srcDoc={srcDoc}
-            title={title}
-            className={className}
-            style={style}
-            width={width}
-            height={height}
-            hidden={hidden}
-            onLoad={onLoad}
-            onError={onError}
-            sandbox={iframeSandbox}
-            allow={iframeAllow}
-            allowFullScreen={allowFullScreen}
-          />
-        )}
-      </Fragment>
+      <iframe
+        key={isActivated ? 'media-enabled' : 'media-disabled'}
+        ref={setIframeElement}
+        src={src}
+        srcDoc={srcDoc}
+        title={title}
+        className={className}
+        style={style}
+        width={width}
+        height={height}
+        hidden={hidden}
+        onLoad={onLoad}
+        onError={onError}
+        sandbox={iframeSandbox}
+        allow={iframeAllow}
+        allowFullScreen={allowFullScreen}
+      />
       {isDefined(permission) &&
-        !isAvailablePermissionActivated &&
+        !isActivated &&
         !hidden &&
-        isDefined(anchorElement) && (
+        isDefined(iframeElement) && (
           <ManagedIframeEnableButton
-            anchorElement={anchorElement}
+            anchorElement={iframeElement}
             label={getEnableLabel(permission)}
             onClick={handleEnable}
           />

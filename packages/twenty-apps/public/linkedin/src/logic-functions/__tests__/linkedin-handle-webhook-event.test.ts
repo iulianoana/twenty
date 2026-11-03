@@ -216,7 +216,6 @@ describe('linkedinHandleWebhookEventHandler', () => {
     ).resolves.toEqual({ handled: true });
 
     expect(mocks.ingestMessages).toHaveBeenCalledOnce();
-    expect(mocks.getUnipileUser).not.toHaveBeenCalled();
   });
 
   it('ingests a sent message to the chat counterpart public profile URL', async () => {

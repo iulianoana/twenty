@@ -511,7 +511,12 @@ export class ToolCallAnswerService {
       );
     }
 
-    if (!(await this.actorService.hasRole(authContext))) {
+    const rolePermissions = await this.actorService.resolveRolePermissions({
+      workspaceId,
+      authContext,
+    });
+
+    if (!isDefined(rolePermissions)) {
       throw new AiException(
         'Answering requires a role in the workspace',
         AiExceptionCode.TOOL_CALL_RESOLUTION_FORBIDDEN,
@@ -526,6 +531,7 @@ export class ToolCallAnswerService {
 
     return {
       workspaceId,
+      ...rolePermissions,
       authContext,
       actorContext,
       userId,

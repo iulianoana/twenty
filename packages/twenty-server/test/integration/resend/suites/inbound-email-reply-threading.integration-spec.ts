@@ -96,13 +96,15 @@ describe('Inbound email reply threading (integration)', () => {
       const messageId = randomUUID();
 
       await workspaceOrmManager
-        .getRepositoryWithoutPermissionChecks<MessageThreadWorkspaceEntity>(
-          'messageThread',
-        )
+        .getRepository<MessageThreadWorkspaceEntity>('messageThread', {
+          shouldBypassPermissionChecks: true,
+        })
         .insert({ id: messageThreadId });
 
       await workspaceOrmManager
-        .getRepositoryWithoutPermissionChecks<MessageWorkspaceEntity>('message')
+        .getRepository<MessageWorkspaceEntity>('message', {
+          shouldBypassPermissionChecks: true,
+        })
         .insert({
           id: messageId,
           headerMessageId: providerMessageId,
@@ -112,8 +114,9 @@ describe('Inbound email reply threading (integration)', () => {
         });
 
       await workspaceOrmManager
-        .getRepositoryWithoutPermissionChecks<MessageChannelMessageAssociationWorkspaceEntity>(
+        .getRepository<MessageChannelMessageAssociationWorkspaceEntity>(
           'messageChannelMessageAssociation',
+          { shouldBypassPermissionChecks: true },
         )
         .insert({
           id: randomUUID(),
@@ -158,7 +161,9 @@ describe('Inbound email reply threading (integration)', () => {
   const findThreadIdOfMessage = (headerMessageId: string) =>
     inWorkspace(async (workspaceOrmManager) => {
       const message = await workspaceOrmManager
-        .getRepositoryWithoutPermissionChecks<MessageWorkspaceEntity>('message')
+        .getRepository<MessageWorkspaceEntity>('message', {
+          shouldBypassPermissionChecks: true,
+        })
         .createQueryBuilder('message')
         .where('message.headerMessageId = :headerMessageId', {
           headerMessageId,

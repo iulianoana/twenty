@@ -5,7 +5,7 @@ import { type FieldMetadataItem } from '@/object-metadata/types/FieldMetadataIte
 import { fieldMetadataItemSchema } from '@/object-metadata/validation-schemas/fieldMetadataItemSchema';
 
 import { TextArea } from '@/ui/input/components/TextArea';
-import { useLingui } from '@lingui/react/macro';
+import { t } from '@lingui/core/macro';
 
 export const settingsDataModelFieldDescriptionFormSchema = () => {
   return fieldMetadataItemSchema([]).pick({
@@ -26,7 +26,6 @@ export const SettingsDataModelFieldDescriptionForm = ({
   disabled,
   fieldMetadataItem,
 }: SettingsDataModelFieldDescriptionFormProps) => {
-  const { t } = useLingui();
   const { control } =
     useFormContext<SettingsDataModelFieldDescriptionFormValues>();
 

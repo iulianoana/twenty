@@ -8,6 +8,7 @@ import { AvatarOrIcon } from '@/ui/field/display/components/internal/AvatarOrIco
 import { filePreviewState } from '@/ui/field/display/states/filePreviewState';
 import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
 import { useCallback } from 'react';
 import { type ExtendedFileUIPart } from 'twenty-shared/ai';
 import { isDefined } from 'twenty-shared/utils';
@@ -16,7 +17,6 @@ import { Chip } from 'twenty-ui/primitives/data-display';
 import { Loader } from 'twenty-ui/primitives/feedback';
 import { OverflowingTextWithTooltip } from 'twenty-ui/primitives/typography';
 import { themeCssVariables, useTheme } from 'twenty-ui/theme';
-import { useLingui } from '@lingui/react/macro';
 
 const StyledPreviewButton = styled.button`
   align-items: center;
@@ -52,7 +52,6 @@ export const AgentChatFilePreview = ({
   onRemove?: () => void;
   isUploading?: boolean;
 }) => {
-  const { t } = useLingui();
   const theme = useTheme();
   const iconColors: Record<AttachmentFileCategory, string> =
     useFileCategoryColors();

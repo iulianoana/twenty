@@ -59,7 +59,6 @@ export const turnSseMetadataEventsToMetadataOperationBrowserEvents = <
             operation: {
               type: 'delete',
               deletedRecordId: event.recordId,
-              deletedRecord: event.properties.before ?? undefined,
             },
             updatedCollectionHash,
           };

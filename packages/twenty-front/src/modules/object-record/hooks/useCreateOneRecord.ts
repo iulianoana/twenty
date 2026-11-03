@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { v4 } from 'uuid';
+import { t } from '@lingui/core/macro';
+
 import { triggerCreateRecordsOptimisticEffect } from '@/apollo/optimistic-effect/utils/triggerCreateRecordsOptimisticEffect';
 import { currentWorkspaceMemberState } from '@/auth/states/currentWorkspaceMemberState';
 import { useApolloCoreClient } from '@/object-metadata/hooks/useApolloCoreClient';
@@ -29,7 +31,6 @@ import { getCreateOneRecordMutationResponseField } from '@/object-record/utils/g
 import { sanitizeRecordInput } from '@/object-record/utils/sanitizeRecordInput';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { CustomError, isDefined } from 'twenty-shared/utils';
-import { useLingui } from '@lingui/react/macro';
 
 type useCreateOneRecordProps = {
   objectNameSingular: string;
@@ -46,7 +47,6 @@ export const useCreateOneRecord = <
   skipPostOptimisticEffect = false,
   shouldMatchRootQueryFilter,
 }: useCreateOneRecordProps) => {
-  const { t } = useLingui();
   const { upsertRecordsInStore } = useUpsertRecordsInStore();
   const apolloCoreClient = useApolloCoreClient();
   const [loading, setLoading] = useState(false);

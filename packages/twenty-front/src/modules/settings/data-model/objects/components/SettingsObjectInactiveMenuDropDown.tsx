@@ -1,3 +1,4 @@
+import { t } from '@lingui/core/macro';
 import {
   IconArchiveOff,
   IconDotsVertical,
@@ -11,7 +12,6 @@ import { Dropdown } from 'twenty-ui/components/navigation';
 import { DropdownRoot } from '@/ui/layout/dropdown/components/DropdownRoot';
 import { DropdownContent } from '@/ui/layout/dropdown/components/DropdownContent';
 import { GenericDropdownContentWidth } from '@/ui/layout/dropdown/constants/GenericDropdownContentWidth';
-import { useLingui } from '@lingui/react/macro';
 
 type SettingsObjectInactiveMenuDropDownProps = {
   isCustomObject: boolean;
@@ -30,7 +30,6 @@ export const SettingsObjectInactiveMenuDropDown = ({
   isCustomObject,
   isReadOnly = false,
 }: SettingsObjectInactiveMenuDropDownProps) => {
-  const { t } = useLingui();
   const isEditable = isCustomObject && !isReadOnly;
 
   return (

@@ -1,1 +1,0 @@
-export const PARTNER_ATTRIBUTION_WINDOW_DAYS = 30;

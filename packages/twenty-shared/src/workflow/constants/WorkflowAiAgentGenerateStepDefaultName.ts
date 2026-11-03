@@ -1,1 +1,0 @@
-export const WORKFLOW_AI_AGENT_GENERATE_STEP_DEFAULT_NAME = 'Generate';

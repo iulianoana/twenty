@@ -1,5 +1,6 @@
 import { InputLabel } from '@/ui/input/components/internal/InputLabel/InputLabel';
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
 import { type StepFilter } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 import { themeCssVariables } from 'twenty-ui/theme';
@@ -17,7 +18,6 @@ import { WorkflowStepFilterContext } from '@/workflow/workflow-steps/filters/sta
 import { rootLevelStepFilterGroupComponentSelector } from '@/workflow/workflow-steps/filters/states/rootLevelStepFilterGroupComponentSelector';
 import { type FilterSettings } from '@/workflow/workflow-steps/filters/types/FilterSettings';
 import { isStepFilterGroupChildAStepFilterGroup } from '@/workflow/workflow-steps/filters/utils/isStepFilterGroupChildAStepFilterGroup';
-import { useLingui } from '@lingui/react/macro';
 
 const StyledContainer = styled.div`
   align-items: start;
@@ -51,7 +51,6 @@ const CoreObjectFiltersBuilderConditions = ({
 }: {
   filterFields: CoreObjectFilterField[];
 }) => {
-  const { t } = useLingui();
   const rootStepFilterGroup = useAtomComponentSelectorValue(
     rootLevelStepFilterGroupComponentSelector,
   );

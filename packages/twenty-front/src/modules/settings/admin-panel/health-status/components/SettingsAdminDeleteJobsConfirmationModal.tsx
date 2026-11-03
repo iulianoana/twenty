@@ -1,6 +1,5 @@
 import { ConfirmationDialog } from '@/ui/layout/dialog/components/ConfirmationDialog';
-import { plural } from '@lingui/core/macro';
-import { useLingui } from '@lingui/react/macro';
+import { plural, t } from '@lingui/core/macro';
 
 type SettingsAdminDeleteJobsConfirmationModalProps = {
   modalInstanceId: string;
@@ -15,7 +14,6 @@ export const SettingsAdminDeleteJobsConfirmationModal = ({
   onConfirm,
   onClose,
 }: SettingsAdminDeleteJobsConfirmationModalProps) => {
-  const { t } = useLingui();
   const title = plural(jobCount, {
     one: `Delete ${jobCount} Job`,
     other: `Delete ${jobCount} Jobs`,

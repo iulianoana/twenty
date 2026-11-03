@@ -54,6 +54,9 @@ import { SEARCH_VECTOR_FIELD } from 'src/engine/metadata-modules/search-field-me
 import { resolveEffectiveEntityProperty } from 'src/engine/metadata-modules/overrides/utils/resolve-effective-entity-property.util';
 import { WorkspaceOrmManager } from 'src/engine/twenty-orm/workspace-orm.manager';
 import { type WorkspaceRepository } from 'src/engine/twenty-orm/repository/workspace-repository';
+import { getWorkspaceContext } from 'src/engine/twenty-orm/storage/orm-workspace-context.storage';
+import { resolveRolePermissionConfig } from 'src/engine/permissions/principal/utils/resolve-role-permission-config.util';
+import { type RolePermissionConfig } from 'src/engine/permissions/principal/types/role-permission-config.type';
 import { ApplicationTranslationCatalogService } from 'src/engine/metadata-modules/application-translation-catalog/services/application-translation-catalog.service';
 import { resolveEffectiveFlatEntityProperty } from 'src/engine/metadata-modules/overrides/utils/resolve-effective-flat-entity-property.util';
 
@@ -109,9 +112,20 @@ export class SearchService {
         objectMetadataItemChunk.map(async (flatObjectMetadata) => {
           return this.workspaceOrmManager.executeInWorkspaceContext(
             async () => {
+              const context = getWorkspaceContext();
+              const rolePermissionConfig =
+                resolveRolePermissionConfig({
+                  authContext: context.authContext,
+                  userWorkspaceRoleMap: context.userWorkspaceRoleMap,
+                  apiKeyRoleMap: context.apiKeyRoleMap,
+                  flatRoleTargetByAgentIdMaps:
+                    context.flatRoleTargetByAgentIdMaps,
+                }) ?? undefined;
+
               const repository =
                 this.workspaceOrmManager.getRepository<ObjectRecord>(
                   flatObjectMetadata.nameSingular,
+                  rolePermissionConfig,
                   { useReplica: true },
                 );
 
@@ -119,6 +133,7 @@ export class SearchService {
                 objectMetadataItem: flatObjectMetadata,
                 records: await this.buildSearchQueryAndGetRecordsWithFallback({
                   entityManager: repository,
+                  rolePermissionConfig,
                   flatObjectMetadata,
                   flatFieldMetadataMaps,
                   searchInput,
@@ -196,6 +211,7 @@ export class SearchService {
     Entity extends ObjectLiteral,
   >({
     entityManager,
+    rolePermissionConfig,
     flatObjectMetadata,
     flatFieldMetadataMaps,
     searchInput,
@@ -206,6 +222,7 @@ export class SearchService {
     after,
   }: {
     entityManager: WorkspaceRepository<Entity>;
+    rolePermissionConfig?: RolePermissionConfig;
     flatObjectMetadata: FlatObjectMetadata;
     flatFieldMetadataMaps: FlatEntityMaps<FlatFieldMetadata>;
     searchInput: string;
@@ -236,6 +253,7 @@ export class SearchService {
 
     const fallbackResults = await this.buildIlikeFallbackQuery({
       entityManager,
+      rolePermissionConfig,
       flatObjectMetadata,
       flatFieldMetadataMaps,
       searchInput,
@@ -364,6 +382,7 @@ export class SearchService {
 
   private async buildIlikeFallbackQuery<Entity extends ObjectLiteral>({
     entityManager,
+    rolePermissionConfig,
     flatObjectMetadata,
     flatFieldMetadataMaps,
     searchInput,
@@ -371,6 +390,7 @@ export class SearchService {
     filter,
   }: {
     entityManager: WorkspaceRepository<Entity>;
+    rolePermissionConfig?: RolePermissionConfig;
     flatObjectMetadata: FlatObjectMetadata;
     flatFieldMetadataMaps: FlatEntityMaps<FlatFieldMetadata>;
     searchInput: string;
@@ -391,6 +411,7 @@ export class SearchService {
 
           const repository = transactionScope.getRepository<Entity>(
             flatObjectMetadata.nameSingular,
+            rolePermissionConfig,
           );
 
           const queryBuilder = repository.createQueryBuilder(

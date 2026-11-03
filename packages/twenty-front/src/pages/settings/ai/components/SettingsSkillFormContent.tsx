@@ -1,4 +1,5 @@
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
 import { useState } from 'react';
 import { SettingsPath } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
@@ -29,7 +30,6 @@ import { getSettingsAiBreadcrumbLinks } from '~/pages/settings/ai/utils/getSetti
 import { getSettingsSkillInitialFormValues } from '~/pages/settings/ai/utils/getSettingsSkillInitialFormValues';
 import { computeMetadataNameFromLabel } from '@/object-metadata/utils/computeMetadataNameFromLabel';
 import { useGetIsMetadataItemCustom } from '@/object-metadata/hooks/useGetIsMetadataItemCustom';
-import { useLingui } from '@lingui/react/macro';
 
 const StyledFormContainer = styled.div`
   display: flex;
@@ -58,7 +58,6 @@ type SettingsSkillFormContentProps = {
 export const SettingsSkillFormContent = ({
   skill,
 }: SettingsSkillFormContentProps) => {
-  const { t } = useLingui();
   const theme = useTheme();
   const { getIcon } = useIcons();
   const navigate = useNavigateSettings();

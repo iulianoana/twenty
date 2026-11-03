@@ -841,8 +841,7 @@ export class ConfigVariables {
 
   @ConfigVariablesMetadata({
     group: ConfigVariablesGroup.LOGIC_FUNCTION_CONFIG,
-    description:
-      'S3 bucket for uploading Lambda layer zip files. Required with the Lambda driver unless STORAGE_S3_NAME is set.',
+    description: 'S3 bucket for uploading Lambda layer zip files',
     type: ConfigVariableType.STRING,
   })
   @ValidateIf(
@@ -900,15 +899,6 @@ export class ConfigVariables {
     (env) => env.CODE_INTERPRETER_TYPE === CodeInterpreterDriverType.E_2_B,
   )
   E2B_API_KEY?: string;
-
-  @ConfigVariablesMetadata({
-    group: ConfigVariablesGroup.CODE_INTERPRETER_CONFIG,
-    description:
-      'E2B template for code interpreter sandboxes; build one with the libraries the PDF and Office skills need using scripts/build-code-interpreter-e2b-template.ts (default: code-interpreter-v1)',
-    type: ConfigVariableType.STRING,
-  })
-  @IsOptional()
-  E2B_TEMPLATE: string = 'code-interpreter-v1';
 
   @ConfigVariablesMetadata({
     group: ConfigVariablesGroup.CODE_INTERPRETER_CONFIG,

@@ -8,6 +8,7 @@ import { CREATED_BY_WORKSPACE_MEMBER_ID_COLUMN_NAME } from 'src/engine/permissio
 import { IS_PRIVATE_COLUMN_NAME } from 'src/engine/permissions/private-record/constants/is-private-column-name.constant';
 import { type PrivateRecordState } from 'src/engine/permissions/private-record/types/private-record-state.type';
 import { findPrivateRecordStates } from 'src/engine/permissions/private-record/utils/find-private-record-states.util';
+import { isPrivateRecordEnabled } from 'src/engine/permissions/private-record/utils/is-private-record-enabled.util';
 import { RecordShareStorageService } from 'src/engine/permissions/record-share/services/record-share-storage.service';
 import { isPermissionStorageObject } from 'src/engine/permissions/utils/is-permission-storage-object.util';
 import { hasCreatedByField } from 'src/engine/permissions/private-record/utils/has-created-by-field.util';
@@ -40,9 +41,10 @@ export class PrivateRecordStorageService {
     recordIds: string[];
     transactionScope?: WorkspaceTransactionScope;
   }): Promise<Map<string, PrivateRecordState>> {
-    const { flatFieldMetadataMaps } =
+    const { flatFieldMetadataMaps, featureFlagsMap } =
       await this.workspaceCacheService.getOrRecompute(workspaceId, [
         'flatFieldMetadataMaps',
+        'featureFlagsMap',
       ]);
 
     return this.withRepository({
@@ -59,6 +61,7 @@ export class PrivateRecordStorageService {
           flatObjectMetadata,
           flatFieldMetadataMaps,
           recordIds,
+          isPrivateRecordEnabled: isPrivateRecordEnabled(featureFlagsMap),
         }),
     });
   }
@@ -74,10 +77,15 @@ export class PrivateRecordStorageService {
     creatorWorkspaceMemberId: string;
     granteeWorkspaceMemberId: string;
   }): Promise<void> {
-    const { flatFieldMetadataMaps } =
+    const { flatFieldMetadataMaps, featureFlagsMap } =
       await this.workspaceCacheService.getOrRecompute(workspaceId, [
         'flatFieldMetadataMaps',
+        'featureFlagsMap',
       ]);
+
+    if (!isPrivateRecordEnabled(featureFlagsMap)) {
+      return;
+    }
 
     const objectsWithCreator = flatObjectMetadatas.filter(
       (flatObjectMetadata) =>
@@ -127,6 +135,15 @@ export class PrivateRecordStorageService {
       return;
     }
 
+    const { featureFlagsMap } = await this.workspaceCacheService.getOrRecompute(
+      workspaceId,
+      ['featureFlagsMap'],
+    );
+
+    if (!isPrivateRecordEnabled(featureFlagsMap)) {
+      return;
+    }
+
     await this.withRepository({
       workspaceId,
       flatObjectMetadata,
@@ -152,11 +169,10 @@ export class PrivateRecordStorageService {
   }): Promise<TResult> {
     if (isDefined(transactionScope)) {
       return work(
-        transactionScope.getRepositoryWithoutPermissionChecks(
+        transactionScope.getRepository(
           flatObjectMetadata.nameSingular,
-          {
-            shouldSkipEventEmission: true,
-          },
+          { shouldBypassPermissionChecks: true },
+          { shouldSkipEventEmission: true },
         ),
       );
     }
@@ -164,8 +180,9 @@ export class PrivateRecordStorageService {
     return this.workspaceOrmManager.executeInWorkspaceContext(
       () =>
         work(
-          this.workspaceOrmManager.getRepositoryWithoutPermissionChecks(
+          this.workspaceOrmManager.getRepository(
             flatObjectMetadata.nameSingular,
+            { shouldBypassPermissionChecks: true },
             { shouldSkipEventEmission: true },
           ),
         ),

@@ -17,14 +17,14 @@ export const resolvePermissionsRowLevelPermissionFilter = ({
 }: PermissionsRowAccessRequest & { tableAlias: string }):
   | { recordFilter: RecordGqlOperationFilter; condition: SqlCondition }
   | undefined => {
-  const { principals, metadataMaps, flatObjectMetadata } = request;
+  const { principal, metadataMaps, flatObjectMetadata } = request;
 
   if (!isRolePermittingOperation(request)) {
     return undefined;
   }
 
   const recordFilter = resolveRowLevelPermissionRecordFilter({
-    principals,
+    principal,
     metadataMaps,
     flatObjectMetadata,
   });

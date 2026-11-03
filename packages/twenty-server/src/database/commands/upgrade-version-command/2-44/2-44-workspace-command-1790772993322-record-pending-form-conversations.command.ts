@@ -95,7 +95,9 @@ export class RecordPendingFormConversationsCommand extends ProvisionedWorkspaceC
     isDryRun: boolean;
   }): Promise<number> {
     const getRepository = <TEntity extends object>(objectName: string) =>
-      this.workspaceOrmManager.getRepositoryWithoutPermissionChecks<TEntity>(objectName);
+      this.workspaceOrmManager.getRepository<TEntity>(objectName, {
+        shouldBypassPermissionChecks: true,
+      });
     const workflowRunRepository =
       getRepository<WorkflowRunWorkspaceEntity>('workflowRun');
     const threadRepository = getRepository<

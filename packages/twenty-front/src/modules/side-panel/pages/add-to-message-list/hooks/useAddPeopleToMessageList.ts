@@ -2,6 +2,7 @@ import { useTrackedQueueJob } from '@/queue-job/hooks/useTrackedQueueJob';
 import { type TrackedJobStatus } from '@/queue-job/types/TrackedJobStatus';
 import { CombinedGraphQLErrors } from '@apollo/client/errors';
 import { useMutation } from '@apollo/client/react';
+import { t } from '@lingui/core/macro';
 import { useCallback } from 'react';
 import { type RecordGqlOperationFilter } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
@@ -11,7 +12,6 @@ import {
   TriggerAddPeopleToMessageListJobDocument,
 } from '~/generated-metadata/graphql';
 import { getErrorMessageFromApolloError } from '~/utils/get-error-message-from-apollo-error.util';
-import { useLingui } from '@lingui/react/macro';
 
 type UseAddPeopleToMessageListArgs = {
   messageListId: string | null;
@@ -24,7 +24,6 @@ export const useAddPeopleToMessageList = ({
   personFilter,
   onCompleted,
 }: UseAddPeopleToMessageListArgs) => {
-  const { t } = useLingui();
   const { enqueueToast } = useToast();
   const [triggerAddPeopleToMessageListJob, { loading: isTriggeringAdd }] =
     useMutation(TriggerAddPeopleToMessageListJobDocument);
@@ -45,7 +44,7 @@ export const useAddPeopleToMessageList = ({
       });
       onCompleted();
     },
-    [enqueueToast, onCompleted, t],
+    [enqueueToast, onCompleted],
   );
 
   const { activeJobId, trackJob } = useTrackedQueueJob({

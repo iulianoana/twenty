@@ -59,9 +59,7 @@ const buildService = (
     workflowThrottlingWorkspaceService as never,
     {
       executeInWorkspaceContext: jest.fn().mockImplementation((work) => work()),
-      getRepositoryWithoutPermissionChecks: jest
-        .fn()
-        .mockReturnValue(workflowRunRepository),
+      getRepository: jest.fn().mockReturnValue(workflowRunRepository),
     } as never,
     messageQueueService as never,
     { incrementCounterForEvent: jest.fn() } as never,

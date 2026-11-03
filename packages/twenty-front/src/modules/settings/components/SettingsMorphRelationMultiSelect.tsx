@@ -1,6 +1,6 @@
 import { SelectOptionIcon } from '@/ui/input/components/SelectOptionIcon';
 import { styled } from '@linaria/react';
-import { plural } from '@lingui/core/macro';
+import { plural, t } from '@lingui/core/macro';
 import { useRef, useState } from 'react';
 
 import { useFilteredObjectMetadataItems } from '@/object-metadata/hooks/useFilteredObjectMetadataItems';
@@ -19,7 +19,6 @@ import { isDefined } from 'twenty-shared/utils';
 import { Dropdown } from 'twenty-ui/components/navigation';
 import { IconBox } from 'twenty-ui/icon';
 import { themeCssVariables } from 'twenty-ui/theme';
-import { useLingui } from '@lingui/react/macro';
 
 type SettingsMorphRelationMultiSelectProps = {
   className?: string;
@@ -83,7 +82,6 @@ export const SettingsMorphRelationMultiSelect = ({
   hasRightElement,
   error,
 }: SettingsMorphRelationMultiSelectProps) => {
-  const { t } = useLingui();
   const dropdownContentRef = useRef<HTMLDivElement>(null);
 
   const [searchInputValue, setSearchInputValue] = useState('');

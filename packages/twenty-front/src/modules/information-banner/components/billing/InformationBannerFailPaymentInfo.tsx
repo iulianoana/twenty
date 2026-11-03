@@ -1,13 +1,12 @@
 import { InformationBanner } from '@/information-banner/components/InformationBanner';
 import { UpdatePaymentMethodModal } from '@/settings/billing/components/UpdatePaymentMethodModal';
 import { usePaymentMethodFlow } from '@/settings/billing/hooks/usePaymentMethodFlow';
-import { useLingui } from '@lingui/react/macro';
+import { t } from '@lingui/core/macro';
 
 const FAILED_PAYMENT_UPDATE_PAYMENT_MODAL_ID =
   'failed-payment-update-payment-modal';
 
 export const InformationBannerFailPaymentInfo = () => {
-  const { t } = useLingui();
   const {
     hasPermissionToManageBilling: hasPermissionToUpdateBillingDetails,
     shouldAddPaymentMethodInProduct,

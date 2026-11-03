@@ -339,7 +339,6 @@ describe('SyncMessageRecordPageCommand', () => {
               STANDARD_APPLICATION.universalIdentifier,
             workspaceCustomApplicationUniversalIdentifier:
               WORKSPACE_CUSTOM_APPLICATION_UNIVERSAL_IDENTIFIER,
-            flatApplicationMaps: { byId: {}, idByUniversalIdentifier: {} },
           },
           workspaceId: WORKSPACE_ID,
         });

@@ -4,7 +4,6 @@ import { SettingsPath } from 'twenty-shared/types';
 import { getSettingsPath } from 'twenty-shared/utils';
 import { Section } from 'twenty-ui/components/layout';
 import { Text } from 'twenty-ui/primitives/typography';
-import { AiChatAssistantMode } from '~/generated-metadata/graphql';
 import { SettingsAiOverview } from '~/pages/settings/ai/components/SettingsAiOverview';
 import { SettingsAiBehaviorExample } from '~/pages/settings/ai/components/__stories__/SettingsAiBehaviorExample';
 import { settingsAiOverviewStoryParameters } from '~/pages/settings/ai/components/__stories__/settingsAiOverviewStoryParameters';
@@ -67,8 +66,8 @@ export const WithSections: Story = {
     ),
     behaviorSection: (
       <SettingsAiBehaviorExample
-        directMessageMode={AiChatAssistantMode.MENTION_ONLY}
-        inboxMode={AiChatAssistantMode.AUTOMATIC}
+        directMessageMode="MENTION_ONLY"
+        inboxMode="AUTOMATIC"
         onDirectMessageModeChange={fn()}
         onInboxModeChange={fn()}
       />

@@ -42,9 +42,9 @@ export class WorkspaceFlatWorkspaceMemberMapCacheService extends WorkspaceCacheP
       await this.workspaceOrmManager.executeInWorkspaceContext(
         () =>
           this.workspaceOrmManager
-            .getRepositoryWithoutPermissionChecks<WorkspaceMemberWorkspaceEntity>(
-              'workspaceMember',
-            )
+            .getRepository<WorkspaceMemberWorkspaceEntity>('workspaceMember', {
+              shouldBypassPermissionChecks: true,
+            })
             .find({ withDeleted: true }),
         buildSystemAuthContext(workspaceId),
         { lite: true },

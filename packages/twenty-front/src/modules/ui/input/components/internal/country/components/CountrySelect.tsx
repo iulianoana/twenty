@@ -1,3 +1,4 @@
+import { t } from '@lingui/core/macro';
 import { useContext, useMemo } from 'react';
 import { Key } from 'ts-key-enum';
 
@@ -16,7 +17,6 @@ import {
   type CountryChoice,
   CountrySelect as SharedCountrySelect,
 } from 'twenty-ui/components/input';
-import { useLingui } from '@lingui/react/macro';
 
 type CountrySelectProps = {
   label: string;
@@ -31,7 +31,6 @@ export const CountrySelect = ({
   onChange,
   dropdownId = SELECT_COUNTRY_DROPDOWN_ID,
 }: CountrySelectProps) => {
-  const { t } = useLingui();
   const countries = useCountries();
   const parentClickOutsideId = useContext(ParentClickOutsideIdContext);
   const isDropdownOpen = useAtomComponentStateValue(

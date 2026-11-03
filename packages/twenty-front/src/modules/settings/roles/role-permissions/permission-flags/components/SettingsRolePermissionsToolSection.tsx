@@ -7,12 +7,13 @@ import { settingsDraftRoleFamilyState } from '@/settings/roles/states/settingsDr
 import { useAtomFamilyStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomFamilyStateValue';
 import { useSetAtomFamilyState } from '@/ui/utilities/state/jotai/hooks/useSetAtomFamilyState';
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
+
 import { Section } from 'twenty-ui/components/layout';
 import { IconTool } from 'twenty-ui/icon';
 import { Collapsible } from 'twenty-ui/primitives/layout';
 import { Card } from 'twenty-ui/primitives/surfaces';
 import { themeCssVariables } from 'twenty-ui/theme';
-import { useLingui } from '@lingui/react/macro';
 
 const StyledTable = styled.div`
   border-bottom: 1px solid ${themeCssVariables.border.color.light};
@@ -36,7 +37,6 @@ export const SettingsRolePermissionsToolSection = ({
   roleId,
   isEditable,
 }: SettingsRolePermissionsToolSectionProps) => {
-  const { t } = useLingui();
   const settingsDraftRole = useAtomFamilyStateValue(
     settingsDraftRoleFamilyState,
     roleId,

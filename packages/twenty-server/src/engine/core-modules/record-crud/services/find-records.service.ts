@@ -39,6 +39,7 @@ export class FindRecordsService {
       limit,
       offset = 0,
       authContext,
+      rolePermissionConfig,
       select,
       shouldBuildEffectiveSelectFields,
     } = params;
@@ -59,9 +60,11 @@ export class FindRecordsService {
         flatObjectMetadataMaps,
         flatFieldMetadataMaps,
         objectsPermissions,
+        principal,
       } = await this.commonApiContextBuilder.build({
         authContext,
         objectName,
+        rolePermissionConfig,
       });
 
       const { effectiveSelectedFields, warnings } =
@@ -87,7 +90,7 @@ export class FindRecordsService {
                 objectsPermissions,
                 readableObjectMetadataIds:
                   await this.commonSelectFieldsBuilder.findReadableObjectMetadataIds(
-                    { authContext, flatObjectMetadataMaps },
+                    { principal, objectsPermissions, flatObjectMetadataMaps },
                   ),
                 depth: 1,
                 onlyUseLabelIdentifierFieldsInRelations: true,

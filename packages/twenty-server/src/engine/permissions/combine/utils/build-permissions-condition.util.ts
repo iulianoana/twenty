@@ -10,10 +10,11 @@ import { areRecordGrantsHeldToRowLevelPermissions } from 'src/engine/permissions
 import { combineSqlConditions } from 'src/engine/permissions/combine/utils/combine-sql-conditions.util';
 import { resolvePermissionsRowAccessOutcome } from 'src/engine/permissions/combine/utils/resolve-permissions-row-access-outcome.util';
 import { buildPermissionsCreatorCondition } from 'src/engine/permissions/private-record/utils/build-permissions-creator-condition.util';
+import { isShareOnlyWhilePrivateRecordFlagDisabled } from 'src/engine/permissions/private-record/utils/is-share-only-while-private-record-flag-disabled.util';
 import { buildPermissionsShareCondition } from 'src/engine/permissions/record-share/utils/build-permissions-share-condition.util';
 import { buildPermissionsRlsCondition } from 'src/engine/permissions/rls/utils/build-permissions-rls-condition.util';
 import { resolvePermissionsRowLevelPermissionFilter } from 'src/engine/permissions/rls/utils/resolve-permissions-row-level-permission-filter.util';
-import { buildPermissionsAllRecordsCondition } from 'src/engine/permissions/all-records/utils/build-permissions-all-records-condition.util';
+import { buildPermissionsObjectCondition } from 'src/engine/permissions/role/utils/build-permissions-object-condition.util';
 
 const combineWithOr = (conditions: SqlCondition[]): SqlCondition =>
   conditions.length === 1
@@ -23,14 +24,14 @@ const combineWithOr = (conditions: SqlCondition[]): SqlCondition =>
 const buildPermissionsRoleConditions = (
   sqlRequest: PermissionsRowAccessSqlRequest,
 ): SqlCondition[] | true => {
-  const allRecordsCondition = buildPermissionsAllRecordsCondition(sqlRequest);
+  const objectCondition = buildPermissionsObjectCondition(sqlRequest);
 
-  if (allRecordsCondition === true) {
+  if (objectCondition === true) {
     return true;
   }
 
   return [
-    allRecordsCondition === false ? undefined : allRecordsCondition,
+    objectCondition === false ? undefined : objectCondition,
     buildPermissionsRlsCondition(sqlRequest),
   ].filter(isDefined);
 };
@@ -51,7 +52,10 @@ export const buildPermissionsCondition = ({
     return outcome;
   }
 
-  const roleConditions = buildPermissionsRoleConditions(sqlRequest);
+  // TODO(@charlesBochet): remove with isShareOnlyWhilePrivateRecordFlagDisabled after 2.55
+  const roleConditions = isShareOnlyWhilePrivateRecordFlagDisabled(sqlRequest)
+    ? []
+    : buildPermissionsRoleConditions(sqlRequest);
 
   if (roleConditions === true) {
     return true;

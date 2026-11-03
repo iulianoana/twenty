@@ -4,7 +4,6 @@ import { type ExtendedUIMessagePart } from 'twenty-shared/ai';
 import { type SendInboxMessageInput } from 'twenty-shared/application';
 import { isDefined } from 'twenty-shared/utils';
 
-import { IS_PRIVATE_COLUMN_NAME } from 'src/engine/permissions/private-record/constants/is-private-column-name.constant';
 import { AgentMessageRole } from 'src/engine/metadata-modules/ai/ai-history/enums/agent-message-role.enum';
 import { AgentChatSharingService } from 'src/engine/metadata-modules/ai/ai-chat/services/agent-chat-sharing.service';
 import { AgentChatThreadService } from 'src/engine/metadata-modules/ai/ai-chat/services/agent-chat-thread.service';
@@ -417,9 +416,12 @@ export class AgentInboxService {
     threadId: string;
     title: string;
   }): Promise<AgentChatThreadWorkspaceEntity> {
+    const { privateColumn, privateValue } =
+      await this.sharingService.getPrivateRecordInsertSql(workspaceId);
+
     await this.threadRepository.query(workspaceId, ({ manager, table }) =>
       manager.query(
-        `INSERT INTO ${table('agentChatThread')} (id, title, "${IS_PRIVATE_COLUMN_NAME}") VALUES ($1, $2, true)`,
+        `INSERT INTO ${table('agentChatThread')} (id, title${privateColumn}) VALUES ($1, $2${privateValue})`,
         [threadId, title],
       ),
     );

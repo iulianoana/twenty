@@ -10,6 +10,7 @@ import { Select } from '@/ui/input/components/Select';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
 import { Controller, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -22,7 +23,6 @@ import { useIcons } from 'twenty-ui/icon/provider';
 import { type SelectOption } from 'twenty-ui/primitives/input';
 import { themeCssVariables } from 'twenty-ui/theme';
 import { type z } from 'zod';
-import { useLingui } from '@lingui/react/macro';
 
 export const settingsDataModelObjectIdentifiersFormSchema =
   objectMetadataItemSchema.pick({
@@ -51,7 +51,6 @@ const StyledContainer = styled.div`
 export const SettingsDataModelObjectIdentifiersForm = ({
   objectMetadataItem,
 }: SettingsDataModelObjectIdentifiersFormProps) => {
-  const { t } = useLingui();
   const isDDLLocked = useAtomStateValue(isDDLLockedState);
 
   const getIsMetadataItemCustom = useGetIsMetadataItemCustom();

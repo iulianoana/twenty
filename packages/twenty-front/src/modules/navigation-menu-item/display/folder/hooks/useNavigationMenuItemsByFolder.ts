@@ -1,3 +1,4 @@
+import { t } from '@lingui/core/macro';
 import { isDefined } from 'twenty-shared/utils';
 import { type NavigationMenuItem } from '~/generated-metadata/graphql';
 
@@ -8,7 +9,6 @@ import { viewsSelector } from '@/views/states/selectors/viewsSelector';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 
 import { useNavigationMenuItemsData } from '@/navigation-menu-item/display/hooks/useNavigationMenuItemsData';
-import { useLingui } from '@lingui/react/macro';
 
 type NavigationMenuItemFolder = {
   id: string;
@@ -24,7 +24,6 @@ type NavigationMenuItemFolderEntry = Pick<
 >;
 
 export const useNavigationMenuItemsByFolder = () => {
-  const { t } = useLingui();
   const views = useAtomStateValue(viewsSelector);
   const objectMetadataItems = useNavigationObjectMetadataItems();
 

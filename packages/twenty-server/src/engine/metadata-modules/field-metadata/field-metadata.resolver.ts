@@ -7,6 +7,8 @@ import {
   Query,
   ResolveField,
 } from '@nestjs/graphql';
+
+import { PermissionFlagType } from 'twenty-shared/constants';
 import { isDefined } from 'twenty-shared/utils';
 
 import { MetadataResolver } from 'src/engine/api/graphql/graphql-config/decorators/metadata-resolver.decorator';
@@ -21,6 +23,9 @@ import { I18nContext } from 'src/engine/core-modules/i18n/types/i18n-context.typ
 import { WorkspaceEntity } from 'src/engine/core-modules/workspace/workspace.entity';
 import { type IDataloaders } from 'src/engine/dataloaders/dataloader.interface';
 import { AuthWorkspace } from 'src/engine/decorators/auth/auth-workspace.decorator';
+import { NoPermissionGuard } from 'src/engine/guards/no-permission.guard';
+import { SettingsPermissionGuard } from 'src/engine/guards/settings-permission.guard';
+import { AuthPrincipalGuard } from 'src/engine/guards/auth-principal.guard';
 import { DerivedFieldMetadataIdsService } from 'src/engine/metadata-modules/derived-field-metadata-ids/services/derived-field-metadata-ids.service';
 import { CreateOneFieldMetadataInput } from 'src/engine/metadata-modules/field-metadata/dtos/create-field.input';
 import { DeleteOneFieldInput } from 'src/engine/metadata-modules/field-metadata/dtos/delete-field.input';
@@ -48,12 +53,15 @@ import { ApplicationTranslationCatalogService } from 'src/engine/metadata-module
 import { AuthGraphqlApiExceptionFilter } from 'src/engine/core-modules/auth/filters/auth-graphql-api-exception.filter';
 import { InjectWorkspaceScopedRepository } from 'src/engine/twenty-orm/workspace-scoped-repository/inject-workspace-scoped-repository.decorator';
 import { WorkspaceScopedRepository } from 'src/engine/twenty-orm/workspace-scoped-repository/workspace-scoped-repository';
-import { FIELD_METADATA_WRITE_ACCESS_POLICY } from 'src/engine/metadata-modules/field-metadata/constants/field-metadata-write-access-policy.constant';
-import { AccessPolicyGuard } from 'src/engine/guards/access-policy.guard';
-import { type AccessPolicy } from 'src/engine/guards/types/access-policy.type';
 
-const FIELD_METADATA_RESOLVER_READ_ACCESS_POLICY: AccessPolicy = {
-  authPrincipals: {
+// structural type so ResolverValidationPipe skips FieldMetadataDTO decorators on loaded parents
+type FieldMetadataStandardOverrideParent = Pick<
+  FieldMetadataDTO,
+  'label' | 'description' | 'icon' | 'overrides' | 'applicationId'
+>;
+
+@UseGuards(
+  AuthPrincipalGuard({
     userSession: {
       standard: true,
       impersonated: true,
@@ -63,16 +71,8 @@ const FIELD_METADATA_RESOLVER_READ_ACCESS_POLICY: AccessPolicy = {
     apiKey: true,
     oauthClient: true,
     application: true,
-  },
-  requiredPermissionFlags: [],
-};
-
-// structural type so ResolverValidationPipe skips FieldMetadataDTO decorators on loaded parents
-type FieldMetadataStandardOverrideParent = Pick<
-  FieldMetadataDTO,
-  'label' | 'description' | 'icon' | 'overrides' | 'applicationId'
->;
-
+  }),
+)
 @UsePipes(ResolverValidationPipe)
 @MetadataResolver(() => FieldMetadataDTO)
 @UseFilters(
@@ -89,7 +89,7 @@ export class FieldMetadataResolver {
     private readonly derivedFieldMetadataIdsService: DerivedFieldMetadataIdsService,
   ) {}
 
-  @UseGuards(AccessPolicyGuard(FIELD_METADATA_RESOLVER_READ_ACCESS_POLICY))
+  @UseGuards(NoPermissionGuard)
   @Query(() => FieldConnectionDTO)
   async fields(
     @AuthWorkspace() { id: workspaceId }: WorkspaceEntity,
@@ -137,7 +137,7 @@ export class FieldMetadataResolver {
     };
   }
 
-  @UseGuards(AccessPolicyGuard(FIELD_METADATA_RESOLVER_READ_ACCESS_POLICY))
+  @UseGuards(NoPermissionGuard)
   @Query(() => FieldMetadataDTO)
   async field(
     @Args('id', {
@@ -255,7 +255,7 @@ export class FieldMetadataResolver {
     );
   }
 
-  @UseGuards(AccessPolicyGuard(FIELD_METADATA_WRITE_ACCESS_POLICY))
+  @UseGuards(SettingsPermissionGuard(PermissionFlagType.DATA_MODEL))
   @Mutation(() => FieldMetadataDTO)
   async createOneField(
     @Args('input') input: CreateOneFieldMetadataInput,
@@ -273,7 +273,7 @@ export class FieldMetadataResolver {
     }
   }
 
-  @UseGuards(AccessPolicyGuard(FIELD_METADATA_WRITE_ACCESS_POLICY))
+  @UseGuards(SettingsPermissionGuard(PermissionFlagType.DATA_MODEL))
   @Mutation(() => FieldMetadataDTO)
   async updateOneField(
     @Args('input') input: UpdateOneFieldMetadataInput,
@@ -291,7 +291,7 @@ export class FieldMetadataResolver {
     }
   }
 
-  @UseGuards(AccessPolicyGuard(FIELD_METADATA_WRITE_ACCESS_POLICY))
+  @UseGuards(SettingsPermissionGuard(PermissionFlagType.DATA_MODEL))
   @Mutation(() => FieldMetadataDTO)
   async deleteOneField(
     @Args('input') deleteOneFieldInput: DeleteOneFieldInput,

@@ -83,8 +83,9 @@ export class AccessTokenService {
       workspaceMemberId =
         await this.workspaceOrmManager.executeInWorkspaceContext(async () => {
           const workspaceMemberRepository =
-            this.workspaceOrmManager.getRepositoryWithoutPermissionChecks<WorkspaceMemberWorkspaceEntity>(
+            this.workspaceOrmManager.getRepository<WorkspaceMemberWorkspaceEntity>(
               'workspaceMember',
+              { shouldBypassPermissionChecks: true },
             );
 
           const workspaceMember = await workspaceMemberRepository.findOne({

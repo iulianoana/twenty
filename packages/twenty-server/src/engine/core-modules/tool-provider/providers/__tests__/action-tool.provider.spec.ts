@@ -27,6 +27,7 @@ const USER_AUTH_CONTEXT = {
 
 const CONTEXT: ToolProviderContext = {
   workspaceId: WORKSPACE_ID,
+  rolePermissionConfig: { intersectionOf: { userWorkspaceRoleId: 'role-id' } },
   authContext: USER_AUTH_CONTEXT,
   userId: 'user-id',
   userWorkspaceId: 'user-workspace-id',
@@ -65,7 +66,7 @@ const buildProvider = ({
     shareRecordTool,
     { isEnabled: () => false } as unknown as CodeInterpreterService,
     {
-      hasPermissionFlag: jest.fn().mockResolvedValue(false),
+      checkRolesPermissions: jest.fn().mockResolvedValue(false),
     } as unknown as PermissionsService,
     {
       translateMessage: ({ messageId }: { messageId: string }) => messageId,

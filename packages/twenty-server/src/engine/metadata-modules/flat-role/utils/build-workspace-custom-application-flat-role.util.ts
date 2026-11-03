@@ -38,7 +38,6 @@ export const buildWorkspaceCustomApplicationFlatRole = ({
     canBeAssignedToUsers: false,
     canBeAssignedToAgents: false,
     canBeAssignedToApiKeys: false,
-    canBeAssignedToApplications: false,
     workspaceId,
     createdAt: now,
     updatedAt: now,

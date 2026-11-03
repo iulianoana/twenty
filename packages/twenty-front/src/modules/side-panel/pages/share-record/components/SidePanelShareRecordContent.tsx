@@ -247,6 +247,7 @@ export const SidePanelShareRecordContent = ({
         )}
       </StyledListContainer>
       <SidePanelFooter
+        variant="compact"
         actions={[
           <Button
             key="copy-link"

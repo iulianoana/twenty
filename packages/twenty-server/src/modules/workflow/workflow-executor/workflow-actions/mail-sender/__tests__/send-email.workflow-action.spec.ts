@@ -82,9 +82,7 @@ describe('SendEmailWorkflowAction', () => {
           provide: WorkspaceOrmManager,
           useValue: {
             executeInWorkspaceContext: jest.fn((callback) => callback()),
-            getRepositoryWithoutPermissionChecks: jest
-              .fn()
-              .mockReturnValue(workspaceMemberRepository),
+            getRepository: jest.fn().mockReturnValue(workspaceMemberRepository),
           },
         },
         {

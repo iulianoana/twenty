@@ -11,7 +11,6 @@ jest.mock('twenty-front-component-renderer', () => {
   return {
     FrontComponentInputFocusContext:
       ReactForMock.createContext<SetEditableFocused | null>(null),
-    FrontComponentIframeHostContext: ReactForMock.createContext(null),
   };
 });
 
@@ -45,12 +44,7 @@ const renderProviderWithStore = () => {
 
   const result = render(
     <JotaiProvider store={store}>
-      <FrontComponentRendererProvider
-        frontComponentId={FRONT_COMPONENT_ID}
-        applicationId="application-1"
-        applicationName="Test application"
-        applicationGrantedIframeMediaPermissions={[]}
-      >
+      <FrontComponentRendererProvider frontComponentId={FRONT_COMPONENT_ID}>
         <TestConsumerEffect
           onCallbackResolved={(callback) => {
             resolvedSetEditableFocused = callback;

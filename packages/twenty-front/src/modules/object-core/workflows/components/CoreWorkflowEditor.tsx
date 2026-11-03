@@ -1,3 +1,4 @@
+import { t } from '@lingui/core/macro';
 import { useCallback } from 'react';
 import { isDefined } from 'twenty-shared/utils';
 
@@ -12,7 +13,6 @@ import { WorkflowDiagramCanvasEditable } from '@/workflow/workflow-diagram/compo
 import { WorkflowDiagramEffect } from '@/workflow/workflow-diagram/components/WorkflowDiagramEffect';
 import { WorkflowVisualizerEffect } from '@/workflow/workflow-diagram/components/WorkflowVisualizerEffect';
 import { WorkflowVisualizerComponentInstanceContext } from '@/workflow/workflow-diagram/states/contexts/WorkflowVisualizerComponentInstanceContext';
-import { useLingui } from '@lingui/react/macro';
 
 export const CoreWorkflowEditor = ({
   coreWorkflowId,
@@ -23,7 +23,6 @@ export const CoreWorkflowEditor = ({
   coreWorkflowVersionId: string;
   readonly: boolean;
 }) => {
-  const { t } = useLingui();
   const { coreWorkflowVersion, loading, error, refetchCoreWorkflowVersion } =
     useCoreWorkflowVersion(coreWorkflowVersionId);
 

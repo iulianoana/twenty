@@ -8,11 +8,6 @@ export const FIND_ONE_FRONT_COMPONENT = gql`
       applicationId
       applicationName
       applicationGrantedCapabilities
-      applicationGrantedIframeMediaPermissions {
-        origin
-        microphone
-        camera
-      }
       builtComponentChecksum
       isHeadless
       usesSdkClient

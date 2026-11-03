@@ -2,7 +2,8 @@ import { formatQueueJobProgressLabel } from '@/queue-job/utils/formatQueueJobPro
 import { ConfirmationDialog } from '@/ui/layout/dialog/components/ConfirmationDialog';
 import { useDialog } from '@/ui/layout/dialog/hooks/useDialog';
 import { TooltipDelay } from '@/ui/layout/tooltip/constants/TooltipDelay';
-import { Trans, useLingui } from '@lingui/react/macro';
+import { t } from '@lingui/core/macro';
+import { Trans } from '@lingui/react/macro';
 import { isNonEmptyString } from '@sniptt/guards';
 import { useId } from 'react';
 import { IconTrash } from 'twenty-ui/icon';
@@ -24,7 +25,6 @@ export const SettingsApplicationUninstallButton = ({
   uninstallProgress,
   disabledReason,
 }: SettingsApplicationUninstallButtonProps) => {
-  const { t } = useLingui();
   const { openDialog } = useDialog();
   const uninstallDialogId = useId();
 

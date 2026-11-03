@@ -96,7 +96,9 @@ export class AddPeopleToMessageListJobService {
       await this.workspaceOrmManager.executeInWorkspaceContext(
         () =>
           this.workspaceOrmManager
-            .getRepository<MessageListWorkspaceEntity>('messageList')
+            .getRepositoryWithContextPermissions<MessageListWorkspaceEntity>(
+              'messageList',
+            )
             .findOne({ where: { id: messageListId } }),
         authContext,
       );

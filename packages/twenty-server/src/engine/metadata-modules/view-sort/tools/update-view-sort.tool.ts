@@ -1,4 +1,5 @@
 import { ToolCategory } from 'twenty-shared/ai';
+import { PermissionFlagType } from 'twenty-shared/constants';
 import { ViewSortDirection } from 'twenty-shared/types';
 import { z } from 'zod';
 
@@ -8,7 +9,6 @@ import { type ToolExecuteArgs } from 'src/engine/core-modules/tool-provider/type
 import { type ToolOutput } from 'src/engine/core-modules/tool/types/tool-output.type';
 import { ViewSortService } from 'src/engine/metadata-modules/view-sort/services/view-sort.service';
 import { ViewToolAccessService } from 'src/engine/metadata-modules/view/tools/services/view-tool-access.service';
-import { VIEW_WRITE_ACCESS_POLICY } from 'src/engine/metadata-modules/view/constants/view-write-access-policy.constant';
 
 const updateViewSortInputSchema = z.object({
   id: z.string().uuid().describe('ID of the view sort to update'),
@@ -21,7 +21,7 @@ const updateViewSortInputSchema = z.object({
 @DefineTool({
   name: 'update_view_sort',
   category: ToolCategory.VIEW,
-  accessPolicy: VIEW_WRITE_ACCESS_POLICY,
+  requiredPermissionFlags: [PermissionFlagType.VIEWS],
   description:
     'Update a sort on a view. Use get_view_sorts to find the sort ID.',
 })

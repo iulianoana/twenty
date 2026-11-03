@@ -1,12 +1,14 @@
 import { isNonEmptyString } from '@sniptt/guards';
-import { kv } from 'twenty-sdk/logic-function';
+import { kv, listConnections } from 'twenty-sdk/logic-function';
 
 import { buildTeamsConnectedAccountTenantKvKey } from 'src/features/chat/logic-functions/utils/build-teams-connected-account-tenant-kv-key';
 import { buildTeamsTenantKvKey } from 'src/features/chat/logic-functions/utils/build-teams-tenant-kv-key';
-import { listTeamsConnections } from 'src/features/transcripts/logic-functions/utils/list-teams-connections';
+import { TEAMS_PROVIDER_NAME } from 'src/features/transcripts/constants/teams-provider-name';
 
 const listTeamsConnectionIds = async (): Promise<string[]> =>
-  (await listTeamsConnections()).map((connection) => connection.id);
+  (await listConnections({ providerName: TEAMS_PROVIDER_NAME })).map(
+    (connection) => connection.id,
+  );
 
 const isTenantHeldByConnections = async ({
   tenantId,

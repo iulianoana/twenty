@@ -20,6 +20,9 @@ import { AuthUserWorkspaceId } from 'src/engine/decorators/auth/auth-user-worksp
 import { AuthWorkspace } from 'src/engine/decorators/auth/auth-workspace.decorator';
 import { AllowSuspendedWorkspace } from 'src/engine/decorators/auth/allow-suspended-workspace.decorator';
 import { MetadataResolver } from 'src/engine/api/graphql/graphql-config/decorators/metadata-resolver.decorator';
+import { NoPermissionGuard } from 'src/engine/guards/no-permission.guard';
+import { SettingsPermissionGuard } from 'src/engine/guards/settings-permission.guard';
+import { AuthPrincipalGuard } from 'src/engine/guards/auth-principal.guard';
 import { CommandMenuItemService } from 'src/engine/metadata-modules/command-menu-item/command-menu-item.service';
 import { CommandMenuItemDTO } from 'src/engine/metadata-modules/command-menu-item/dtos/command-menu-item.dto';
 import { CreateCommandMenuItemInput } from 'src/engine/metadata-modules/command-menu-item/dtos/create-command-menu-item.input';
@@ -29,11 +32,9 @@ import { FrontComponentDTO } from 'src/engine/metadata-modules/front-component/d
 import { FrontComponentService } from 'src/engine/metadata-modules/front-component/front-component.service';
 import { WorkspaceMigrationGraphqlApiExceptionInterceptor } from 'src/engine/workspace-manager/workspace-migration/interceptors/workspace-migration-graphql-api-exception.interceptor';
 import { AuthGraphqlApiExceptionFilter } from 'src/engine/core-modules/auth/filters/auth-graphql-api-exception.filter';
-import { AccessPolicyGuard } from 'src/engine/guards/access-policy.guard';
-import { type AccessPolicy } from 'src/engine/guards/types/access-policy.type';
 
-const COMMAND_MENU_ITEM_READ_ACCESS_POLICY: AccessPolicy = {
-  authPrincipals: {
+@UseGuards(
+  AuthPrincipalGuard({
     userSession: {
       standard: true,
       impersonated: true,
@@ -43,25 +44,8 @@ const COMMAND_MENU_ITEM_READ_ACCESS_POLICY: AccessPolicy = {
     apiKey: true,
     oauthClient: true,
     application: true,
-  },
-  requiredPermissionFlags: [],
-};
-
-const COMMAND_MENU_ITEM_WRITE_ACCESS_POLICY: AccessPolicy = {
-  authPrincipals: {
-    userSession: {
-      standard: true,
-      impersonated: true,
-      playground: true,
-      workspaceAgnostic: false,
-    },
-    apiKey: true,
-    oauthClient: true,
-    application: true,
-  },
-  requiredPermissionFlags: [PermissionFlagType.LAYOUTS],
-};
-
+  }),
+)
 @UseInterceptors(
   WorkspaceMigrationGraphqlApiExceptionInterceptor,
   CommandMenuItemGraphqlApiExceptionInterceptor,
@@ -141,7 +125,7 @@ export class CommandMenuItemResolver {
   }
 
   @Query(() => [CommandMenuItemDTO])
-  @UseGuards(AccessPolicyGuard(COMMAND_MENU_ITEM_READ_ACCESS_POLICY))
+  @UseGuards(NoPermissionGuard)
   @AllowSuspendedWorkspace()
   async commandMenuItems(
     @AuthUserWorkspaceId({ allowUndefined: true })
@@ -156,7 +140,7 @@ export class CommandMenuItemResolver {
   }
 
   @Query(() => CommandMenuItemDTO, { nullable: true })
-  @UseGuards(AccessPolicyGuard(COMMAND_MENU_ITEM_READ_ACCESS_POLICY))
+  @UseGuards(NoPermissionGuard)
   async commandMenuItem(
     @Args('id', { type: () => UUIDScalarType }) id: string,
     @AuthUserWorkspaceId({ allowUndefined: true })
@@ -183,7 +167,7 @@ export class CommandMenuItemResolver {
   }
 
   @Mutation(() => CommandMenuItemDTO)
-  @UseGuards(AccessPolicyGuard(COMMAND_MENU_ITEM_WRITE_ACCESS_POLICY))
+  @UseGuards(SettingsPermissionGuard(PermissionFlagType.LAYOUTS))
   async createCommandMenuItem(
     @Args('input') input: CreateCommandMenuItemInput,
     @AuthWorkspace() workspace: WorkspaceEntity,
@@ -192,7 +176,7 @@ export class CommandMenuItemResolver {
   }
 
   @Mutation(() => CommandMenuItemDTO)
-  @UseGuards(AccessPolicyGuard(COMMAND_MENU_ITEM_WRITE_ACCESS_POLICY))
+  @UseGuards(SettingsPermissionGuard(PermissionFlagType.LAYOUTS))
   async updateCommandMenuItem(
     @Args('input') input: UpdateCommandMenuItemInput,
     @AuthWorkspace() workspace: WorkspaceEntity,
@@ -201,7 +185,7 @@ export class CommandMenuItemResolver {
   }
 
   @Mutation(() => CommandMenuItemDTO)
-  @UseGuards(AccessPolicyGuard(COMMAND_MENU_ITEM_WRITE_ACCESS_POLICY))
+  @UseGuards(SettingsPermissionGuard(PermissionFlagType.LAYOUTS))
   async resetCommandMenuItem(
     @Args('id', { type: () => UUIDScalarType }) id: string,
     @AuthWorkspace() workspace: WorkspaceEntity,
@@ -210,7 +194,7 @@ export class CommandMenuItemResolver {
   }
 
   @Mutation(() => CommandMenuItemDTO)
-  @UseGuards(AccessPolicyGuard(COMMAND_MENU_ITEM_WRITE_ACCESS_POLICY))
+  @UseGuards(SettingsPermissionGuard(PermissionFlagType.LAYOUTS))
   async deleteCommandMenuItem(
     @Args('id', { type: () => UUIDScalarType }) id: string,
     @AuthWorkspace() workspace: WorkspaceEntity,

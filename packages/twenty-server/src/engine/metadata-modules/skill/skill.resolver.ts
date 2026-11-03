@@ -22,6 +22,8 @@ import { ApplicationTargetArg } from 'src/engine/decorators/auth/application-tar
 import { AuthApplication } from 'src/engine/decorators/auth/auth-application.decorator';
 import { AuthWorkspace } from 'src/engine/decorators/auth/auth-workspace.decorator';
 import { MetadataResolver } from 'src/engine/api/graphql/graphql-config/decorators/metadata-resolver.decorator';
+import { SettingsPermissionGuard } from 'src/engine/guards/settings-permission.guard';
+import { AuthPrincipalGuard } from 'src/engine/guards/auth-principal.guard';
 import { ApplicationTranslationCatalogService } from 'src/engine/metadata-modules/application-translation-catalog/services/application-translation-catalog.service';
 import { resolveEffectiveEntityProperty } from 'src/engine/metadata-modules/overrides/utils/resolve-effective-entity-property.util';
 import { CreateSkillInput } from 'src/engine/metadata-modules/skill/dtos/create-skill.input';
@@ -33,12 +35,10 @@ import { SkillService } from 'src/engine/metadata-modules/skill/skill.service';
 import { WorkspaceMigrationGraphqlApiExceptionInterceptor } from 'src/engine/workspace-manager/workspace-migration/interceptors/workspace-migration-graphql-api-exception.interceptor';
 import { AuthGraphqlApiExceptionFilter } from 'src/engine/core-modules/auth/filters/auth-graphql-api-exception.filter';
 import { ApplicationTargetGuard } from 'src/engine/guards/application-target.guard';
-import { AccessPolicyGuard } from 'src/engine/guards/access-policy.guard';
-import { type AccessPolicy } from 'src/engine/guards/types/access-policy.type';
 
-// Reads only need the AI flag so the chat composer can list skills
-const SKILL_READ_ACCESS_POLICY: AccessPolicy = {
-  authPrincipals: {
+// Reads only need the AI flag so the chat composer can list skills; mutations need AI_SETTINGS
+@UseGuards(
+  AuthPrincipalGuard({
     userSession: {
       standard: true,
       impersonated: true,
@@ -48,28 +48,9 @@ const SKILL_READ_ACCESS_POLICY: AccessPolicy = {
     apiKey: true,
     oauthClient: true,
     application: true,
-  },
-  requiredPermissionFlags: [PermissionFlagType.AI],
-};
-
-const SKILL_WRITE_ACCESS_POLICY: AccessPolicy = {
-  authPrincipals: {
-    userSession: {
-      standard: true,
-      impersonated: true,
-      playground: true,
-      workspaceAgnostic: false,
-    },
-    apiKey: true,
-    oauthClient: true,
-    application: true,
-  },
-  requiredPermissionFlags: [
-    PermissionFlagType.AI,
-    PermissionFlagType.AI_SETTINGS,
-  ],
-};
-
+  }),
+  SettingsPermissionGuard(PermissionFlagType.AI),
+)
 @UseInterceptors(
   WorkspaceMigrationGraphqlApiExceptionInterceptor,
   SkillGraphqlApiExceptionInterceptor,
@@ -125,7 +106,6 @@ export class SkillResolver {
   }
 
   @Query(() => [SkillDTO])
-  @UseGuards(AccessPolicyGuard(SKILL_READ_ACCESS_POLICY))
   async skills(
     @AuthWorkspace() workspace: WorkspaceEntity,
     @AuthApplication({ allowUndefined: true })
@@ -144,10 +124,7 @@ export class SkillResolver {
   }
 
   @Query(() => SkillDTO, { nullable: true })
-  @UseGuards(
-    AccessPolicyGuard(SKILL_READ_ACCESS_POLICY),
-    ApplicationTargetGuard,
-  )
+  @UseGuards(ApplicationTargetGuard)
   async skill(
     @ApplicationTargetArg(
       'id',
@@ -165,7 +142,7 @@ export class SkillResolver {
   }
 
   @Mutation(() => SkillDTO)
-  @UseGuards(AccessPolicyGuard(SKILL_WRITE_ACCESS_POLICY))
+  @UseGuards(SettingsPermissionGuard(PermissionFlagType.AI_SETTINGS))
   async createSkill(
     @Args('input') input: CreateSkillInput,
     @AuthWorkspace() workspace: WorkspaceEntity,
@@ -175,7 +152,7 @@ export class SkillResolver {
 
   @Mutation(() => SkillDTO)
   @UseGuards(
-    AccessPolicyGuard(SKILL_WRITE_ACCESS_POLICY),
+    SettingsPermissionGuard(PermissionFlagType.AI_SETTINGS),
     ApplicationTargetGuard,
   )
   async updateSkill(
@@ -193,7 +170,7 @@ export class SkillResolver {
 
   @Mutation(() => SkillDTO)
   @UseGuards(
-    AccessPolicyGuard(SKILL_WRITE_ACCESS_POLICY),
+    SettingsPermissionGuard(PermissionFlagType.AI_SETTINGS),
     ApplicationTargetGuard,
   )
   async deleteSkill(
@@ -214,7 +191,7 @@ export class SkillResolver {
 
   @Mutation(() => SkillDTO)
   @UseGuards(
-    AccessPolicyGuard(SKILL_WRITE_ACCESS_POLICY),
+    SettingsPermissionGuard(PermissionFlagType.AI_SETTINGS),
     ApplicationTargetGuard,
   )
   async activateSkill(
@@ -235,7 +212,7 @@ export class SkillResolver {
 
   @Mutation(() => SkillDTO)
   @UseGuards(
-    AccessPolicyGuard(SKILL_WRITE_ACCESS_POLICY),
+    SettingsPermissionGuard(PermissionFlagType.AI_SETTINGS),
     ApplicationTargetGuard,
   )
   async deactivateSkill(

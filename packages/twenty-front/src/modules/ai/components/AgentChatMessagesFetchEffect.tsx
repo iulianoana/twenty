@@ -1,10 +1,7 @@
 import { isGraphqlErrorOfType } from '~/utils/is-graphql-error-of-type.util';
 import { useStore } from 'jotai';
 import { useCallback } from 'react';
-import {
-  type AgentChatSubscriptionEvent,
-  mapAgentMessagesToUIMessages,
-} from 'twenty-shared/ai';
+import { type AgentChatSubscriptionEvent } from 'twenty-shared/ai';
 import { isDefined } from 'twenty-shared/utils';
 
 import { AGENT_CHAT_REFETCH_MESSAGES_EVENT_NAME } from '@/ai/constants/AgentChatRefetchMessagesEventName';
@@ -20,6 +17,7 @@ import { agentChatMessagesLoadingState } from '@/ai/states/agentChatMessagesLoad
 import { agentChatQueuedMessagesFamilyState } from '@/ai/states/agentChatQueuedMessagesFamilyState';
 import { currentAiChatThreadState } from '@/ai/states/currentAiChatThreadState';
 import { skipMessagesSkeletonUntilLoadedState } from '@/ai/states/skipMessagesSkeletonUntilLoadedState';
+import { mapDBMessagesToUIMessages } from '@/ai/utils/mapDBMessagesToUIMessages';
 import { SSE_CLIENT_RECONNECTED_EVENT_NAME } from '@/sse-db-event/constants/SseClientReconnectedEventName';
 import { useQueryWithCallbacks } from '@/apollo/hooks/useQueryWithCallbacks';
 import { useListenToBrowserEvent } from '@/browser-event/hooks/useListenToBrowserEvent';
@@ -75,7 +73,7 @@ export const AgentChatMessagesFetchEffect = () => {
       if (isGraphqlErrorOfType(error, 'NOT_FOUND')) {
         return;
       }
-      const uiMessages = mapAgentMessagesToUIMessages(data.chatMessages ?? []);
+      const uiMessages = mapDBMessagesToUIMessages(data.chatMessages ?? []);
       // A live snapshot is at least as recent as a fetch, which may have been read before it
       const liveReactionRevisions = store.get(
         agentChatLiveReactionRevisionsFamilyState.atomFamily({

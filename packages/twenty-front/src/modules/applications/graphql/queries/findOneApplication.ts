@@ -7,16 +7,6 @@ export const FIND_ONE_APPLICATION = gql`
     findOneApplication(id: $id) {
       ...ApplicationFields
       isUninstallBlockedByOtherWorkspaceInstallations
-      requestedIframeMediaPermissions {
-        origin
-        microphone
-        camera
-      }
-      grantedIframeMediaPermissions {
-        origin
-        microphone
-        camera
-      }
     }
   }
 `;

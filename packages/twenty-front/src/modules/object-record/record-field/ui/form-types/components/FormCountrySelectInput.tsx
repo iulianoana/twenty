@@ -1,3 +1,4 @@
+import { t } from '@lingui/core/macro';
 import { useMemo } from 'react';
 
 import { FormSelectFieldInput } from '@/object-record/record-field/ui/form-types/components/FormSelectFieldInput';
@@ -5,7 +6,6 @@ import { type VariablePickerComponent } from '@/ui/input/types/VariablePickerCom
 import { useCountries } from '@/ui/input/components/internal/hooks/useCountries';
 import { IconCircleOff, type IconComponentProps } from 'twenty-ui/icon';
 import { type SelectOption } from 'twenty-ui/primitives/input';
-import { useLingui } from '@lingui/react/macro';
 
 export const FormCountrySelectInput = ({
   selectedCountryName,
@@ -20,7 +20,6 @@ export const FormCountrySelectInput = ({
   readonly?: boolean;
   VariablePicker?: VariablePickerComponent;
 }) => {
-  const { t } = useLingui();
   const countries = useCountries();
 
   const options: SelectOption[] = useMemo(() => {
@@ -40,7 +39,7 @@ export const FormCountrySelectInput = ({
       },
       ...countryList,
     ];
-  }, [countries, t]);
+  }, [countries]);
 
   const onCountryChange = (country: string | null) => {
     if (readonly) {

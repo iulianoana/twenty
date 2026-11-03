@@ -24,14 +24,12 @@ export const linkedinSyncHistoryHandler = async (
   const historyImport = await refreshLinkedinHistoryImportState(connection.id);
 
   if (historyImport?.status !== 'IMPORTING') {
-    const settings = await getLinkedinSettings(connection.id);
+    const { importPolicy } = await getLinkedinSettings(connection.id);
 
-    if (settings.historyConversationLimit > 0) {
-      await startLinkedinHistoryImport({
-        connectedAccountId: connection.id,
-        settings,
-      });
-    }
+    await startLinkedinHistoryImport({
+      connectedAccountId: connection.id,
+      importPolicy,
+    });
   }
 
   return buildLinkedinSettingsView(connection);
@@ -41,7 +39,7 @@ export default defineLogicFunction({
   universalIdentifier: LINKEDIN_SYNC_HISTORY_UNIVERSAL_IDENTIFIER,
   name: 'linkedin-sync-history',
   description:
-    'Starts importing the most recent past LinkedIn conversations of the requesting member connection, up to the number their settings allow.',
+    'Starts importing the past LinkedIn conversations of the requesting member connection, most recent first.',
   timeoutSeconds: 15,
   handler: linkedinSyncHistoryHandler,
   httpRouteTriggerSettings: {

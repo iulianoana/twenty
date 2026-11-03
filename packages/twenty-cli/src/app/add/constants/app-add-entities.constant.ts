@@ -3,5 +3,4 @@ export const APP_ADD_ENTITIES = [
   'field',
   'logic-function',
   'front-component',
-  'validation-rule',
 ] as const;

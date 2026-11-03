@@ -17,11 +17,9 @@ const isPermanentUnipileError = (error: unknown): boolean =>
 export const withLinkedinPublicIdentifier = async ({
   unipileAccountId,
   user,
-  shouldLookUp,
 }: {
   unipileAccountId: string;
   user: UnipileUser;
-  shouldLookUp?: () => Promise<boolean>;
 }): Promise<UnipileUser> => {
   if (isNonEmptyString(user.public_identifier)) {
     return user;
@@ -32,10 +30,6 @@ export const withLinkedinPublicIdentifier = async ({
 
   if (isNonEmptyString(cachedPublicIdentifier)) {
     return { ...user, public_identifier: cachedPublicIdentifier };
-  }
-
-  if (isDefined(shouldLookUp) && !(await shouldLookUp())) {
-    return user;
   }
 
   try {

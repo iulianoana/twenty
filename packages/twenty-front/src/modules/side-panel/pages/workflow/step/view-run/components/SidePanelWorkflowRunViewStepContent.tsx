@@ -26,6 +26,7 @@ import {
 import { getWorkflowRunStepExecutionStatus } from '@/workflow/workflow-steps/utils/getWorkflowRunStepExecutionStatus';
 import { WorkflowIteratorSubStepSwitcher } from '@/workflow/workflow-steps/workflow-actions/iterator-action/components/WorkflowIteratorSubStepSwitcher';
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
 import { isNull } from '@sniptt/guards';
 import { isDefined } from 'twenty-shared/utils';
 import { doNotTranslate } from 'twenty-shared/i18n';
@@ -36,7 +37,6 @@ import {
   IconTerminal,
 } from 'twenty-ui/icon';
 import { themeCssVariables } from 'twenty-ui/theme';
-import { useLingui } from '@lingui/react/macro';
 
 const StyledContainer = styled.div`
   display: flex;
@@ -52,7 +52,6 @@ const StyledTabListContainer = styled.div`
 type TabId = WorkflowRunTabIdType;
 
 export const SidePanelWorkflowRunViewStepContent = () => {
-  const { t } = useLingui();
   const flow = useFlowOrThrow();
   const workflowSelectedNode = useAtomComponentStateValue(
     workflowSelectedNodeComponentState,

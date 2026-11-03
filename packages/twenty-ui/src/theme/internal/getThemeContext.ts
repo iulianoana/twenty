@@ -1,12 +1,13 @@
 import React from 'react';
 
-import { resolveThemeTokens } from './resolveThemeTokens';
+import { themeCssVariables } from '../themeCssVariables';
+import { type ThemeType } from '../themeTypes';
 import { type ThemeContextType } from './ThemeContextType';
 
 let themeContext: React.Context<ThemeContextType> | undefined;
 
 export const getThemeContext = () =>
   (themeContext ??= React.createContext<ThemeContextType>({
-    theme: resolveThemeTokens(),
+    theme: themeCssVariables as unknown as ThemeType,
     colorScheme: 'light',
   }));

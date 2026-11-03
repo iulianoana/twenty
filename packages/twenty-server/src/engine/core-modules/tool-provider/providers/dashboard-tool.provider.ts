@@ -1,4 +1,3 @@
-import { isDefined } from 'twenty-shared/utils';
 import { Inject, Injectable, Optional } from '@nestjs/common';
 
 import { type ToolSet } from 'ai';
@@ -38,10 +37,11 @@ export class DashboardToolProvider implements ToolProvider {
       return false;
     }
 
-    return this.permissionsService.hasPermissionFlag({
-      authContext: context.authContext,
-      setting: PermissionFlagType.LAYOUTS,
-    });
+    return this.permissionsService.checkRolesPermissions(
+      context.rolePermissionConfig,
+      context.workspaceId,
+      PermissionFlagType.LAYOUTS,
+    );
   }
 
   async generateDescriptors(
@@ -90,13 +90,13 @@ export class DashboardToolProvider implements ToolProvider {
   private async buildToolSet(
     context: ToolProviderContext,
   ): Promise<ToolSet | null> {
-    if (!this.dashboardToolService || !isDefined(context.authContext)) {
+    if (!this.dashboardToolService) {
       return null;
     }
 
     return this.dashboardToolService.generateDashboardTools(
       context.workspaceId,
-      context.authContext,
+      context.rolePermissionConfig,
     );
   }
 }

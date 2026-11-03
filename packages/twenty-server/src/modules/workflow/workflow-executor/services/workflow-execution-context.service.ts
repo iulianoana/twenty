@@ -15,7 +15,7 @@ import { CoreEntityCacheService } from 'src/engine/core-entity-cache/services/co
 import { type FlatEntityMaps } from 'src/engine/metadata-modules/flat-entity/types/flat-entity-maps.type';
 import { findFlatEntityByIdInFlatEntityMaps } from 'src/engine/metadata-modules/flat-entity/utils/find-flat-entity-by-id-in-flat-entity-maps.util';
 import { type FlatWorkflow } from 'src/engine/metadata-modules/flat-workflow/types/flat-workflow.type';
-import { PermissionsService } from 'src/engine/permissions/permissions.service';
+import { resolveRolePermissionConfig } from 'src/engine/permissions/principal/utils/resolve-role-permission-config.util';
 import { WorkspaceCacheService } from 'src/engine/workspace-cache/services/workspace-cache.service';
 import { type WorkflowRunWorkspaceEntity } from 'src/modules/workflow/common/standard-objects/workflow-run.workspace-entity';
 import {
@@ -35,7 +35,6 @@ export class WorkflowExecutionContextService {
     private readonly userWorkspaceService: UserWorkspaceService,
     private readonly workspaceCacheService: WorkspaceCacheService,
     private readonly coreEntityCacheService: CoreEntityCacheService,
-    private readonly permissionsService: PermissionsService,
   ) {}
 
   async getExecutionContext(
@@ -86,7 +85,7 @@ export class WorkflowExecutionContextService {
       WorkflowExecutionContext,
       'application' | 'authContext'
     >;
-    targetApplicationId: string | null;
+    targetApplicationId: string;
     targetLabel: string;
   }): void {
     if (
@@ -111,10 +110,11 @@ export class WorkflowExecutionContextService {
     workflowRun: WorkflowRunWorkspaceEntity,
     workspace: FlatWorkspace,
   ): Promise<WorkflowExecutionContext> {
-    const { flatApplicationMaps, flatWorkflowMaps } =
+    const { flatApplicationMaps, flatWorkflowMaps, userWorkspaceRoleMap } =
       await this.workspaceCacheService.getOrRecompute(workspace.id, [
         'flatApplicationMaps',
         'flatWorkflowMaps',
+        'userWorkspaceRoleMap',
       ]);
 
     const application = resolveWorkflowRunApplicationOrThrow({
@@ -134,9 +134,14 @@ export class WorkflowExecutionContextService {
         })
       : buildApplicationAuthContext({ workspace, application });
 
-    const roleIds = await this.permissionsService.getRoleIds(authContext);
+    const rolePermissionConfig = resolveRolePermissionConfig({
+      authContext,
+      userWorkspaceRoleMap,
+      apiKeyRoleMap: {},
+      flatRoleTargetByAgentIdMaps: {},
+    });
 
-    if (roleIds.length === 0) {
+    if (!isDefined(rolePermissionConfig)) {
       throw new WorkflowStepExecutorException(
         'No role is left to run this step with',
         WorkflowStepExecutorExceptionCode.FORBIDDEN,
@@ -146,6 +151,7 @@ export class WorkflowExecutionContextService {
     return {
       isActingOnBehalfOfUser,
       initiator: workflowRun.createdBy,
+      rolePermissionConfig,
       authContext,
       application,
     };
@@ -200,7 +206,6 @@ export class WorkflowExecutionContextService {
       user: fromUserEntityToFlat(userWorkspace.user),
       workspaceMemberId: workspaceMember.id,
       workspaceMember,
-      userSessionVariant: 'standard',
       application,
     });
   }

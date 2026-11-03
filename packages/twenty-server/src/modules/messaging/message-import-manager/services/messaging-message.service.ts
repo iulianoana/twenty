@@ -62,18 +62,20 @@ export class MessagingMessageService {
     return this.workspaceOrmManager.executeInWorkspaceContext(
       async () => {
         const messageChannelMessageAssociationRepository =
-          transactionScope.getRepositoryWithoutPermissionChecks<MessageChannelMessageAssociationWorkspaceEntity>(
+          transactionScope.getRepository<MessageChannelMessageAssociationWorkspaceEntity>(
             'messageChannelMessageAssociation',
+            { shouldBypassPermissionChecks: true },
           );
 
         const messageRepository =
-          transactionScope.getRepositoryWithoutPermissionChecks<MessageWorkspaceEntity>(
-            'message',
-          );
+          transactionScope.getRepository<MessageWorkspaceEntity>('message', {
+            shouldBypassPermissionChecks: true,
+          });
 
         const messageThreadRepository =
-          transactionScope.getRepositoryWithoutPermissionChecks<MessageThreadWorkspaceEntity>(
+          transactionScope.getRepository<MessageThreadWorkspaceEntity>(
             'messageThread',
+            { shouldBypassPermissionChecks: true },
           );
 
         const messageAccumulatorMap = new Map<string, MessageAccumulator>();

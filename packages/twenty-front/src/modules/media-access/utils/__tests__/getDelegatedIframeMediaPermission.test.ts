@@ -33,13 +33,4 @@ describe('getDelegatedIframeMediaPermission', () => {
       }),
     ).toBeNull();
   });
-
-  it('drops the activated permission when one capability is revoked', () => {
-    expect(
-      getDelegatedIframeMediaPermission({
-        activatedPermission: { ...ACTIVATED_PERMISSION, camera: true },
-        permission: ACTIVATED_PERMISSION,
-      }),
-    ).toBeNull();
-  });
 });

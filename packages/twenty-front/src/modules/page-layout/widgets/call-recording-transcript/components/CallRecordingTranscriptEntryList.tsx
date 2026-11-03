@@ -4,6 +4,7 @@ import { type CallRecordingTranscriptPlayback } from '@/page-layout/widgets/call
 import { getCallRecordingTranscriptEntryPlaybackPhase } from '@/page-layout/widgets/call-recording-transcript/utils/getCallRecordingTranscriptEntryPlaybackPhase';
 import { ScrollOverlayButton } from '@/ui/utilities/scroll/components/ScrollOverlayButton';
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
 import {
   useCallback,
   useRef,
@@ -15,7 +16,6 @@ import { type CallRecordingParsedTranscriptEntry } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 import { doNotTranslate } from 'twenty-shared/i18n';
 import { themeCssVariables } from 'twenty-ui/theme';
-import { useLingui } from '@lingui/react/macro';
 
 const StyledTranscriptContainer = styled.div`
   height: 100%;
@@ -60,7 +60,6 @@ export const CallRecordingTranscriptEntryList = ({
   entries,
   playback,
 }: CallRecordingTranscriptEntryListProps) => {
-  const { t } = useLingui();
   const scrollContainerElementRef = useRef<HTMLDivElement>(null);
   const activeEntryElementRef = useRef<HTMLLIElement>(null);
   const [isFollowingPlayback, setIsFollowingPlayback] = useState(true);

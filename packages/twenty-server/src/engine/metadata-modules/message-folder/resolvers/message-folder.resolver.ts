@@ -6,6 +6,8 @@ import { MetadataResolver } from 'src/engine/api/graphql/graphql-config/decorato
 import { WorkspaceEntity } from 'src/engine/core-modules/workspace/workspace.entity';
 import { AuthUserWorkspaceId } from 'src/engine/decorators/auth/auth-user-workspace-id.decorator';
 import { AuthWorkspace } from 'src/engine/decorators/auth/auth-workspace.decorator';
+import { NoPermissionGuard } from 'src/engine/guards/no-permission.guard';
+import { AuthPrincipalGuard } from 'src/engine/guards/auth-principal.guard';
 import { MessageFolderDTO } from 'src/engine/metadata-modules/message-folder/dtos/message-folder.dto';
 import {
   UpdateMessageFolderInput,
@@ -14,22 +16,18 @@ import {
 import { MessageFolderGraphqlApiExceptionInterceptor } from 'src/engine/metadata-modules/message-folder/interceptors/message-folder-graphql-api-exception.interceptor';
 import { MessageFolderMetadataService } from 'src/engine/metadata-modules/message-folder/message-folder-metadata.service';
 import { AuthGraphqlApiExceptionFilter } from 'src/engine/core-modules/auth/filters/auth-graphql-api-exception.filter';
-import { AccessPolicyGuard } from 'src/engine/guards/access-policy.guard';
 
 @UseGuards(
-  AccessPolicyGuard({
-    authPrincipals: {
-      userSession: {
-        standard: true,
-        impersonated: true,
-        playground: true,
-        workspaceAgnostic: false,
-      },
-      apiKey: true,
-      oauthClient: true,
-      application: true,
+  AuthPrincipalGuard({
+    userSession: {
+      standard: true,
+      impersonated: true,
+      playground: true,
+      workspaceAgnostic: false,
     },
-    requiredPermissionFlags: [],
+    apiKey: true,
+    oauthClient: true,
+    application: true,
   }),
 )
 @UseInterceptors(MessageFolderGraphqlApiExceptionInterceptor)
@@ -41,6 +39,7 @@ export class MessageFolderResolver {
   ) {}
 
   @Query(() => [MessageFolderDTO])
+  @UseGuards(NoPermissionGuard)
   async myMessageFolders(
     @AuthWorkspace() workspace: WorkspaceEntity,
     @AuthUserWorkspaceId() userWorkspaceId: string,
@@ -65,6 +64,7 @@ export class MessageFolderResolver {
   }
 
   @Mutation(() => MessageFolderDTO)
+  @UseGuards(NoPermissionGuard)
   async updateMessageFolder(
     @Args('input') input: UpdateMessageFolderInput,
     @AuthWorkspace() workspace: WorkspaceEntity,
@@ -84,6 +84,7 @@ export class MessageFolderResolver {
   }
 
   @Mutation(() => [MessageFolderDTO])
+  @UseGuards(NoPermissionGuard)
   async updateMessageFolders(
     @Args('input') input: UpdateMessageFoldersInput,
     @AuthWorkspace() workspace: WorkspaceEntity,

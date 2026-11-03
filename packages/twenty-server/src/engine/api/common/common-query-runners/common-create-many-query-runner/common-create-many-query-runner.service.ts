@@ -52,6 +52,7 @@ import { type ShareWithInput } from 'src/engine/permissions/record-share/types/s
 import { resolveObjectSharing } from 'src/engine/permissions/record-share/utils/resolve-object-sharing.util';
 import { resolveCreatedRecordSharingOrThrow } from 'src/engine/permissions/record-share/utils/resolve-created-record-sharing-or-throw.util';
 import { WorkspaceRepository } from 'src/engine/twenty-orm/repository/workspace-repository';
+import { RolePermissionConfig } from 'src/engine/permissions/principal/types/role-permission-config.type';
 import { containsNestedRelationCreate } from 'src/engine/twenty-orm/utils/contains-nested-relation-create.util';
 import { getNestedRelationFieldNames } from 'src/engine/twenty-orm/utils/get-nested-relation-field-names.util';
 
@@ -107,6 +108,7 @@ export class CommonCreateManyQueryRunnerService extends CommonBaseQueryRunnerSer
             transactionScope,
             repository: transactionScope.getRepository(
               queryRunnerContext.flatObjectMetadata.nameSingular,
+              queryRunnerContext.rolePermissionConfig,
             ),
           }),
       );
@@ -125,6 +127,7 @@ export class CommonCreateManyQueryRunnerService extends CommonBaseQueryRunnerSer
     const {
       repository,
       authContext,
+      rolePermissionConfig,
       flatObjectMetadata,
       flatObjectMetadataMaps,
       flatFieldMetadataMaps,
@@ -158,8 +161,9 @@ export class CommonCreateManyQueryRunnerService extends CommonBaseQueryRunnerSer
       repository:
         objectSharing.isPrivateByDefault &&
         isDefined(queryRunnerContext.transactionScope)
-          ? queryRunnerContext.transactionScope.getRepositoryWithoutPermissionChecks(
+          ? queryRunnerContext.transactionScope.getRepository(
               flatObjectMetadata.nameSingular,
+              { shouldBypassPermissionChecks: true },
             )
           : repository,
       selectedFieldsResult: args.selectedFieldsResult,
@@ -172,6 +176,7 @@ export class CommonCreateManyQueryRunnerService extends CommonBaseQueryRunnerSer
       flatObjectMetadataMaps,
       flatFieldMetadataMaps,
       authContext,
+      rolePermissionConfig,
       repository,
       nestedRelationsReadPathOptions: this.getNestedRelationsReadPathOptions(),
     });
@@ -186,6 +191,7 @@ export class CommonCreateManyQueryRunnerService extends CommonBaseQueryRunnerSer
     flatObjectMetadataMaps,
     flatFieldMetadataMaps,
     authContext,
+    rolePermissionConfig,
     repository,
     nestedRelationsReadPathOptions,
   }: {
@@ -195,6 +201,7 @@ export class CommonCreateManyQueryRunnerService extends CommonBaseQueryRunnerSer
     flatObjectMetadataMaps: FlatEntityMaps<FlatObjectMetadata>;
     flatFieldMetadataMaps: FlatEntityMaps<OrmFlatFieldMetadata>;
     authContext: WorkspaceAuthContext;
+    rolePermissionConfig?: RolePermissionConfig;
     repository: WorkspaceRepository<ObjectRecord>;
     nestedRelationsReadPathOptions: NestedRelationsReadPathOptions;
   }): Promise<void> {
@@ -213,6 +220,7 @@ export class CommonCreateManyQueryRunnerService extends CommonBaseQueryRunnerSer
       >,
       limit: QUERY_MAX_RECORDS,
       authContext,
+      rolePermissionConfig,
       repository,
       selectedFields: args.selectedFieldsResult.select,
       ...nestedRelationsReadPathOptions,

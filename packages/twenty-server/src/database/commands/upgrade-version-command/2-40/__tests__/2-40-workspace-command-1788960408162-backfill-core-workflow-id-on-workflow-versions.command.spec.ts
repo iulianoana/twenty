@@ -57,7 +57,7 @@ const setup = ({
 
   const workspaceOrmManager = {
     executeInWorkspaceContext: (fn: () => Promise<unknown>) => fn(),
-    getRepositoryWithoutPermissionChecks: () => ({ count }),
+    getRepository: () => ({ count }),
   } as unknown as WorkspaceOrmManager;
 
   const command = new BackfillCoreWorkflowIdOnWorkflowVersionsCommand(

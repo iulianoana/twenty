@@ -29,10 +29,6 @@ const isCoreAgentMatchingRule = ({
       return normalizedLabel.includes(normalizedValue);
     case ViewFilterOperand.DOES_NOT_CONTAIN:
       return !normalizedLabel.includes(normalizedValue);
-    case ViewFilterOperand.IS:
-      return agent.label === stepFilter.value;
-    case ViewFilterOperand.IS_NOT:
-      return agent.label !== stepFilter.value;
     case ViewFilterOperand.IS_EMPTY:
       return normalizedLabel === '';
     case ViewFilterOperand.IS_NOT_EMPTY:

@@ -152,8 +152,9 @@ export class MessagingMessagesImportService {
           });
 
           const workspaceMemberRepository =
-            this.workspaceOrmManager.getRepositoryWithoutPermissionChecks<WorkspaceMemberWorkspaceEntity>(
+            this.workspaceOrmManager.getRepository<WorkspaceMemberWorkspaceEntity>(
               'workspaceMember',
+              { shouldBypassPermissionChecks: true },
             );
 
           const workspaceMember = userWorkspace

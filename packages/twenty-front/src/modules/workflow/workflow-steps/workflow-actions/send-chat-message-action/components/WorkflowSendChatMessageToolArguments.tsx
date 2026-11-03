@@ -7,6 +7,7 @@ import { buildToolArgumentFields } from '@/workflow/workflow-steps/workflow-acti
 import { isEmptyToolArgument } from '@/workflow/workflow-steps/workflow-actions/send-chat-message-action/utils/isEmptyToolArgument';
 import { WorkflowVariablePicker } from '@/workflow/workflow-variables/components/WorkflowVariablePicker';
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
 import { isNonEmptyString } from '@sniptt/guards';
 import { useMemo, useState } from 'react';
 import { isDefined } from 'twenty-shared/utils';
@@ -14,7 +15,6 @@ import { isStandaloneVariableString } from 'twenty-shared/workflow';
 import { LightButton } from 'twenty-ui/components/input';
 import { themeCssVariables } from 'twenty-ui/theme';
 import { GetToolInputSchemaDocument } from '~/generated-metadata/graphql';
-import { useLingui } from '@lingui/react/macro';
 
 const StyledArguments = styled.div`
   display: flex;
@@ -53,7 +53,6 @@ export const WorkflowSendChatMessageToolArguments = ({
   readonly,
   onChange,
 }: WorkflowSendChatMessageToolArgumentsProps) => {
-  const { t } = useLingui();
   const { data, loading } = useQuery(GetToolInputSchemaDocument, {
     variables: { toolName },
   });

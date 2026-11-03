@@ -6,8 +6,6 @@ export const UPDATE_WORKSPACE = gql`
   mutation UpdateWorkspace($input: UpdateWorkspaceInput!) {
     updateWorkspace(data: $input) {
       id
-      aiChatDirectMessageAssistantMode
-      aiChatInboxAssistantMode
       customDomain
       subdomain
       displayName

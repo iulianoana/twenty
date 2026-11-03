@@ -1,6 +1,7 @@
 /* @license Enterprise */
 
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
 import { Dropdown } from 'twenty-ui/components/navigation';
 
 import { AdvancedFilterFieldSelectDropdownButtonClickableSelect } from '@/object-record/advanced-filter/components/AdvancedFilterFieldSelectDropdownButtonClickableSelect';
@@ -10,7 +11,6 @@ import { SettingsRolePermissionsObjectLevelRecordLevelPermissionFieldSelectDropd
 import { DropdownContent } from '@/ui/layout/dropdown/components/DropdownContent';
 import { DropdownRoot } from '@/ui/layout/dropdown/components/DropdownRoot';
 import { GenericDropdownContentWidth } from '@/ui/layout/dropdown/constants/GenericDropdownContentWidth';
-import { useLingui } from '@lingui/react/macro';
 
 const StyledContainer = styled.div`
   flex: 2;
@@ -25,7 +25,6 @@ export const SettingsRolePermissionsObjectLevelRecordLevelPermissionFieldSelect 
   ({
     recordFilterId,
   }: SettingsRolePermissionsObjectLevelRecordLevelPermissionFieldSelectProps) => {
-    const { t } = useLingui();
     const { advancedFilterFieldSelectDropdownId } =
       useAdvancedFilterFieldSelectDropdown(recordFilterId);
 

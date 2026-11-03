@@ -1,13 +1,10 @@
 'use client';
 
 import { useLingui } from '@lingui/react';
-import { Trans } from '@lingui/react/macro';
 import { styled } from '@linaria/react';
 import { type FormEvent, useState } from 'react';
 import { isDefined, isNonEmptyString } from 'twenty-shared/utils';
 
-import { localizeHref } from '@/platform/i18n/localize-href';
-import { useLocale } from '@/platform/i18n/use-locale';
 import {
   color,
   FONT_WEIGHT,
@@ -17,15 +14,7 @@ import {
   spacing,
   typeRampDeclarations,
 } from '@/tokens';
-import {
-  Button,
-  ExternalLink,
-  Field,
-  Heading,
-  Select,
-  TextareaField,
-  TextField,
-} from '@/ui';
+import { Button, Field, Heading, Select, TextareaField, TextField } from '@/ui';
 
 import { AFFILIATE_APPLICATION_COPY } from './affiliate-application-copy';
 import { affiliateApplicationRequestSchema } from './affiliate-application-request-schema';
@@ -73,13 +62,6 @@ const CheckboxStack = styled.div`
   row-gap: ${spacing(2)};
 `;
 
-// Opens in a new tab so the applicant keeps what they typed.
-const TermsLink = styled(ExternalLink)`
-  color: ${color('blue')};
-  text-decoration: underline;
-  text-underline-offset: 2px;
-`;
-
 const CheckboxLabel = styled.label`
   ${typeRampDeclarations('bodyXs')}
   align-items: center;
@@ -95,8 +77,6 @@ const CheckboxLabel = styled.label`
     width: 16px;
   }
 `;
-
-const ACCEPTS_TERMS_LABEL_ID = 'affiliate-application-accepts-terms-label';
 
 const ErrorBanner = styled.p`
   ${typeRampDeclarations('bodyXs')}
@@ -140,8 +120,8 @@ const INITIAL_STATE: FormState = {
   acceptsTerms: false,
 };
 
-// The route's schema is strict and rejects an empty optional, so optional
-// blanks are dropped; the required main channel is always sent.
+// The route's schema is strict and rejects an empty optional, so blanks are
+// dropped rather than sent as ''.
 function buildRequestBody(state: FormState) {
   const trimmedChannel = state.mainChannel.trim();
   const trimmedAudience = state.audienceSize.trim();
@@ -152,7 +132,7 @@ function buildRequestBody(state: FormState) {
     name: state.name.trim(),
     email: state.email.trim(),
     partnerType: state.partnerType,
-    mainChannel: trimmedChannel,
+    ...(isNonEmptyString(trimmedChannel) && { mainChannel: trimmedChannel }),
     ...(isNonEmptyString(trimmedAudience) && { audienceSize: trimmedAudience }),
     ...(isNonEmptyString(trimmedCountry) && { country: trimmedCountry }),
     ...(isNonEmptyString(trimmedPlan) && { promotionPlan: trimmedPlan }),
@@ -163,7 +143,6 @@ function buildRequestBody(state: FormState) {
 
 export function AffiliateApplicationForm() {
   const { i18n } = useLingui();
-  const locale = useLocale();
   const [state, setState] = useState<FormState>(INITIAL_STATE);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -318,10 +297,8 @@ export function AffiliateApplicationForm() {
               />
               {i18n._(COPY.fields.isIntegrationPartner)}
             </CheckboxLabel>
-            {/* A div, not a label: a link inside a label makes a click ambiguous. */}
-            <CheckboxLabel as="div">
+            <CheckboxLabel>
               <input
-                aria-labelledby={ACCEPTS_TERMS_LABEL_ID}
                 checked={state.acceptsTerms}
                 name="acceptsTerms"
                 onChange={(event) =>
@@ -329,16 +306,7 @@ export function AffiliateApplicationForm() {
                 }
                 type="checkbox"
               />
-              <span id={ACCEPTS_TERMS_LABEL_ID}>
-                <Trans>
-                  I agree to the{' '}
-                  <TermsLink
-                    href={localizeHref(locale, '/affiliate-partners/terms')}
-                  >
-                    affiliate program terms
-                  </TermsLink>
-                </Trans>
-              </span>
+              {i18n._(COPY.fields.acceptsTerms)}
             </CheckboxLabel>
           </CheckboxStack>
           <Button

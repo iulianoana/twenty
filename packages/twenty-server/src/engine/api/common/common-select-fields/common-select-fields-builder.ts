@@ -18,7 +18,7 @@ import { findManyFlatEntityByIdInFlatEntityMapsOrThrow } from 'src/engine/metada
 import { type OrmFlatFieldMetadata } from 'src/engine/metadata-modules/flat-field-metadata/types/orm-flat-field-metadata.type';
 import { type FlatObjectMetadata } from 'src/engine/metadata-modules/flat-object-metadata/types/flat-object-metadata.type';
 import { RecordAccessPolicyService } from 'src/engine/permissions/combine/services/record-access-policy.service';
-import { type PermissionsAuthContext } from 'src/engine/permissions/principal/types/permissions-auth-context.type';
+import { type PermissionsPrincipal } from 'src/engine/permissions/principal/types/permissions-principal.type';
 
 @Injectable()
 export class CommonSelectFieldsBuilder {
@@ -28,21 +28,33 @@ export class CommonSelectFieldsBuilder {
 
   // Relations to objects the ORM would refuse are left out, so they cannot fail the whole query
   async findReadableObjectMetadataIds({
-    authContext,
+    principal,
+    objectsPermissions,
     flatObjectMetadataMaps,
   }: {
-    authContext: PermissionsAuthContext;
+    principal: PermissionsPrincipal | undefined;
+    objectsPermissions: ObjectsPermissions;
     flatObjectMetadataMaps: FlatEntityMaps<FlatObjectMetadata>;
   }): Promise<Set<string>> {
     const flatObjectMetadatas = Object.values(
       flatObjectMetadataMaps.byUniversalIdentifier,
     ).filter(isDefined);
 
-    const recordAccessPolicy =
-      this.recordAccessPolicyService.forAuthContext(authContext);
+    if (!isDefined(principal)) {
+      return new Set(
+        flatObjectMetadatas
+          .filter(
+            (flatObjectMetadata) =>
+              objectsPermissions[flatObjectMetadata.id]?.canReadObjectRecords,
+          )
+          .map((flatObjectMetadata) => flatObjectMetadata.id),
+      );
+    }
+
     const readableFlags = await Promise.all(
       flatObjectMetadatas.map((flatObjectMetadata) =>
-        recordAccessPolicy.hasAccessToSomeRecords({
+        this.recordAccessPolicyService.hasAccessToSomeRecords({
+          principal,
           flatObjectMetadata,
           operationType: 'select',
         }),

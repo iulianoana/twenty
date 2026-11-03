@@ -169,8 +169,9 @@ export class UserWorkspaceService {
 
     await this.workspaceOrmManager.executeInWorkspaceContext(async () => {
       const workspaceMemberRepository =
-        this.workspaceOrmManager.getRepositoryWithoutPermissionChecks<WorkspaceMemberWorkspaceEntity>(
+        this.workspaceOrmManager.getRepository<WorkspaceMemberWorkspaceEntity>(
           'workspaceMember',
+          { shouldBypassPermissionChecks: true },
         );
 
       const existingWorkspaceMembers = await workspaceMemberRepository.find({
@@ -493,8 +494,9 @@ export class UserWorkspaceService {
 
     return this.workspaceOrmManager.executeInWorkspaceContext(async () => {
       const workspaceMemberRepository =
-        this.workspaceOrmManager.getRepositoryWithoutPermissionChecks<WorkspaceMemberWorkspaceEntity>(
+        this.workspaceOrmManager.getRepository<WorkspaceMemberWorkspaceEntity>(
           'workspaceMember',
+          { shouldBypassPermissionChecks: true },
         );
 
       return workspaceMemberRepository.findOne({

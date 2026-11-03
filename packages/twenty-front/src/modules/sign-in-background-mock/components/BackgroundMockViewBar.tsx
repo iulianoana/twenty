@@ -1,9 +1,10 @@
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
+
 import { TopBar } from '@/ui/layout/top-bar/components/TopBar';
 import { TintedIconTile } from 'twenty-ui/components/data-display';
 import { IconBuildingSkyscraper, IconChevronDown } from 'twenty-ui/icon';
 import { useTheme, themeCssVariables } from 'twenty-ui/theme';
-import { useLingui } from '@lingui/react/macro';
 
 const StyledViewPicker = styled.div`
   align-items: center;
@@ -30,7 +31,6 @@ const StyledRightAction = styled.div`
 `;
 
 export const BackgroundMockViewBar = () => {
-  const { t } = useLingui();
   const theme = useTheme();
 
   return (

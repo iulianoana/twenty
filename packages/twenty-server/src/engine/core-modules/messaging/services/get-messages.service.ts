@@ -175,20 +175,17 @@ export class GetMessagesService {
         workspaceId,
       );
 
-    const { threadVisibilityByThreadId, threadChannelByThreadId } =
-      await this.timelineMessagingService.getThreadVisibilityAndChannelByThreadId(
-        {
-          messageThreadIds,
-          userWorkspaceId,
-          workspaceId,
-        },
-      );
+    const threadVisibilityByThreadId =
+      await this.timelineMessagingService.getThreadVisibilityByThreadId({
+        messageThreadIds,
+        userWorkspaceId,
+        workspaceId,
+      });
 
     return formatThreads(
       messageThreads,
       threadParticipantsByThreadId,
       threadVisibilityByThreadId,
-      threadChannelByThreadId,
     );
   }
 

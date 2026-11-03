@@ -1,3 +1,4 @@
+import { t } from '@lingui/core/macro';
 import { isNonEmptyString } from '@sniptt/guards';
 
 import { type FieldCurrencyValue } from '@/object-record/record-field/ui/types/FieldMetadata';
@@ -16,10 +17,8 @@ import {
   convertCurrencyAmountToCurrencyMicros,
   isDefined,
 } from 'twenty-shared/utils';
-import { useLingui } from '@lingui/react/macro';
 
 export const CurrencyFieldInput = () => {
-  const { t } = useLingui();
   const { fieldValue, draftValue, setDraftValue, defaultValue } =
     useCurrencyField();
 

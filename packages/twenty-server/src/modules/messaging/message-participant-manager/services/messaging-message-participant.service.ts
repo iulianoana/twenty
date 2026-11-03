@@ -36,8 +36,9 @@ export class MessagingMessageParticipantService {
     return this.workspaceOrmManager.executeInWorkspaceContext(
       async () => {
         const messageParticipantRepository =
-          transactionScope.getRepositoryWithoutPermissionChecks<MessageParticipantWorkspaceEntity>(
+          transactionScope.getRepository<MessageParticipantWorkspaceEntity>(
             'messageParticipant',
+            { shouldBypassPermissionChecks: true },
           );
 
         const existingParticipantsBasedOnMessageIds =

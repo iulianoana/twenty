@@ -2,6 +2,7 @@ import { NavigationButton } from '@/ui/input/components/NavigationButton';
 
 import { SettingsEmptyPlaceholder } from '@/settings/components/SettingsEmptyPlaceholder';
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
 import { type ComponentType } from 'react';
 import { isDefined } from 'twenty-shared/utils';
 
@@ -24,7 +25,6 @@ import {
 } from 'twenty-ui/icon';
 import { Tooltip } from 'twenty-ui/primitives/surfaces';
 import { useTheme, themeCssVariables } from 'twenty-ui/theme';
-import { useLingui } from '@lingui/react/macro';
 
 type SchemaProperty = {
   type?: string;
@@ -95,7 +95,6 @@ export const SettingsToolParameterTable = ({
   requiredFields,
   functionLink,
 }: SettingsToolParameterTableProps) => {
-  const { t } = useLingui();
   const theme = useTheme();
   const entries = Object.entries(schemaProperties);
 

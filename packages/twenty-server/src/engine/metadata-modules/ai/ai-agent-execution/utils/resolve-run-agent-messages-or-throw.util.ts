@@ -1,14 +1,15 @@
 import { isNonEmptyString } from '@sniptt/guards';
-import {
-  hasRunAgentMessageContentOrAttachments,
-  type RunAgentMessage,
-} from 'twenty-shared/application';
+import { type RunAgentMessage } from 'twenty-shared/application';
 import { isDefined, isNonEmptyArray } from 'twenty-shared/utils';
 
 import {
   AiException,
   AiExceptionCode,
 } from 'src/engine/metadata-modules/ai/ai.exception';
+
+const isBlankMessage = (message: RunAgentMessage): boolean =>
+  !isNonEmptyString(message.content.trim()) &&
+  !isNonEmptyArray(message.attachments);
 
 // GraphQL cannot express XOR
 export const resolveRunAgentMessagesOrThrow = ({
@@ -49,10 +50,7 @@ export const resolveRunAgentMessagesOrThrow = ({
     return messages;
   }
 
-  if (
-    !isNonEmptyArray(input) ||
-    !input.every(hasRunAgentMessageContentOrAttachments)
-  ) {
+  if (!isNonEmptyArray(input) || input.some(isBlankMessage)) {
     throw new AiException(
       'input must hold messages with content or attachments',
       AiExceptionCode.INVALID_AGENT_INPUT,

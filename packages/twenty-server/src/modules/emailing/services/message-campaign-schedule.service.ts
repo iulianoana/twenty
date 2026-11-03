@@ -1,11 +1,8 @@
-import { PermissionsException } from 'src/engine/permissions/permissions.exception';
-import { AuthException } from 'src/engine/core-modules/auth/auth.exception';
 import { Injectable, Logger } from '@nestjs/common';
 
 import { MessageCampaignStatus } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 
-import { UserWorkspaceAuthContextService } from 'src/engine/core-modules/user-workspace/services/user-workspace-auth-context.service';
 import { withWorkspaceAuthContext } from 'src/engine/core-modules/auth/storage/workspace-auth-context.storage';
 import { BillingService } from 'src/engine/core-modules/billing/services/billing.service';
 import { CAMPAIGN_SEND_RETRY_BACKOFF } from 'src/engine/core-modules/emailing-domain/constants/campaign-send-retry-backoff.constant';
@@ -18,6 +15,7 @@ import { type SendScheduledCampaignJobData } from 'src/engine/core-modules/email
 import { InjectMessageQueue } from 'src/engine/core-modules/message-queue/decorators/message-queue.decorator';
 import { MessageQueue } from 'src/engine/core-modules/message-queue/message-queue.constants';
 import { MessageQueueService } from 'src/engine/core-modules/message-queue/services/message-queue.service';
+import { buildSystemAuthContext } from 'src/engine/twenty-orm/utils/build-system-auth-context.util';
 import { SEND_SCHEDULED_CAMPAIGN_JOB } from 'src/modules/emailing/constants/send-scheduled-campaign-job.constant';
 import { EmailBillingService } from 'src/modules/emailing/services/email-billing.service';
 import { MessageCampaignLifecycleService } from 'src/modules/emailing/services/message-campaign-lifecycle.service';
@@ -35,7 +33,6 @@ export class MessageCampaignScheduleService {
     private readonly messageCampaignService: MessageCampaignService,
     private readonly billingService: BillingService,
     private readonly emailBillingService: EmailBillingService,
-    private readonly userWorkspaceAuthContextService: UserWorkspaceAuthContextService,
   ) {}
 
   async sendNowOrScheduleOrThrow({
@@ -173,91 +170,68 @@ export class MessageCampaignScheduleService {
     userWorkspaceId,
     scheduledAt,
   }: SendScheduledCampaignJobData): Promise<void> {
-    const scheduledAtDate = new Date(scheduledAt);
+    await withWorkspaceAuthContext(
+      buildSystemAuthContext(workspaceId),
+      async () => {
+        const scheduledAtDate = new Date(scheduledAt);
 
-    const isStillScheduledForThisTime =
-      await this.messageCampaignLifecycleService.isCampaignScheduledFor({
-        workspaceId,
-        campaignId,
-        scheduledAt: scheduledAtDate,
-      });
+        const isStillScheduledForThisTime =
+          await this.messageCampaignLifecycleService.isCampaignScheduledFor({
+            workspaceId,
+            campaignId,
+            scheduledAt: scheduledAtDate,
+          });
 
-    if (!isStillScheduledForThisTime) {
-      return;
-    }
-
-    const schedulerAuthContext = await this.userWorkspaceAuthContextService
-      .resolve({ workspaceId, userWorkspaceId })
-      .catch(async (error) => {
-        if (!(error instanceof AuthException)) {
-          throw error;
+        if (!isStillScheduledForThisTime) {
+          return;
         }
 
-        await this.releaseUnsendableScheduledCampaign({
-          workspaceId,
-          campaignId,
-          scheduledAt: scheduledAtDate,
-          reason:
-            'the member who scheduled it can no longer act in the workspace',
-        });
+        const prepared = await this.messageCampaignService
+          .prepareCampaignSendOrThrow({
+            workspaceId,
+            userWorkspaceId,
+            campaignId,
+          })
+          .catch(async (error) => {
+            if (!(error instanceof EmailingDomainException)) {
+              throw error;
+            }
 
-        return null;
-      });
+            await this.releaseUnsendableScheduledCampaign({
+              workspaceId,
+              campaignId,
+              scheduledAt: scheduledAtDate,
+              reason: error.message,
+            });
 
-    if (!isDefined(schedulerAuthContext)) {
-      return;
-    }
+            return null;
+          });
 
-    // Runs as the member who scheduled it, so it only reaches the records they can
-    await withWorkspaceAuthContext(schedulerAuthContext, async () => {
-      const prepared = await this.messageCampaignService
-        .prepareCampaignSendOrThrow({
-          workspaceId,
-          userWorkspaceId,
-          campaignId,
-        })
-        .catch(async (error) => {
-          if (
-            !(error instanceof EmailingDomainException) &&
-            !(error instanceof PermissionsException)
-          ) {
-            throw error;
-          }
+        if (!isDefined(prepared)) {
+          return;
+        }
 
+        if (prepared.sendableRecipients.length === 0) {
           await this.releaseUnsendableScheduledCampaign({
             workspaceId,
             campaignId,
             scheduledAt: scheduledAtDate,
-            reason: error.message,
+            reason: 'no recipient remains sendable',
           });
 
-          return null;
-        });
+          return;
+        }
 
-      if (!isDefined(prepared)) {
-        return;
-      }
-
-      if (prepared.sendableRecipients.length === 0) {
-        await this.releaseUnsendableScheduledCampaign({
+        await this.messageCampaignService.claimAndMaterializeOrThrow({
           workspaceId,
+          userWorkspaceId,
           campaignId,
-          scheduledAt: scheduledAtDate,
-          reason: 'no recipient remains sendable',
+          prepared,
+          from: MessageCampaignStatus.SCHEDULED,
+          fromScheduledAt: scheduledAtDate,
         });
-
-        return;
-      }
-
-      await this.messageCampaignService.claimAndMaterializeOrThrow({
-        workspaceId,
-        userWorkspaceId,
-        campaignId,
-        prepared,
-        from: MessageCampaignStatus.SCHEDULED,
-        fromScheduledAt: scheduledAtDate,
-      });
-    });
+      },
+    );
   }
 
   private async releaseUnsendableScheduledCampaign({

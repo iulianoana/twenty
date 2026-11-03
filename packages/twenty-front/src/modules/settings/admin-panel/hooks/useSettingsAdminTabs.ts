@@ -2,6 +2,7 @@ import { currentUserState } from '@/auth/states/currentUserState';
 import { billingState } from '@/client-config/states/billingState';
 import { SETTINGS_ADMIN_TABS } from '@/settings/admin-panel/constants/SettingsAdminTabs';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
+import { t } from '@lingui/core/macro';
 import {
   IconApps,
   IconHeart,
@@ -10,10 +11,8 @@ import {
   IconSparkles,
   IconVariable,
 } from 'twenty-ui/icon';
-import { useLingui } from '@lingui/react/macro';
 
 export const useSettingsAdminTabs = () => {
-  const { t } = useLingui();
   const currentUser = useAtomStateValue(currentUserState);
   const billing = useAtomStateValue(billingState);
 

@@ -3,25 +3,14 @@
 import { type FieldMetadataType } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 
-import {
-  type OverridableFlatEntity,
-  resolveEffectiveFlatEntityProperty,
-} from 'src/engine/metadata-modules/overrides/utils/resolve-effective-flat-entity-property.util';
 import { type ValidationRuleFieldChange } from 'src/engine/metadata-modules/validation-rule/types/validation-rule-field-change.type';
 
-type ValidationRuleFieldState = OverridableFlatEntity & {
+type ValidationRuleFieldState = {
   universalIdentifier: string;
   name: string;
   type: FieldMetadataType;
   isActive: boolean;
 };
-
-const isFieldActive = (field: ValidationRuleFieldState): boolean =>
-  resolveEffectiveFlatEntityProperty({
-    metadataName: 'fieldMetadata',
-    flatEntity: field,
-    property: 'isActive',
-  });
 
 export const computeValidationRuleFieldChanges = ({
   updatedFields,
@@ -44,8 +33,7 @@ export const computeValidationRuleFieldChanges = ({
 
     const isRenamed = existingField.name !== updatedField.name;
     const isRetyped = existingField.type !== updatedField.type;
-    const isDeactivated =
-      isFieldActive(existingField) && !isFieldActive(updatedField);
+    const isDeactivated = existingField.isActive && !updatedField.isActive;
 
     if (!isRenamed && !isRetyped && !isDeactivated) {
       return [];

@@ -1,6 +1,8 @@
 /* @license Enterprise */
 
 import { SelectOptionIcon } from '@/ui/input/components/SelectOptionIcon';
+
+import { t } from '@lingui/core/macro';
 import { isNonEmptyString } from '@sniptt/guards';
 import { useState } from 'react';
 import { Dropdown } from 'twenty-ui/components/navigation';
@@ -29,7 +31,6 @@ import { RECORD_LEVEL_PERMISSION_PREDICATE_FIELD_TYPES } from '@/settings/roles/
 import { getComparableWorkspaceMemberRelationFields } from '@/settings/roles/role-permissions/object-level-permissions/record-level-permissions/utils/getComparableWorkspaceMemberRelationFields';
 import { useAtomComponentSelectorValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentSelectorValue';
 import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
-import { useLingui } from '@lingui/react/macro';
 
 type SettingsRolePermissionsObjectLevelRecordLevelPermissionMeValueSelectProps =
   {
@@ -42,7 +43,6 @@ export const SettingsRolePermissionsObjectLevelRecordLevelPermissionMeValueSelec
     onSelect,
     recordFilterId,
   }: SettingsRolePermissionsObjectLevelRecordLevelPermissionMeValueSelectProps) => {
-    const { t } = useLingui();
     const { getIcon } = useIcons();
     const [searchInput, setSearchInput] = useState('');
 

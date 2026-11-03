@@ -1,11 +1,12 @@
 import {
   findConnectionForRequest,
+  listConnections,
   type LogicFunctionExecutionContext,
 } from 'twenty-sdk/logic-function';
 import { isDefined } from 'twenty-sdk/utils';
 
+import { TEAMS_PROVIDER_NAME } from 'src/features/transcripts/constants/teams-provider-name';
 import { TeamsConnectionUnavailableError } from 'src/features/transcripts/logic-functions/types/teams-connection-unavailable-error';
-import { listTeamsConnections } from 'src/features/transcripts/logic-functions/utils/list-teams-connections';
 
 export const getTeamsConnectionForRequestOrThrow = async (
   context: Pick<LogicFunctionExecutionContext, 'userWorkspaceId'>,
@@ -13,7 +14,9 @@ export const getTeamsConnectionForRequestOrThrow = async (
     isOwnConnectionRequired = false,
   }: { isOwnConnectionRequired?: boolean } = {},
 ) => {
-  const connections = await listTeamsConnections();
+  const connections = await listConnections({
+    providerName: TEAMS_PROVIDER_NAME,
+  });
   const connection = findConnectionForRequest(
     isOwnConnectionRequired
       ? connections.filter(

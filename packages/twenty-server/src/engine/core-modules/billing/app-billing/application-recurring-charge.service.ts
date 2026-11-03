@@ -130,8 +130,9 @@ export class ApplicationRecurringChargeService {
     return this.workspaceOrmManager.executeInWorkspaceContext(
       async () => {
         const workspaceMemberRepository =
-          this.workspaceOrmManager.getRepositoryWithoutPermissionChecks<WorkspaceMemberWorkspaceEntity>(
+          this.workspaceOrmManager.getRepository<WorkspaceMemberWorkspaceEntity>(
             'workspaceMember',
+            { shouldBypassPermissionChecks: true },
           );
 
         return workspaceMemberRepository.count();

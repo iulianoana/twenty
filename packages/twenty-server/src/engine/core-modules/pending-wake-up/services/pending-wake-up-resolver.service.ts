@@ -107,10 +107,6 @@ export class PendingWakeUpResolverService {
       ReturnType<PendingWakeUpOwnerHandler['getReadPermissions']>
     >;
   }): Promise<PendingWakeUpEvent | undefined> {
-    if (!isDefined(readPermissions)) {
-      return undefined;
-    }
-
     const [objectName, action] = event.eventName.split('.');
 
     const { success, result, error } = await this.findRecordsService.execute({
@@ -121,7 +117,7 @@ export class PendingWakeUpResolverService {
           ? { id: { eq: event.recordId }, deletedAt: { is: 'NOT_NULL' } }
           : { id: { eq: event.recordId } },
       limit: 1,
-      authContext: readPermissions.authContext,
+      ...readPermissions,
       shouldBuildEffectiveSelectFields: false,
     });
 

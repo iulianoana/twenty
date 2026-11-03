@@ -38,8 +38,9 @@ describe('2-44 workspace command 1790772993322 - RecordPendingFormConversationsC
     );
 
   const workflowRunRepository = () =>
-    workspaceOrmManager.getRepositoryWithoutPermissionChecks<WorkflowRunWorkspaceEntity>(
+    workspaceOrmManager.getRepository<WorkflowRunWorkspaceEntity>(
       'workflowRun',
+      { shouldBypassPermissionChecks: true },
     );
 
   beforeAll(async () => {
@@ -134,7 +135,9 @@ describe('2-44 workspace command 1790772993322 - RecordPendingFormConversationsC
     const countThreads = () =>
       inWorkspace(() =>
         workspaceOrmManager
-          .getRepositoryWithoutPermissionChecks('agentChatThread')
+          .getRepository('agentChatThread', {
+            shouldBypassPermissionChecks: true,
+          })
           .count({ withDeleted: true }),
       );
     const threadCountBefore = await countThreads();

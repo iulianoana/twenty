@@ -5,6 +5,7 @@ import { TableHeader } from '@/ui/layout/table/components/TableHeader';
 import { TableRow } from '@/ui/layout/table/components/TableRow';
 import { TableSection } from '@/ui/layout/table/components/TableSection';
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
 import { type ReactNode } from 'react';
 import { Section } from 'twenty-ui/components/layout';
 import { Button } from 'twenty-ui/primitives/input';
@@ -12,7 +13,6 @@ import { IconRestore, IconTimelineEvent } from 'twenty-ui/icon';
 import { Card } from 'twenty-ui/primitives/surfaces';
 import { themeCssVariables } from 'twenty-ui/theme';
 import { type SettingsApplicationTimelineActivityType } from '~/pages/settings/applications/types/SettingsApplicationTimelineActivityType';
-import { useLingui } from '@lingui/react/macro';
 
 type SettingsApplicationTimelineActivityTypeSettingsTabProps = {
   timelineActivityType: SettingsApplicationTimelineActivityType;
@@ -40,7 +40,6 @@ export const SettingsApplicationTimelineActivityTypeSettingsTab = ({
   onIsActiveChange,
   onReset,
 }: SettingsApplicationTimelineActivityTypeSettingsTabProps) => {
-  const { t } = useLingui();
   const detailRows: { key: string; label: string; value: ReactNode }[] = [
     {
       key: 'label',

@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { isDefined } from 'twenty-shared/utils';
 
-import { savePartner } from './save-partner';
+import { PARTNER_STORAGE_KEY } from './partner-storage-key';
 
 const PARTNER_QUERY_PARAM = 'via';
 
@@ -18,7 +18,7 @@ export function PartnerAttributionEffect(): null {
     }
 
     try {
-      savePartner({ storage: localStorage, code: partner, now: Date.now() });
+      sessionStorage.setItem(PARTNER_STORAGE_KEY, partner);
     } catch {
       return;
     }

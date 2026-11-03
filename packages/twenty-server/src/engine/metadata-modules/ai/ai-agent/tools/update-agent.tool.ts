@@ -1,4 +1,6 @@
 import { ToolCategory } from 'twenty-shared/ai';
+import { PermissionFlagType } from 'twenty-shared/constants';
+import { FeatureFlagKey } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 import { z } from 'zod';
 
@@ -7,7 +9,6 @@ import { BaseTool } from 'src/engine/core-modules/tool-provider/interfaces/base-
 import { type ToolExecuteArgs } from 'src/engine/core-modules/tool-provider/types/tool-execute-args.type';
 import { type ToolOutput } from 'src/engine/core-modules/tool/types/tool-output.type';
 import { AgentService } from 'src/engine/metadata-modules/ai/ai-agent/agent.service';
-import { AGENT_WRITE_ACCESS_POLICY } from 'src/engine/metadata-modules/ai/ai-agent/constants/agent-write-access-policy.constant';
 import { agentTriggersSchema } from 'src/engine/metadata-modules/ai/ai-agent/tools/schemas/agent-trigger.schema';
 import { ManageableAgentService } from 'src/engine/metadata-modules/ai/ai-agent/tools/services/manageable-agent.service';
 import { toAgentSummary } from 'src/engine/metadata-modules/ai/ai-agent/tools/utils/to-agent-summary.util';
@@ -36,7 +37,8 @@ const updateAgentInputSchema = z.object({
 @DefineTool({
   name: 'update_agent',
   category: ToolCategory.AGENT,
-  accessPolicy: AGENT_WRITE_ACCESS_POLICY,
+  requiredPermissionFlags: [PermissionFlagType.AI_SETTINGS],
+  requiredFeatureFlags: [FeatureFlagKey.IS_AI_CHAT_INBOX_ENABLED],
   description: `Update an AI agent. Only the fields you pass are changed.
 
 To pause an agent without deleting it, set isActive to false on its triggers. Confirm changes to the role or triggers with the user first.`,

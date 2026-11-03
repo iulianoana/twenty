@@ -16,7 +16,6 @@ import { getFieldBaseFile } from '@/app/add/entity-field-template';
 import { getFrontComponentBaseFile } from '@/app/add/entity-front-component-template';
 import { getLogicFunctionBaseFile } from '@/app/add/entity-logic-function-template';
 import { getObjectBaseFile } from '@/app/add/entity-object-template';
-import { getValidationRuleBaseFile } from '@/app/add/entity-validation-rule-template';
 import { kebabCase } from '@/app/pull/kebab-case';
 import {
   readBooleanOption,
@@ -129,14 +128,7 @@ export const prepareAppAddFiles = async ({
   };
 
   if (entity !== 'object') rejectOptions(objectOptions);
-  if (entity !== 'field') {
-    rejectOptions([
-      ...fieldOptions.filter(
-        (option) => option !== 'object' || entity !== 'validation-rule',
-      ),
-      ...relationOptions,
-    ]);
-  }
+  if (entity !== 'field') rejectOptions([...fieldOptions, ...relationOptions]);
   if (entity !== 'object' && entity !== 'field') rejectOptions(['label']);
 
   const name = await readValue({ option: 'name', label: 'Name' });
@@ -299,15 +291,6 @@ export const prepareAppAddFiles = async ({
       break;
     case 'front-component':
       content = getFrontComponentBaseFile({ name });
-      break;
-    case 'validation-rule':
-      content = getValidationRuleBaseFile({
-        name,
-        objectUniversalIdentifier: await readIdentifier(
-          'object',
-          'Object universal identifier',
-        ),
-      });
       break;
     default:
       throw invalidInput(`Unsupported entity: ${entity}.`);

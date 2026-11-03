@@ -19,6 +19,7 @@ import { useDialog } from '@/ui/layout/dialog/hooks/useDialog';
 import { isSubscriptionPaymentOverdue } from '@/settings/billing/utils/isSubscriptionPaymentOverdue';
 import { useSubscriptionStatus } from '@/workspace/hooks/useSubscriptionStatus';
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
 import { DOCUMENTATION_PATHS } from 'twenty-shared/constants';
 import { SettingsPath } from 'twenty-shared/types';
 import { getSettingsPath, isDefined } from 'twenty-shared/utils';
@@ -37,7 +38,6 @@ import {
   SubscriptionStatus,
 } from '~/generated-metadata/graphql';
 import { openUrlInNewTab } from '~/utils/openUrlInNewTab';
-import { useLingui } from '@lingui/react/macro';
 
 const StyledSettingsBillingCardBody = styled.div`
   display: flex;
@@ -136,7 +136,6 @@ export const SettingsBillingCreditsSection = ({
   onUpdatePayment: () => void;
   isUpdatePaymentDisabled: boolean;
 }) => {
-  const { t } = useLingui();
   const theme = useTheme();
   const subscriptionStatus = useSubscriptionStatus();
   const { openDialog } = useDialog();

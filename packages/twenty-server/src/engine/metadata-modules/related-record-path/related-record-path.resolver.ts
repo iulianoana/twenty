@@ -17,28 +17,26 @@ import { AuthGraphqlApiExceptionFilter } from 'src/engine/core-modules/auth/filt
 import { ResolverValidationPipe } from 'src/engine/core-modules/graphql/pipes/resolver-validation.pipe';
 import { WorkspaceEntity } from 'src/engine/core-modules/workspace/workspace.entity';
 import { AuthWorkspace } from 'src/engine/decorators/auth/auth-workspace.decorator';
+import { FeatureFlagGuard } from 'src/engine/guards/feature-flag.guard';
+import { AuthPrincipalGuard } from 'src/engine/guards/auth-principal.guard';
+import { SettingsPermissionGuard } from 'src/engine/guards/settings-permission.guard';
 import { CreateRelatedRecordPathInput } from 'src/engine/metadata-modules/related-record-path/dtos/create-related-record-path.input';
 import { RelatedRecordPathDTO } from 'src/engine/metadata-modules/related-record-path/dtos/related-record-path.dto';
 import { RelatedRecordPathGraphqlApiExceptionFilter } from 'src/engine/metadata-modules/related-record-path/filters/related-record-path-graphql-api-exception.filter';
 import { RelatedRecordPathService } from 'src/engine/metadata-modules/related-record-path/related-record-path.service';
 import { WorkspaceMigrationGraphqlApiExceptionInterceptor } from 'src/engine/workspace-manager/workspace-migration/interceptors/workspace-migration-graphql-api-exception.interceptor';
-import { AccessPolicyGuard } from 'src/engine/guards/access-policy.guard';
 
 @UseGuards(
-  AccessPolicyGuard({
-    authPrincipals: {
-      userSession: {
-        standard: true,
-        impersonated: true,
-        playground: true,
-        workspaceAgnostic: false,
-      },
-      apiKey: false,
-      oauthClient: { withUser: true, withoutUser: false },
-      application: false,
+  AuthPrincipalGuard({
+    userSession: {
+      standard: true,
+      impersonated: true,
+      playground: true,
+      workspaceAgnostic: false,
     },
-    requiredPermissionFlags: [PermissionFlagType.ROLES],
-    requiredFeatureFlags: [FeatureFlagKey.IS_RELATED_RECORD_PATHS_ENABLED],
+    apiKey: false,
+    oauthClient: { withUser: true, withoutUser: false },
+    application: false,
   }),
 )
 @UseInterceptors(WorkspaceMigrationGraphqlApiExceptionInterceptor)
@@ -54,6 +52,10 @@ export class RelatedRecordPathResolver {
   ) {}
 
   @Query(() => [RelatedRecordPathDTO])
+  @UseGuards(
+    FeatureFlagGuard(FeatureFlagKey.IS_RELATED_RECORD_PATHS_ENABLED),
+    SettingsPermissionGuard(PermissionFlagType.ROLES),
+  )
   async relatedRecordPaths(
     @AuthWorkspace() workspace: WorkspaceEntity,
   ): Promise<RelatedRecordPathDTO[]> {
@@ -63,6 +65,10 @@ export class RelatedRecordPathResolver {
   }
 
   @Mutation(() => RelatedRecordPathDTO)
+  @UseGuards(
+    FeatureFlagGuard(FeatureFlagKey.IS_RELATED_RECORD_PATHS_ENABLED),
+    SettingsPermissionGuard(PermissionFlagType.ROLES),
+  )
   async createRelatedRecordPath(
     @Args('input') input: CreateRelatedRecordPathInput,
     @AuthWorkspace() workspace: WorkspaceEntity,
@@ -74,6 +80,10 @@ export class RelatedRecordPathResolver {
   }
 
   @Mutation(() => RelatedRecordPathDTO)
+  @UseGuards(
+    FeatureFlagGuard(FeatureFlagKey.IS_RELATED_RECORD_PATHS_ENABLED),
+    SettingsPermissionGuard(PermissionFlagType.ROLES),
+  )
   async deleteRelatedRecordPath(
     @Args('id', { type: () => UUIDScalarType }) id: string,
     @AuthWorkspace() workspace: WorkspaceEntity,

@@ -64,10 +64,12 @@ export class DashboardSyncService {
 
     try {
       await this.workspaceOrmManager.executeInWorkspaceContext(async () => {
-        const dashboardRepository =
-          this.workspaceOrmManager.getRepositoryWithoutPermissionChecks(
-            'dashboard',
-          );
+        const dashboardRepository = this.workspaceOrmManager.getRepository(
+          'dashboard',
+          {
+            shouldBypassPermissionChecks: true,
+          },
+        );
 
         await dashboardRepository.update({ pageLayoutId }, { updatedAt });
       }, authContext);

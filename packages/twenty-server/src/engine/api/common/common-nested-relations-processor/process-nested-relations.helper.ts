@@ -32,6 +32,7 @@ import {
   type FieldMapsForObject,
 } from 'src/engine/metadata-modules/flat-field-metadata/utils/build-field-maps-from-flat-object-metadata.util';
 import { FlatObjectMetadata } from 'src/engine/metadata-modules/flat-object-metadata/types/flat-object-metadata.type';
+import { type RolePermissionConfig } from 'src/engine/permissions/principal/types/role-permission-config.type';
 import { WorkspaceOrmManager } from 'src/engine/twenty-orm/workspace-orm.manager';
 import { type WorkspaceSelectQueryBuilder } from 'src/engine/twenty-orm/query-builder/workspace-select-query-builder';
 import { type WorkspaceRepository } from 'src/engine/twenty-orm/repository/workspace-repository';
@@ -53,6 +54,7 @@ type ProcessNestedRelationsArgs<T extends ObjectRecord = ObjectRecord> = {
   limit: number;
   authContext: WorkspaceAuthContext;
   useReplica?: boolean;
+  rolePermissionConfig?: RolePermissionConfig;
   repository?: WorkspaceRepository;
   // oxlint-disable-next-line typescript/no-explicit-any
   selectedFields: Record<string, any>;
@@ -85,6 +87,7 @@ export class ProcessNestedRelationsHelper {
       limit,
       authContext,
       useReplica = false,
+      rolePermissionConfig,
       repository,
       selectedFields,
     }: ProcessNestedRelationsArgs<T>,
@@ -104,6 +107,7 @@ export class ProcessNestedRelationsHelper {
           limit,
           authContext,
           useReplica,
+          rolePermissionConfig,
           repository,
           relationQueryLimiter,
           selectedFields:
@@ -128,6 +132,7 @@ export class ProcessNestedRelationsHelper {
     limit,
     authContext,
     useReplica,
+    rolePermissionConfig,
     repository,
     relationQueryLimiter,
     selectedFields,
@@ -144,6 +149,7 @@ export class ProcessNestedRelationsHelper {
     limit: number;
     authContext: WorkspaceAuthContext;
     useReplica: boolean;
+    rolePermissionConfig?: RolePermissionConfig;
     repository?: WorkspaceRepository;
     relationQueryLimiter: ConcurrencyLimiter;
     selectedFields: Record<string, unknown>;
@@ -197,6 +203,7 @@ export class ProcessNestedRelationsHelper {
       ? repository.getRepositoryForObjectMetadataId(targetObjectMetadata.id)
       : this.workspaceOrmManager.getRepository(
           targetObjectMetadata.nameSingular,
+          rolePermissionConfig,
           { useReplica },
         );
 
@@ -325,6 +332,7 @@ export class ProcessNestedRelationsHelper {
           limit,
           authContext,
           useReplica,
+          rolePermissionConfig,
           repository,
           selectedFields,
         },

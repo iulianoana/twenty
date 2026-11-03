@@ -66,8 +66,6 @@ export const fromCreateRoleTargetInputToFlatRoleTargetToCreate = ({
     apiKeyId: null,
     webhookId: null,
     webhookUniversalIdentifier,
-    targetApplicationId: null,
-    targetApplicationUniversalIdentifier: null,
     createdAt: now.toISOString(),
     updatedAt: now.toISOString(),
     universalIdentifier: universalIdentifier ?? v4(),

@@ -1,6 +1,7 @@
 import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
 import { labPublicFeatureFlagsState } from '@/client-config/states/labPublicFeatureFlagsState';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
+import { t } from '@lingui/core/macro';
 import { useState } from 'react';
 import { useAtomState } from '@/ui/utilities/state/jotai/hooks/useAtomState';
 import { isDefined } from 'twenty-shared/utils';
@@ -9,10 +10,8 @@ import {
   type FeatureFlagKey,
   UpdateLabPublicFeatureFlagDocument,
 } from '~/generated-metadata/graphql';
-import { useLingui } from '@lingui/react/macro';
 
 export const useLabPublicFeatureFlags = () => {
-  const { t } = useLingui();
   const [error, setError] = useState<string | null>(null);
   const [currentWorkspace, setCurrentWorkspace] = useAtomState(
     currentWorkspaceState,

@@ -1,4 +1,5 @@
 import { type EmailRecipientSuggestion } from '@/activities/emails/recipients/types/EmailRecipientSuggestion';
+import { t } from '@lingui/core/macro';
 import { isNonEmptyString } from '@sniptt/guards';
 import { CoreObjectNameSingular } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
@@ -15,7 +16,6 @@ import { useFindManyRecords } from '@/object-record/hooks/useFindManyRecords';
 import { useFindOneRecord } from '@/object-record/hooks/useFindOneRecord';
 import { useObjectRecordSearchRecords } from '@/object-record/hooks/useObjectRecordSearchRecords';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
-import { useLingui } from '@lingui/react/macro';
 
 type UseEmailRecipientSuggestionsArgs = {
   searchInput: string;
@@ -70,7 +70,6 @@ export const useEmailRecipientSuggestions = ({
   excludedRecipientKeys,
   contextRecord,
 }: UseEmailRecipientSuggestionsArgs) => {
-  const { t } = useLingui();
   const currentWorkspaceMembers = useAtomStateValue(
     currentWorkspaceMembersState,
   );

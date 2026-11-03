@@ -5,8 +5,6 @@ import { OverflowingTextWithTooltip } from 'twenty-ui/primitives/typography';
 import { themeCssVariables } from 'twenty-ui/theme';
 
 import { useResolvedAiModel } from '@/ai/hooks/useResolvedAiModel';
-import { getAiModelModeDescription } from '@/ai/utils/getAiModelModeDescription';
-import { isDefined } from 'twenty-shared/utils';
 
 const StyledContainer = styled.div`
   color: ${themeCssVariables.font.color.secondary};
@@ -26,13 +24,12 @@ export const CoreAgentModelCell = ({ modelId }: CoreAgentModelCellProps) => {
     modelId === AUTO_SELECT_WORKSPACE_DEFAULT_MODEL_ID
       ? t`Workspace default`
       : modelId;
-  const modelLabel = isDefined(resolvedModel)
-    ? getAiModelModeDescription({ model: resolvedModel, isPinned: true })
-    : fallbackLabel;
 
   return (
     <StyledContainer>
-      <OverflowingTextWithTooltip text={modelLabel} />
+      <OverflowingTextWithTooltip
+        text={resolvedModel?.label ?? fallbackLabel}
+      />
     </StyledContainer>
   );
 };

@@ -1,8 +1,9 @@
+import { t } from '@lingui/core/macro';
 import { useRef, useState } from 'react';
 
 import { css } from '@linaria/core';
 import { styled } from '@linaria/react';
-import { Trans, useLingui } from '@lingui/react/macro';
+import { Trans } from '@lingui/react/macro';
 import { isDefined } from 'twenty-shared/utils';
 import { IconTrash } from 'twenty-ui/icon';
 import { Tooltip } from 'twenty-ui/primitives/surfaces';
@@ -85,7 +86,6 @@ export const SettingsAiModelsTable = <TModel extends AiModelSummary>({
   showProviderColumn = true,
   anchorPrefix,
 }: SettingsAiModelsTableProps<TModel>) => {
-  const { t } = useLingui();
   const hoveredRowRef = useRef<HTMLDivElement>(null);
   const [hoveredModelId, setHoveredModelId] = useState<string | null>(null);
   const theme = useTheme();

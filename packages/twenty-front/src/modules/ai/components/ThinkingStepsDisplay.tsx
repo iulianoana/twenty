@@ -1,5 +1,5 @@
 import { styled } from '@linaria/react';
-import { plural } from '@lingui/core/macro';
+import { plural, t } from '@lingui/core/macro';
 import { useState } from 'react';
 import { Collapsible } from 'twenty-ui/primitives/layout';
 import { IconChevronRight, ThinkingOrbitLoaderIcon } from 'twenty-ui/icon';
@@ -14,7 +14,6 @@ import { getThinkingStepLabel } from '@/ai/utils/getThinkingStepLabel';
 import { isThinkingStepPartActive } from '@/ai/utils/isThinkingStepPartActive';
 import { type ThinkingStepPart } from '@/ai/types/ThinkingStepPart';
 import { formatRoundedDuration } from '~/utils/format/formatRoundedDuration';
-import { useLingui } from '@lingui/react/macro';
 
 const StyledContainer = styled.div`
   display: flex;
@@ -136,7 +135,6 @@ export const ThinkingStepsDisplay = ({
   isTrailingWhileStreaming?: boolean;
   workDurationMs?: number | null;
 }) => {
-  const { t } = useLingui();
   const [isExpanded, setIsExpanded] = useState(false);
   const displayContext = useToolDisplayContext();
 

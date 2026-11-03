@@ -7,7 +7,6 @@ export type BuiltInAccountApp = {
   id: 'google' | 'outlook' | 'imap';
   name: MessageDescriptor;
   description: MessageDescriptor;
-  connectTitle: MessageDescriptor;
   logo: string;
   coverImage: string;
   Icon: IconComponent;

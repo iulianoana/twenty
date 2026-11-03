@@ -135,6 +135,7 @@ export class FindRecordsWorkflowAction implements WorkflowAction {
       limit: resolveLimitInput(workflowActionInput.limit),
       offset: resolveOffsetInput(workflowActionInput.offset),
       authContext: executionContext.authContext,
+      rolePermissionConfig: executionContext.rolePermissionConfig,
       shouldBuildEffectiveSelectFields: false,
     });
 

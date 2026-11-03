@@ -4,6 +4,7 @@ import { type TrackedJobStatus } from '@/queue-job/types/TrackedJobStatus';
 import { isTerminalJobState } from '@/queue-job/utils/isTerminalJobState';
 import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
 import { useLazyQuery, useMutation, useQuery } from '@apollo/client/react';
+import { t } from '@lingui/core/macro';
 import { isNonEmptyString } from '@sniptt/guards';
 import { useCallback } from 'react';
 import { isDefined } from 'twenty-shared/utils';
@@ -13,7 +14,6 @@ import {
   JobState,
   TriggerUninstallApplicationDocument,
 } from '~/generated-metadata/graphql';
-import { useLingui } from '@lingui/react/macro';
 
 type UseUninstallApplicationArgs = {
   universalIdentifier?: string;
@@ -24,7 +24,6 @@ export const useUninstallApplication = ({
   universalIdentifier,
   onCompleted,
 }: UseUninstallApplicationArgs = {}) => {
-  const { t } = useLingui();
   const { enqueueToast } = useToast();
   const [triggerUninstallApplication, { loading: isTriggeringUninstall }] =
     useMutation(TriggerUninstallApplicationDocument);
@@ -87,7 +86,7 @@ export const useUninstallApplication = ({
       });
       onCompleted?.();
     },
-    [enqueueToast, onCompleted, setCurrentWorkspace, t],
+    [enqueueToast, onCompleted, setCurrentWorkspace],
   );
 
   const fetchUninstallJobStatus = useCallback(

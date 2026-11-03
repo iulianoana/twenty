@@ -18,9 +18,11 @@ export class AgentHistoryTransactionService {
         this.workspaceOrmManager.runInWorkspaceTransaction(
           (transactionScope) => {
             const getRepository = (name: AgentHistoryObjectName) =>
-              transactionScope.getRepositoryWithoutPermissionChecks(name, {
-                shouldSkipEventEmission: true,
-              });
+              transactionScope.getRepository(
+                name,
+                { shouldBypassPermissionChecks: true },
+                { shouldSkipEventEmission: true },
+              );
 
             return work({
               executeRawQuery: transactionScope.executeRawQuery,

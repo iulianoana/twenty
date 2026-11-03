@@ -1,4 +1,5 @@
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
 import { FieldActorSource } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 import {
@@ -10,7 +11,6 @@ import {
 } from 'twenty-ui/icon';
 import { OverflowingTextWithTooltip } from 'twenty-ui/primitives/typography';
 import { themeCssVariables, useTheme } from 'twenty-ui/theme';
-import { useLingui } from '@lingui/react/macro';
 
 const StyledContainer = styled.div`
   align-items: center;
@@ -37,7 +37,6 @@ export const CoreAgentRunSource = ({
   creatorSource,
   creatorName,
 }: CoreAgentRunSourceProps) => {
-  const { t } = useLingui();
   const theme = useTheme();
   const SourceIcon = SOURCE_ICONS[creatorSource];
 

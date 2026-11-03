@@ -10,23 +10,18 @@ export const listUnipileChats = async ({
   inboxId,
   cursor,
   limit,
-  deadlineAtMs,
 }: {
   accountId: string;
   inboxId: string;
   cursor?: string;
   limit: number;
-  deadlineAtMs?: number;
 }): Promise<UnipilePage<UnipileChat>> => {
-  const { data } = await requestUnipile(
-    'list inbox chats',
-    () =>
-      new UnipileMessaging().getInboxChatsList({
-        ...getUnipileRequestOptions(),
-        path: { account_id: accountId, inbox_id: inboxId },
-        query: { cursor, limit },
-      }),
-    { deadlineAtMs },
+  const { data } = await requestUnipile('list inbox chats', () =>
+    new UnipileMessaging().getInboxChatsList({
+      ...getUnipileRequestOptions(),
+      path: { account_id: accountId, inbox_id: inboxId },
+      query: { cursor, limit },
+    }),
   );
 
   return {

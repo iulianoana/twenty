@@ -102,10 +102,9 @@ export class TrashCleanupService {
     const authContext = buildSystemAuthContext(workspaceId);
 
     return this.workspaceOrmManager.executeInWorkspaceContext(async () => {
-      const repository =
-        this.workspaceOrmManager.getRepositoryWithoutPermissionChecks(
-          objectName,
-        );
+      const repository = this.workspaceOrmManager.getRepository(objectName, {
+        shouldBypassPermissionChecks: true,
+      });
 
       let deleted = 0;
 

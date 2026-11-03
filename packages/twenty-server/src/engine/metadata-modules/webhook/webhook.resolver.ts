@@ -1,14 +1,14 @@
 import { UseGuards, UseInterceptors, UseFilters } from '@nestjs/common';
 import { Args, Mutation, Parent, Query, ResolveField } from '@nestjs/graphql';
 
+import { PermissionFlagType } from 'twenty-shared/constants';
+
 import { UUIDScalarType } from 'src/engine/api/graphql/workspace-schema-builder/graphql-types/scalars';
 import { WorkspaceEntity } from 'src/engine/core-modules/workspace/workspace.entity';
 import { AuthWorkspace } from 'src/engine/decorators/auth/auth-workspace.decorator';
 import { MetadataResolver } from 'src/engine/api/graphql/graphql-config/decorators/metadata-resolver.decorator';
-import { AccessPolicyGuard } from 'src/engine/guards/access-policy.guard';
-import { WEBHOOK_DELETE_ACCESS_POLICY } from 'src/engine/metadata-modules/webhook/constants/webhook-delete-access-policy.constant';
-import { WEBHOOK_READ_ACCESS_POLICY } from 'src/engine/metadata-modules/webhook/constants/webhook-read-access-policy.constant';
-import { WEBHOOK_WRITE_ACCESS_POLICY } from 'src/engine/metadata-modules/webhook/constants/webhook-write-access-policy.constant';
+import { SettingsPermissionGuard } from 'src/engine/guards/settings-permission.guard';
+import { AuthPrincipalGuard } from 'src/engine/guards/auth-principal.guard';
 import { PermissionsGraphqlApiExceptionFilter } from 'src/engine/permissions/utils/permissions-graphql-api-exception.filter';
 import { RoleDTO } from 'src/engine/metadata-modules/role/dtos/role.dto';
 import { CreateWebhookInput } from 'src/engine/metadata-modules/webhook/dtos/create-webhook.input';
@@ -19,6 +19,19 @@ import { WebhookService } from 'src/engine/metadata-modules/webhook/webhook.serv
 import { WorkspaceMigrationGraphqlApiExceptionInterceptor } from 'src/engine/workspace-manager/workspace-migration/interceptors/workspace-migration-graphql-api-exception.interceptor';
 import { AuthGraphqlApiExceptionFilter } from 'src/engine/core-modules/auth/filters/auth-graphql-api-exception.filter';
 
+@UseGuards(
+  AuthPrincipalGuard({
+    userSession: {
+      standard: true,
+      impersonated: true,
+      playground: true,
+      workspaceAgnostic: false,
+    },
+    apiKey: true,
+    oauthClient: true,
+    application: true,
+  }),
+)
 @UseInterceptors(
   WorkspaceMigrationGraphqlApiExceptionInterceptor,
   WebhookGraphqlApiExceptionInterceptor,
@@ -29,7 +42,7 @@ export class WebhookResolver {
   constructor(private readonly webhookService: WebhookService) {}
 
   @Query(() => [WebhookDTO])
-  @UseGuards(AccessPolicyGuard(WEBHOOK_READ_ACCESS_POLICY))
+  @UseGuards(SettingsPermissionGuard(PermissionFlagType.API_KEYS_AND_WEBHOOKS))
   async webhooks(
     @AuthWorkspace() workspace: WorkspaceEntity,
   ): Promise<WebhookDTO[]> {
@@ -37,7 +50,7 @@ export class WebhookResolver {
   }
 
   @Query(() => WebhookDTO, { nullable: true })
-  @UseGuards(AccessPolicyGuard(WEBHOOK_READ_ACCESS_POLICY))
+  @UseGuards(SettingsPermissionGuard(PermissionFlagType.API_KEYS_AND_WEBHOOKS))
   async webhook(
     @Args('id', { type: () => UUIDScalarType }) id: string,
     @AuthWorkspace() workspace: WorkspaceEntity,
@@ -46,7 +59,12 @@ export class WebhookResolver {
   }
 
   @Mutation(() => WebhookDTO)
-  @UseGuards(AccessPolicyGuard(WEBHOOK_WRITE_ACCESS_POLICY))
+  @UseGuards(
+    SettingsPermissionGuard([
+      PermissionFlagType.API_KEYS_AND_WEBHOOKS,
+      PermissionFlagType.ROLES,
+    ]),
+  )
   async createWebhook(
     @Args('input') input: CreateWebhookInput,
     @AuthWorkspace() workspace: WorkspaceEntity,
@@ -58,7 +76,12 @@ export class WebhookResolver {
   }
 
   @Mutation(() => WebhookDTO)
-  @UseGuards(AccessPolicyGuard(WEBHOOK_WRITE_ACCESS_POLICY))
+  @UseGuards(
+    SettingsPermissionGuard([
+      PermissionFlagType.API_KEYS_AND_WEBHOOKS,
+      PermissionFlagType.ROLES,
+    ]),
+  )
   async updateWebhook(
     @Args('input') input: UpdateWebhookInput,
     @AuthWorkspace() workspace: WorkspaceEntity,
@@ -70,7 +93,7 @@ export class WebhookResolver {
   }
 
   @Mutation(() => WebhookDTO)
-  @UseGuards(AccessPolicyGuard(WEBHOOK_DELETE_ACCESS_POLICY))
+  @UseGuards(SettingsPermissionGuard(PermissionFlagType.API_KEYS_AND_WEBHOOKS))
   async deleteWebhook(
     @Args('id', { type: () => UUIDScalarType }) id: string,
     @AuthWorkspace() workspace: WorkspaceEntity,

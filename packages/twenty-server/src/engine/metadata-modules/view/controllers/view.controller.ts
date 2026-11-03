@@ -26,6 +26,8 @@ import { AuthUserWorkspaceId } from 'src/engine/decorators/auth/auth-user-worksp
 import { AuthWorkspace } from 'src/engine/decorators/auth/auth-workspace.decorator';
 import { RequestLocale } from 'src/engine/decorators/locale/request-locale.decorator';
 import { CustomPermissionGuard } from 'src/engine/guards/custom-permission.guard';
+import { NoPermissionGuard } from 'src/engine/guards/no-permission.guard';
+import { AuthPrincipalGuard } from 'src/engine/guards/auth-principal.guard';
 import { WorkspaceManyOrAllFlatEntityMapsCacheService } from 'src/engine/metadata-modules/flat-entity/services/workspace-many-or-all-flat-entity-maps-cache.service';
 import { findFlatEntityByIdInFlatEntityMaps } from 'src/engine/metadata-modules/flat-entity/utils/find-flat-entity-by-id-in-flat-entity-maps.util';
 import { ApplicationTranslationCatalogService } from 'src/engine/metadata-modules/application-translation-catalog/services/application-translation-catalog.service';
@@ -50,11 +52,21 @@ import { WorkspaceMigrationRunnerRestApiExceptionFilter } from 'src/engine/works
 import { ViewPermissionGuard } from 'src/engine/permissions/view/guards/view-permission.guard';
 import { CreateViewPermissionGuard } from 'src/engine/permissions/view/guards/create-view-permission.guard';
 import { AuthRestApiExceptionFilter } from 'src/engine/core-modules/auth/filters/auth-rest-api-exception.filter';
-import { VIEW_READ_ACCESS_POLICY } from 'src/engine/metadata-modules/view/constants/view-read-access-policy.constant';
-import { VIEW_WRITE_BY_VISIBILITY_ACCESS_POLICY } from 'src/engine/metadata-modules/view/constants/view-write-by-visibility-access-policy.constant';
-import { AccessPolicyGuard } from 'src/engine/guards/access-policy.guard';
 
 @Controller(`${ApiPath.Rest}/metadata/views`)
+@UseGuards(
+  AuthPrincipalGuard({
+    userSession: {
+      standard: true,
+      impersonated: true,
+      playground: true,
+      workspaceAgnostic: false,
+    },
+    apiKey: true,
+    oauthClient: true,
+    application: true,
+  }),
+)
 @UseFilters(
   PermissionsRestApiExceptionFilter,
   ViewRestApiExceptionFilter,
@@ -70,7 +82,7 @@ export class ViewController {
   ) {}
 
   @Get()
-  @UseGuards(AccessPolicyGuard(VIEW_READ_ACCESS_POLICY), CustomPermissionGuard)
+  @UseGuards(CustomPermissionGuard)
   async findMany(
     @Req() request: AuthenticatedRequest,
     @RequestLocale() locale: keyof typeof APP_LOCALES | undefined,
@@ -98,7 +110,7 @@ export class ViewController {
   }
 
   @Get(':id')
-  @UseGuards(AccessPolicyGuard(VIEW_READ_ACCESS_POLICY))
+  @UseGuards(NoPermissionGuard)
   async findOne(
     @Param('id') id: string,
     @RequestLocale() locale: keyof typeof APP_LOCALES | undefined,
@@ -131,10 +143,7 @@ export class ViewController {
   }
 
   @Post()
-  @UseGuards(
-    AccessPolicyGuard(VIEW_WRITE_BY_VISIBILITY_ACCESS_POLICY),
-    CreateViewPermissionGuard,
-  )
+  @UseGuards(CreateViewPermissionGuard)
   async create(
     @Body() input: CreateViewInput,
     @AuthWorkspace() workspace: WorkspaceEntity,
@@ -155,10 +164,7 @@ export class ViewController {
   }
 
   @Patch(':id')
-  @UseGuards(
-    AccessPolicyGuard(VIEW_WRITE_BY_VISIBILITY_ACCESS_POLICY),
-    ViewPermissionGuard,
-  )
+  @UseGuards(ViewPermissionGuard)
   @UsePipes(new ValidationPipe())
   async update(
     @Param('id') id: string,
@@ -187,10 +193,7 @@ export class ViewController {
   }
 
   @Delete(':id')
-  @UseGuards(
-    AccessPolicyGuard(VIEW_WRITE_BY_VISIBILITY_ACCESS_POLICY),
-    ViewPermissionGuard,
-  )
+  @UseGuards(ViewPermissionGuard)
   async delete(
     @Param('id') id: string,
     @AuthWorkspace() workspace: WorkspaceEntity,

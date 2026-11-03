@@ -90,8 +90,9 @@ export class TimelineActivityRepository {
     linkedRecordIds,
   }: LinkedTimelineActivityHappensAtSyncUpdate) {
     const sourceRepository =
-      this.workspaceOrmManager.getRepositoryWithoutPermissionChecks<ObjectLiteral>(
+      this.workspaceOrmManager.getRepository<ObjectLiteral>(
         sourceObjectNameSingular,
+        { shouldBypassPermissionChecks: true },
       );
 
     // Queue retries can replay an older event, so read the value from the source row rather than the event snapshot
@@ -118,8 +119,9 @@ export class TimelineActivityRepository {
     }
 
     const timelineActivityRepository =
-      this.workspaceOrmManager.getRepositoryWithoutPermissionChecks<ObjectLiteral>(
+      this.workspaceOrmManager.getRepository<ObjectLiteral>(
         'timelineActivity',
+        { shouldBypassPermissionChecks: true },
       );
 
     const timelineActivities = await timelineActivityRepository.find({
@@ -171,9 +173,9 @@ export class TimelineActivityRepository {
           });
 
           const timelineActivityRepository =
-            transactionScope.getRepositoryWithoutPermissionChecks<ObjectLiteral>(
-              'timelineActivity',
-            );
+            transactionScope.getRepository<ObjectLiteral>('timelineActivity', {
+              shouldBypassPermissionChecks: true,
+            });
 
           const recentTimelineActivities =
             await this.findRecentTimelineActivities({
@@ -296,10 +298,10 @@ export class TimelineActivityRepository {
       return payloads;
     }
 
-    const targetRepository =
-      transactionScope.getRepositoryWithoutPermissionChecks<ObjectLiteral>(
-        objectSingularName,
-      );
+    const targetRepository = transactionScope.getRepository<ObjectLiteral>(
+      objectSingularName,
+      { shouldBypassPermissionChecks: true },
+    );
 
     const existingRecords = await targetRepository.find({
       select: ['id'],

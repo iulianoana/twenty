@@ -33,14 +33,11 @@ const buildTimelineActivityRepository = (
       callback(),
     runInWorkspaceTransaction: async (
       callback: (transactionScope: {
-        getRepositoryWithoutPermissionChecks: () => typeof workspaceRepository;
+        getRepository: () => typeof workspaceRepository;
         executeRawQuery: typeof executeRawQuery;
       }) => Promise<void>,
     ) =>
-      callback({
-        getRepositoryWithoutPermissionChecks: () => workspaceRepository,
-        executeRawQuery,
-      }),
+      callback({ getRepository: () => workspaceRepository, executeRawQuery }),
   } as unknown as WorkspaceOrmManager;
 
   return {

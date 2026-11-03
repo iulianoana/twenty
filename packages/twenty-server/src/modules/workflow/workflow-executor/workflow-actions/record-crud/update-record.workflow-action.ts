@@ -127,6 +127,7 @@ export class UpdateRecordWorkflowAction implements WorkflowAction {
       fieldsToUpdate: filteredFieldsToUpdate,
       authContext: executionContext.authContext,
       updatedBy,
+      rolePermissionConfig: executionContext.rolePermissionConfig,
     });
 
     if (!toolOutput.success) {

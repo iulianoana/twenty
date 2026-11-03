@@ -9,9 +9,11 @@ import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/use
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { flowComponentState } from '@/workflow/states/flowComponentState';
 import { useWorkflowWithCurrentVersion } from '@/workflow/hooks/useWorkflowWithCurrentVersion';
+import { getAgentIdFromStep } from '@/workflow/utils/getAgentIdFromStep';
 import { getStepDefinitionOrThrow } from '@/workflow/utils/getStepDefinitionOrThrow';
 import { getWorkflowStepDisplayName } from '@/workflow/utils/getWorkflowStepDisplayName';
 import { getWorkflowVisualizerComponentInstanceId } from '@/workflow/utils/getWorkflowVisualizerComponentInstanceId';
+import { useUpdateAgentLabel } from '@/workflow/workflow-steps/hooks/useUpdateAgentLabel';
 import { useUpdateStep } from '@/workflow/workflow-steps/hooks/useUpdateStep';
 import { useUpdateTrigger } from '@/workflow/workflow-trigger/hooks/useUpdateTrigger';
 import { useWorkflowVersionContent } from '@/workflow/workflow-version/hooks/useWorkflowVersionContent';
@@ -20,6 +22,7 @@ import { getActionIcon } from '@/workflow/workflow-steps/workflow-actions/utils/
 import { getActionIconColorOrThrow } from '@/workflow/workflow-steps/workflow-actions/utils/getActionIconColorOrThrow';
 import { getTriggerIcon } from '@/workflow/workflow-trigger/utils/getTriggerIcon';
 import { getTriggerIconColor } from '@/workflow/workflow-trigger/utils/getTriggerIconColor';
+import { t } from '@lingui/core/macro';
 import { useState } from 'react';
 import { SidePanelPages } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
@@ -27,14 +30,12 @@ import { TRIGGER_STEP_ID } from 'twenty-shared/workflow';
 import { useIcons } from 'twenty-ui/icon/provider';
 import { HeaderIdentifier } from '@/ui/layout/page/components/HeaderIdentifier';
 import { useTheme } from 'twenty-ui/theme';
-import { useLingui } from '@lingui/react/macro';
 
 export const SidePanelWorkflowStepInfo = ({
   sidePanelPageInstanceId,
 }: {
   sidePanelPageInstanceId: string;
 }) => {
-  const { t } = useLingui();
   const theme = useTheme();
   const { getIcon } = useIcons();
 
@@ -93,6 +94,8 @@ export const SidePanelWorkflowStepInfo = ({
   const thirdPartyApplicationInformation =
     useLogicFunctionThirdPartyApplicationInformation(logicFunctionId);
 
+  const agentId = getAgentIdFromStep(stepDefinition);
+  const { updateAgentLabel } = useUpdateAgentLabel(agentId);
   const stepName =
     isDefined(stepDefinition) && isDefined(stepDefinition.definition)
       ? isTrigger
@@ -154,7 +157,7 @@ export const SidePanelWorkflowStepInfo = ({
 
   const Icon = getIcon(headerIcon ?? 'IconDefault');
 
-  const saveTitle = () => {
+  const saveTitle = async () => {
     if (!isDefined(workflowVersionId) || !isDefined(workflowId)) {
       return;
     }
@@ -174,6 +177,10 @@ export const SidePanelWorkflowStepInfo = ({
         ...stepDefinition.definition,
         name: title,
       });
+
+      if (isDefined(agentId)) {
+        await updateAgentLabel(title);
+      }
     }
   };
 

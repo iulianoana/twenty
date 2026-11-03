@@ -69,9 +69,11 @@ export class MessageCampaignDeliveryService {
 
     await this.workspaceOrmManager.executeInWorkspaceContext(async () => {
       const isStillClaimable = await this.workspaceOrmManager
-        .getRepositoryWithoutPermissionChecks(CampaignDeliveryWorkspaceEntity, {
-          shouldSkipEventEmission: true,
-        })
+        .getRepository(
+          CampaignDeliveryWorkspaceEntity,
+          { shouldBypassPermissionChecks: true },
+          { shouldSkipEventEmission: true },
+        )
         .existsBy({
           id: data.messageId,
           state: In(CLAIMABLE_CAMPAIGN_DELIVERY_STATES),
@@ -107,11 +109,11 @@ export class MessageCampaignDeliveryService {
         return;
       }
 
-      const messageRepository =
-        this.workspaceOrmManager.getRepositoryWithoutPermissionChecks(
-          MessageWorkspaceEntity,
-          { shouldSkipEventEmission: true },
-        );
+      const messageRepository = this.workspaceOrmManager.getRepository(
+        MessageWorkspaceEntity,
+        { shouldBypassPermissionChecks: true },
+        { shouldSkipEventEmission: true },
+      );
 
       const sendContext = await this.loadSendContext({ data, campaign });
 
@@ -189,9 +191,11 @@ export class MessageCampaignDeliveryService {
     messageId: string;
   }): Promise<void> {
     const { generatedMaps: failedDeliveries } = await this.workspaceOrmManager
-      .getRepositoryWithoutPermissionChecks(CampaignDeliveryWorkspaceEntity, {
-        shouldSkipEventEmission: true,
-      })
+      .getRepository(
+        CampaignDeliveryWorkspaceEntity,
+        { shouldBypassPermissionChecks: true },
+        { shouldSkipEventEmission: true },
+      )
       .update(
         { id: messageId, state: In(CLAIMABLE_CAMPAIGN_DELIVERY_STATES) },
         {
@@ -221,10 +225,10 @@ export class MessageCampaignDeliveryService {
   }): Promise<SendContext | null> {
     const { campaignId, messageId, personId } = data;
 
-    const campaignRepository =
-      this.workspaceOrmManager.getRepositoryWithoutPermissionChecks(
-        MessageCampaignWorkspaceEntity,
-      );
+    const campaignRepository = this.workspaceOrmManager.getRepository(
+      MessageCampaignWorkspaceEntity,
+      { shouldBypassPermissionChecks: true },
+    );
 
     const claimToken = await this.claimDeliveryForSending({
       messageId,
@@ -252,10 +256,10 @@ export class MessageCampaignDeliveryService {
       return null;
     }
 
-    const personRepository =
-      this.workspaceOrmManager.getRepositoryWithoutPermissionChecks(
-        PersonWorkspaceEntity,
-      );
+    const personRepository = this.workspaceOrmManager.getRepository(
+      PersonWorkspaceEntity,
+      { shouldBypassPermissionChecks: true },
+    );
 
     return {
       campaign,
@@ -389,11 +393,11 @@ export class MessageCampaignDeliveryService {
     messageId: string;
     providerMessageId: string;
   }): Promise<void> {
-    const associationRepository =
-      this.workspaceOrmManager.getRepositoryWithoutPermissionChecks(
-        MessageChannelMessageAssociationWorkspaceEntity,
-        { shouldSkipEventEmission: true },
-      );
+    const associationRepository = this.workspaceOrmManager.getRepository(
+      MessageChannelMessageAssociationWorkspaceEntity,
+      { shouldBypassPermissionChecks: true },
+      { shouldSkipEventEmission: true },
+    );
 
     await associationRepository.update(
       { messageId },
@@ -477,9 +481,11 @@ export class MessageCampaignDeliveryService {
     const claimToken = v4();
 
     const { generatedMaps: claimedDeliveries } = await this.workspaceOrmManager
-      .getRepositoryWithoutPermissionChecks(CampaignDeliveryWorkspaceEntity, {
-        shouldSkipEventEmission: true,
-      })
+      .getRepository(
+        CampaignDeliveryWorkspaceEntity,
+        { shouldBypassPermissionChecks: true },
+        { shouldSkipEventEmission: true },
+      )
       .update(
         { id: messageId, state: In(CLAIMABLE_CAMPAIGN_DELIVERY_STATES) },
         {
@@ -511,9 +517,11 @@ export class MessageCampaignDeliveryService {
     >;
   }): Promise<number> {
     const { generatedMaps: settledDeliveries } = await this.workspaceOrmManager
-      .getRepositoryWithoutPermissionChecks(CampaignDeliveryWorkspaceEntity, {
-        shouldSkipEventEmission: true,
-      })
+      .getRepository(
+        CampaignDeliveryWorkspaceEntity,
+        { shouldBypassPermissionChecks: true },
+        { shouldSkipEventEmission: true },
+      )
       .update(
         { id: messageId, claimToken },
         { ...update, claimToken: null, claimExpiresAt: null },

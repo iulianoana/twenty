@@ -1,5 +1,6 @@
 import { isDefined } from 'twenty-shared/utils';
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
 import { useLingui } from '@lingui/react/macro';
 import { LightButton } from 'twenty-ui/components/input';
 import { Button } from 'twenty-ui/primitives/input';
@@ -63,7 +64,6 @@ type AiChatSuggestedPromptsProps = {
 export const AiChatSuggestedPrompts = ({
   isCentered = false,
 }: AiChatSuggestedPromptsProps) => {
-  const { t } = useLingui();
   const { t: resolveMessage } = useLingui();
   const { stageAiChatPreprompt } = useStageAiChatPreprompt();
   const aiChatSuggestedPromptsContext = useAiChatSuggestedPromptsContext();

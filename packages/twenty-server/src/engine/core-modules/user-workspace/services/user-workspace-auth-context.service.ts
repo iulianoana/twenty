@@ -1,4 +1,3 @@
-import { isOAuthOnlyApplication } from 'src/engine/core-modules/application/utils/is-oauth-only-application.util';
 import { workspaceAuthContextStorage } from 'src/engine/core-modules/auth/storage/workspace-auth-context.storage';
 import { isUserAuthContext } from 'src/engine/core-modules/auth/guards/is-user-auth-context.guard';
 import { isNonEmptyString } from '@sniptt/guards';
@@ -145,12 +144,7 @@ export class UserWorkspaceAuthContextService {
           'flatApplicationMaps',
         ]);
       application = flatApplicationMaps.byId[applicationId];
-      // OAuth-only applications have no role and act with the member's role
-      if (
-        !isDefined(application) ||
-        (!isDefined(application.defaultRoleId) &&
-          !isOAuthOnlyApplication(application))
-      ) {
+      if (!isDefined(application) || !isDefined(application.defaultRoleId)) {
         throw new AuthException(
           'Application no longer has access',
           AuthExceptionCode.UNAUTHENTICATED,
@@ -173,11 +167,11 @@ export class UserWorkspaceAuthContextService {
     return buildUserAuthContext({
       workspace,
       application,
+      viaApplication: matchingUserContext?.viaApplication,
       userWorkspaceId,
       user: fromUserEntityToFlat(userWorkspace.user),
       workspaceMemberId,
       workspaceMember,
-      userSessionVariant: matchingUserContext?.userSessionVariant ?? 'standard',
     });
   }
 }

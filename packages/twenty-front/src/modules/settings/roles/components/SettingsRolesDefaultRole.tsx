@@ -6,6 +6,7 @@ import { SettingsOptionCardContentSelect } from '@/settings/components/SettingsO
 import { type RoleWithPartialMembers } from '@/settings/roles/types/RoleWithPartialMembers';
 import { Select } from '@/ui/input/components/Select';
 import { useAtomState } from '@/ui/utilities/state/jotai/hooks/useAtomState';
+import { t } from '@lingui/core/macro';
 import { isDefined } from 'twenty-shared/utils';
 import { Section } from 'twenty-ui/components/layout';
 import { IconUserPin } from 'twenty-ui/icon';
@@ -16,7 +17,6 @@ import {
   type UpdateWorkspaceMutation,
   UpdateWorkspaceDocument,
 } from '~/generated-metadata/graphql';
-import { useLingui } from '@lingui/react/macro';
 
 type SettingsRoleDefaultRoleProps = {
   roles: RoleWithPartialMembers[];
@@ -25,7 +25,6 @@ type SettingsRoleDefaultRoleProps = {
 export const SettingsRoleDefaultRole = ({
   roles,
 }: SettingsRoleDefaultRoleProps) => {
-  const { t } = useLingui();
   const [updateWorkspace] = useMutation(UpdateWorkspaceDocument);
 
   const [currentWorkspace, setCurrentWorkspace] = useAtomState(

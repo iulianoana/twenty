@@ -1,8 +1,8 @@
 import { isNonEmptyString } from '@sniptt/guards';
 import { CoreApiClient } from 'twenty-client-sdk/core';
 
-import { buildPersonNameFilter } from 'src/logic-functions/utils/build-person-name-filter.util';
 import { UNLINKED_PERSON_FILTER } from 'src/logic-functions/utils/unlinked-person-filter.constant';
+import { escapeSqlLikePattern } from 'src/logic-functions/utils/escape-sql-like-pattern.util';
 import { type LinkedinPersonRecord } from 'src/types/linkedin-person-record.type';
 
 export const findUnlinkedPersonIdsByName = async ({
@@ -21,7 +21,12 @@ export const findUnlinkedPersonIdsByName = async ({
       __args: {
         filter: {
           and: [
-            buildPersonNameFilter({ firstName, lastName }),
+            {
+              name: {
+                firstName: { ilike: escapeSqlLikePattern(firstName) },
+                lastName: { ilike: escapeSqlLikePattern(lastName) },
+              },
+            },
             UNLINKED_PERSON_FILTER,
           ],
         },

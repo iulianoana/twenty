@@ -11,5 +11,4 @@ export type MetadataOperation<T extends Record<string, unknown>> =
   | {
       type: 'delete';
       deletedRecordId: string;
-      deletedRecord?: T;
     };

@@ -11,6 +11,8 @@ import {
   UseFilters,
   UseGuards,
 } from '@nestjs/common';
+
+import { PermissionFlagType } from 'twenty-shared/constants';
 import { type APP_LOCALES } from 'twenty-shared/translations';
 import { ApiPath, PageLayoutType } from 'twenty-shared/types';
 
@@ -19,6 +21,9 @@ import { parseMetadataRestPagination } from 'src/engine/api/rest/metadata/utils/
 import { type AuthenticatedRequest } from 'src/engine/api/rest/types/authenticated-request.type';
 import { AuthWorkspace } from 'src/engine/decorators/auth/auth-workspace.decorator';
 import { RequestLocale } from 'src/engine/decorators/locale/request-locale.decorator';
+import { NoPermissionGuard } from 'src/engine/guards/no-permission.guard';
+import { SettingsPermissionGuard } from 'src/engine/guards/settings-permission.guard';
+import { AuthPrincipalGuard } from 'src/engine/guards/auth-principal.guard';
 import { FlatEntityMapsRestApiExceptionFilter } from 'src/engine/metadata-modules/flat-entity/filters/flat-entity-maps-rest-api-exception.filter';
 import { CreatePageLayoutInput } from 'src/engine/metadata-modules/page-layout/dtos/inputs/create-page-layout.input';
 import { UpdatePageLayoutInput } from 'src/engine/metadata-modules/page-layout/dtos/inputs/update-page-layout.input';
@@ -29,11 +34,21 @@ import { PermissionsRestApiExceptionFilter } from 'src/engine/permissions/utils/
 import { ApplicationTranslationCatalogService } from 'src/engine/metadata-modules/application-translation-catalog/services/application-translation-catalog.service';
 import { WorkspaceMigrationRunnerRestApiExceptionFilter } from 'src/engine/workspace-manager/workspace-migration/filters/workspace-migration-runner-rest-api-exception.filter';
 import { AuthRestApiExceptionFilter } from 'src/engine/core-modules/auth/filters/auth-rest-api-exception.filter';
-import { PAGE_LAYOUT_READ_ACCESS_POLICY } from 'src/engine/metadata-modules/page-layout/constants/page-layout-read-access-policy.constant';
-import { PAGE_LAYOUT_WRITE_ACCESS_POLICY } from 'src/engine/metadata-modules/page-layout/constants/page-layout-write-access-policy.constant';
-import { AccessPolicyGuard } from 'src/engine/guards/access-policy.guard';
 
 @Controller(`${ApiPath.Rest}/metadata/pageLayouts`)
+@UseGuards(
+  AuthPrincipalGuard({
+    userSession: {
+      standard: true,
+      impersonated: true,
+      playground: true,
+      workspaceAgnostic: false,
+    },
+    apiKey: true,
+    oauthClient: true,
+    application: true,
+  }),
+)
 @UseFilters(
   PermissionsRestApiExceptionFilter,
   PageLayoutRestApiExceptionFilter,
@@ -48,7 +63,7 @@ export class PageLayoutController {
   ) {}
 
   @Get()
-  @UseGuards(AccessPolicyGuard(PAGE_LAYOUT_READ_ACCESS_POLICY))
+  @UseGuards(NoPermissionGuard)
   async findMany(
     @Req() request: AuthenticatedRequest,
     @RequestLocale() locale: keyof typeof APP_LOCALES | undefined,
@@ -78,7 +93,7 @@ export class PageLayoutController {
   }
 
   @Get(':id')
-  @UseGuards(AccessPolicyGuard(PAGE_LAYOUT_READ_ACCESS_POLICY))
+  @UseGuards(NoPermissionGuard)
   async findOne(
     @Param('id') id: string,
     @RequestLocale() locale: keyof typeof APP_LOCALES | undefined,
@@ -103,7 +118,7 @@ export class PageLayoutController {
   }
 
   @Post()
-  @UseGuards(AccessPolicyGuard(PAGE_LAYOUT_WRITE_ACCESS_POLICY))
+  @UseGuards(SettingsPermissionGuard(PermissionFlagType.LAYOUTS))
   async create(
     @Body() input: CreatePageLayoutInput,
     @AuthWorkspace() workspace: WorkspaceEntity,
@@ -115,7 +130,7 @@ export class PageLayoutController {
   }
 
   @Patch(':id')
-  @UseGuards(AccessPolicyGuard(PAGE_LAYOUT_WRITE_ACCESS_POLICY))
+  @UseGuards(SettingsPermissionGuard(PermissionFlagType.LAYOUTS))
   async update(
     @Param('id') id: string,
     @Body() input: UpdatePageLayoutInput,
@@ -131,7 +146,7 @@ export class PageLayoutController {
   }
 
   @Delete(':id')
-  @UseGuards(AccessPolicyGuard(PAGE_LAYOUT_WRITE_ACCESS_POLICY))
+  @UseGuards(SettingsPermissionGuard(PermissionFlagType.LAYOUTS))
   async destroy(
     @Param('id') id: string,
     @AuthWorkspace() workspace: WorkspaceEntity,

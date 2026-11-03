@@ -27,8 +27,9 @@ export class NotePostQueryHookService {
 
     await this.workspaceOrmManager.executeInWorkspaceContext(async () => {
       const noteTargetRepository =
-        this.workspaceOrmManager.getRepositoryWithoutPermissionChecks<NoteTargetWorkspaceEntity>(
+        this.workspaceOrmManager.getRepository<NoteTargetWorkspaceEntity>(
           'noteTarget',
+          { shouldBypassPermissionChecks: true },
         );
 
       await noteTargetRepository.softDelete({
@@ -51,8 +52,9 @@ export class NotePostQueryHookService {
 
     await this.workspaceOrmManager.executeInWorkspaceContext(async () => {
       const noteTargetRepository =
-        this.workspaceOrmManager.getRepositoryWithoutPermissionChecks<NoteTargetWorkspaceEntity>(
+        this.workspaceOrmManager.getRepository<NoteTargetWorkspaceEntity>(
           'noteTarget',
+          { shouldBypassPermissionChecks: true },
         );
 
       await noteTargetRepository.restore({

@@ -4,21 +4,20 @@ import { LINKEDIN_PLAN_HISTORY_IMPORT_UNIVERSAL_IDENTIFIER } from 'src/constants
 import { getLinkedinPlanHistoryImportJobId } from 'src/logic-functions/utils/get-linkedin-history-import-job-id.util';
 import { saveLinkedinHistoryImportState } from 'src/logic-functions/utils/save-linkedin-history-import-state.util';
 import { type LinkedinHistoryImportState } from 'src/types/linkedin-history-import-state.type';
-import { type LinkedinSettings } from 'src/types/linkedin-settings.type';
+import { type LinkedinImportPolicy } from 'src/types/linkedin-import-policy.type';
 
 const LINKEDIN_PLAN_HISTORY_IMPORT_RETRY_LIMIT = 3;
 
 export const startLinkedinHistoryImport = async ({
   connectedAccountId,
-  settings,
+  importPolicy,
 }: {
   connectedAccountId: string;
-  settings: Pick<LinkedinSettings, 'importPolicy' | 'historyConversationLimit'>;
+  importPolicy: LinkedinImportPolicy;
 }): Promise<LinkedinHistoryImportState> => {
   const state: LinkedinHistoryImportState = {
     runId: crypto.randomUUID(),
-    importPolicy: settings.importPolicy,
-    conversationLimit: settings.historyConversationLimit,
+    importPolicy,
     status: 'IMPORTING',
     importedConversationCount: 0,
     processedConversationCount: 0,

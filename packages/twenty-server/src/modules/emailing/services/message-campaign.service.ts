@@ -46,6 +46,7 @@ import { collectCampaignVariableNamesFromTemplatesOrThrow } from 'src/modules/em
 import { renderCampaignEmail } from 'src/modules/emailing/utils/render-campaign-email.util';
 import { sendableCampaignSchema } from 'src/modules/emailing/zod-schemas/sendable-campaign.zod-schema';
 import { getDomainFromEmail } from 'src/utils/get-domain-from-email';
+import { buildEmailingRolePermissionConfig } from 'src/modules/emailing/utils/build-emailing-role-permission-config.util';
 
 type SendableCampaign = z.infer<typeof sendableCampaignSchema>;
 
@@ -113,10 +114,16 @@ export class MessageCampaignService {
     scheduledAt?: Date;
     locale?: keyof typeof APP_LOCALES;
   }): Promise<PreviewMessageCampaignSendOutputDTO> {
+    const roleId = await this.userRoleService.getRoleIdForUserWorkspace({
+      workspaceId,
+      userWorkspaceId,
+    });
+
     const checkFailure = await this.checkCampaignSendOrThrow({
       workspaceId,
       userWorkspaceId,
       campaignId,
+      roleId,
       requestedScheduledAt: scheduledAt,
     })
       .then(() => null)
@@ -130,7 +137,9 @@ export class MessageCampaignService {
 
     const audience = await this.previewCampaignAudienceOrNull({
       workspaceId,
+      userWorkspaceId,
       campaignId,
+      roleId,
     });
 
     const sendBlocker =
@@ -189,6 +198,7 @@ export class MessageCampaignService {
       workspaceId,
       userWorkspaceId,
       campaignId,
+      roleId,
       requestedScheduledAt,
     });
 
@@ -224,11 +234,13 @@ export class MessageCampaignService {
     workspaceId,
     userWorkspaceId,
     campaignId,
+    roleId,
     requestedScheduledAt,
   }: {
     workspaceId: string;
     userWorkspaceId: string;
     campaignId: string;
+    roleId: string;
     requestedScheduledAt?: Date;
   }) {
     if (
@@ -247,6 +259,7 @@ export class MessageCampaignService {
           await this.findSendableCampaignOrThrow({
             workspaceId,
             campaignId,
+            roleId,
           });
 
         return {
@@ -267,6 +280,7 @@ export class MessageCampaignService {
       await this.messageCampaignAudienceService.resolveNormalizedAudience({
         workspaceId,
         listId,
+        roleId,
         unsubscribeTopicId: unsubscribeTopicId ?? undefined,
       });
 
@@ -379,10 +393,18 @@ export class MessageCampaignService {
     campaignId: string;
     toAddress: string;
   }): Promise<EmailingDomainSendEmailResult> {
+    const roleId = await this.userRoleService.getRoleIdForUserWorkspace({
+      workspaceId,
+      userWorkspaceId,
+    });
+
     const campaign = await this.workspaceOrmManager.executeInWorkspaceContext(
       () =>
         this.workspaceOrmManager
-          .getRepository(MessageCampaignWorkspaceEntity)
+          .getRepository(
+            MessageCampaignWorkspaceEntity,
+            buildEmailingRolePermissionConfig(roleId),
+          )
           .findOne({ where: { id: campaignId } }),
     );
 
@@ -555,15 +577,22 @@ export class MessageCampaignService {
 
   private async previewCampaignAudienceOrNull({
     workspaceId,
+    userWorkspaceId,
     campaignId,
+    roleId,
   }: {
     workspaceId: string;
+    userWorkspaceId: string;
     campaignId: string;
+    roleId: string;
   }) {
     const campaign = await this.workspaceOrmManager.executeInWorkspaceContext(
       () =>
         this.workspaceOrmManager
-          .getRepository(MessageCampaignWorkspaceEntity)
+          .getRepository(
+            MessageCampaignWorkspaceEntity,
+            buildEmailingRolePermissionConfig(roleId),
+          )
           .findOne({ where: { id: campaignId }, relations: { list: true } }),
     );
 
@@ -577,6 +606,7 @@ export class MessageCampaignService {
 
     return this.messageCampaignAudienceService.previewAudience({
       workspaceId,
+      userWorkspaceId,
       listId: campaign.list.id,
       unsubscribeTopicId: campaign.unsubscribeTopicId ?? undefined,
     });
@@ -585,12 +615,15 @@ export class MessageCampaignService {
   private async findSendableCampaignOrThrow({
     workspaceId,
     campaignId,
+    roleId,
   }: {
     workspaceId: string;
     campaignId: string;
+    roleId: string;
   }): Promise<SendableCampaign> {
     const campaignRepository = this.workspaceOrmManager.getRepository(
       MessageCampaignWorkspaceEntity,
+      buildEmailingRolePermissionConfig(roleId),
     );
 
     const campaign = await campaignRepository.findOne({

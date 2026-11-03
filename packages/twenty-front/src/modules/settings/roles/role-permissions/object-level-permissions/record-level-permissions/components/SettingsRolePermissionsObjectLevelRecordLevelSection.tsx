@@ -1,6 +1,7 @@
 /* @license Enterprise */
 
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
 import { Section } from 'twenty-ui/components/layout';
 import { IconArrowUp, IconLock } from 'twenty-ui/icon';
 import { Card } from 'twenty-ui/primitives/surfaces';
@@ -15,7 +16,6 @@ import { Button } from 'twenty-ui/primitives/input';
 import { themeCssVariables } from 'twenty-ui/theme';
 import { useNavigateSettings } from '~/hooks/useNavigateSettings';
 import { OrganizationAdornment } from '@/settings/enterprise/components/OrganizationAdornment';
-import { useLingui } from '@lingui/react/macro';
 
 const StyledContent = styled.div`
   padding-bottom: ${themeCssVariables.spacing[2]};
@@ -37,7 +37,6 @@ export const SettingsRolePermissionsObjectLevelRecordLevelSection = ({
   roleId,
   hasOrganizationPlan,
 }: SettingsRolePermissionsObjectLevelRecordLevelSectionProps) => {
-  const { t } = useLingui();
   const navigateSettings = useNavigateSettings();
   const billing = useAtomStateValue(billingState);
   const isBillingEnabled = billing?.isBillingEnabled ?? false;

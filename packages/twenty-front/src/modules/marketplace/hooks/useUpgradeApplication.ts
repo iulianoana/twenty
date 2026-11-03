@@ -2,6 +2,7 @@ import { useTrackedQueueJob } from '@/queue-job/hooks/useTrackedQueueJob';
 import { type TrackedJobStatus } from '@/queue-job/types/TrackedJobStatus';
 import { isTerminalJobState } from '@/queue-job/utils/isTerminalJobState';
 import { useLazyQuery, useMutation, useQuery } from '@apollo/client/react';
+import { t } from '@lingui/core/macro';
 import { isNonEmptyString } from '@sniptt/guards';
 import { useCallback } from 'react';
 import { isDefined } from 'twenty-shared/utils';
@@ -11,7 +12,6 @@ import {
   JobState,
   TriggerUpgradeApplicationDocument,
 } from '~/generated-metadata/graphql';
-import { useLingui } from '@lingui/react/macro';
 
 type UseUpgradeApplicationArgs = {
   universalIdentifier?: string;
@@ -22,7 +22,6 @@ export const useUpgradeApplication = ({
   universalIdentifier,
   onCompleted,
 }: UseUpgradeApplicationArgs = {}) => {
-  const { t } = useLingui();
   const { enqueueToast } = useToast();
   const [triggerUpgradeApplication, { loading: isTriggeringUpgrade }] =
     useMutation(TriggerUpgradeApplicationDocument);
@@ -70,7 +69,7 @@ export const useUpgradeApplication = ({
       });
       onCompleted?.();
     },
-    [enqueueToast, onCompleted, t],
+    [enqueueToast, onCompleted],
   );
 
   const fetchUpgradeJobStatus = useCallback(

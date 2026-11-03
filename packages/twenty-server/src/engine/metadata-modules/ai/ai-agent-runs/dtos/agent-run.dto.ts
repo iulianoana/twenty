@@ -8,9 +8,8 @@ export class AgentRunDTO {
   @Field(() => UUIDScalarType)
   id: string;
 
-  // null for a one-shot run, which has no conversation
-  @Field(() => UUIDScalarType, { nullable: true })
-  threadId: string | null;
+  @Field(() => UUIDScalarType)
+  threadId: string;
 
   @Field(() => String, { nullable: true })
   threadTitle: string | null;

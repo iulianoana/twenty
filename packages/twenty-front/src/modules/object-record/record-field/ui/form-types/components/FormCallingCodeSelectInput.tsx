@@ -4,9 +4,9 @@ import { FormSelectFieldInput } from '@/object-record/record-field/ui/form-types
 import { type VariablePickerComponent } from '@/ui/input/types/VariablePickerComponent';
 import { useCountries } from '@/ui/input/components/internal/hooks/useCountries';
 import { isStandaloneVariableString } from 'twenty-shared/workflow';
+import { t } from '@lingui/core/macro';
 import { IconCircleOff, type IconComponentProps } from 'twenty-ui/icon';
 import { type SelectOption } from 'twenty-ui/primitives/input';
-import { useLingui } from '@lingui/react/macro';
 
 export type FormCallingCodeSelectInputUpdatedValue = {
   callingCode: string;
@@ -28,7 +28,6 @@ export const FormCallingCodeSelectInput = ({
   readonly?: boolean;
   VariablePicker?: VariablePickerComponent;
 }) => {
-  const { t } = useLingui();
   const countries = useCountries();
 
   const options: SelectOption[] = useMemo(() => {
@@ -48,7 +47,7 @@ export const FormCallingCodeSelectInput = ({
       },
       ...countryList,
     ];
-  }, [countries, t]);
+  }, [countries]);
 
   const defaultValue = isStandaloneVariableString(selectedCallingCode)
     ? selectedCallingCode

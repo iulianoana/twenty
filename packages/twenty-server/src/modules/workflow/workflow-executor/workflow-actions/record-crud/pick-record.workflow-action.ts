@@ -80,6 +80,7 @@ export class PickRecordWorkflowAction implements WorkflowAction {
       objectName,
       filter: { id: { in: recordIds } },
       authContext: executionContext.authContext,
+      rolePermissionConfig: executionContext.rolePermissionConfig,
       shouldBuildEffectiveSelectFields: false,
     });
 
@@ -147,6 +148,7 @@ export class PickRecordWorkflowAction implements WorkflowAction {
       groupBy: [{ [loadBalance.fieldName]: { id: true } }],
       filter: { [loadBalance.fieldName]: { id: { in: candidateIds } } },
       authContext: executionContext.authContext,
+      rolePermissionConfig: executionContext.rolePermissionConfig,
     });
 
     if (!groupByOutput.success) {

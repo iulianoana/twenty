@@ -17,15 +17,6 @@ describe('LinkedIn app deployed functions', () => {
     });
   });
 
-  it('binds no channel on install when no LinkedIn account is connected', async () => {
-    const execution = await executeDeployedFunctionOrThrow({
-      functionName: 'linkedin-post-install',
-    });
-
-    expect(execution.status).toBe('SUCCESS');
-    expect(execution.data).toEqual({ boundChannelCount: 0 });
-  });
-
   it('uninstalls cleanly when no LinkedIn account is connected', async () => {
     const execution = await executeDeployedFunctionOrThrow({
       functionName: 'linkedin-uninstall',

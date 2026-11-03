@@ -43,10 +43,5 @@ export const fetchAllThreadMessagesOperationSignatureFactory: RecordGqlOperation
       person: true,
       workspaceMember: true,
     },
-    messageChannelMessageAssociations: {
-      id: true,
-      messageChannelId: true,
-      direction: true,
-    },
   },
 });

@@ -6,7 +6,6 @@ import { isDateWithoutTime } from '@/utils/date/isDateWithoutTime';
 import { parseToPlainDateOrThrow } from '@/utils/date/parseToPlainDateOrThrow';
 import { isValidationRuleValueDefined } from '@/utils/validation-rule/isValidationRuleValueDefined';
 
-// An operator enabled here for apps also needs a helper in twenty-sdk's ruleExpression
 export const validationRuleParser = new Parser({
   allowMemberAccess: true,
   operators: {

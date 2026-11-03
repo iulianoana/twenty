@@ -6,7 +6,6 @@ import { DefineTool } from 'src/engine/core-modules/tool-provider/decorators/def
 import { BaseTool } from 'src/engine/core-modules/tool-provider/interfaces/base-tool.interface';
 import { type ToolExecuteArgs } from 'src/engine/core-modules/tool-provider/types/tool-execute-args.type';
 import { type ToolOutput } from 'src/engine/core-modules/tool/types/tool-output.type';
-import { NAVIGATION_MENU_ITEM_WRITE_ACCESS_POLICY } from 'src/engine/metadata-modules/navigation-menu-item/constants/navigation-menu-item-write-access-policy.constant';
 import { type CreateNavigationMenuItemInput } from 'src/engine/metadata-modules/navigation-menu-item/dtos/create-navigation-menu-item.input';
 import { NavigationMenuItemService } from 'src/engine/metadata-modules/navigation-menu-item/navigation-menu-item.service';
 import { navigationMenuItemScopeSchema } from 'src/engine/metadata-modules/navigation-menu-item/tools/schemas/navigation-menu-item-scope.schema';
@@ -144,7 +143,7 @@ const toServiceInput = (
 @DefineTool({
   name: 'create_navigation_menu_item',
   category: ToolCategory.NAVIGATION_MENU_ITEM,
-  accessPolicy: NAVIGATION_MENU_ITEM_WRITE_ACCESS_POLICY,
+  requiredPermissionFlags: [],
   description: `Create a navigation menu item. With scope='user' it becomes a personal favorite for the current user; with scope='workspace' it is shared with everyone (requires LAYOUTS permission).
 
 Type chooses the variant:

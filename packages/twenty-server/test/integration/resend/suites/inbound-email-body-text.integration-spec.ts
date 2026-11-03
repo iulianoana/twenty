@@ -88,9 +88,9 @@ describe('Inbound email body text (integration)', () => {
     return workspaceOrmManager.executeInWorkspaceContext(
       async () => {
         const message = await workspaceOrmManager
-          .getRepositoryWithoutPermissionChecks<MessageWorkspaceEntity>(
-            'message',
-          )
+          .getRepository<MessageWorkspaceEntity>('message', {
+            shouldBypassPermissionChecks: true,
+          })
           .createQueryBuilder('message')
           .where('message.headerMessageId = :headerMessageId', {
             headerMessageId,

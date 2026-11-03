@@ -21,7 +21,8 @@ import { DropdownRoot } from '@/ui/layout/dropdown/components/DropdownRoot';
 import { GenericDropdownContentWidth } from '@/ui/layout/dropdown/constants/GenericDropdownContentWidth';
 import { useSetAtomComponentState } from '@/ui/utilities/state/jotai/hooks/useSetAtomComponentState';
 import { styled } from '@linaria/react';
-import { Trans, useLingui } from '@lingui/react/macro';
+import { t } from '@lingui/core/macro';
+import { Trans } from '@lingui/react/macro';
 import { motion } from 'framer-motion';
 import { useCallback, useContext } from 'react';
 import { createPortal } from 'react-dom';
@@ -76,7 +77,6 @@ export const RecordDetailRelationRecordsListItem = ({
   relationObjectMetadataNameSingular,
   relationFieldMetadataId,
 }: RecordDetailRelationRecordsListItemProps) => {
-  const { t } = useLingui();
   const { scopeInstanceId } = useRecordFieldsScopeContextOrThrow();
   const {
     fieldDefinition,

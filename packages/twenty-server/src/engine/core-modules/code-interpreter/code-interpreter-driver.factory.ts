@@ -71,7 +71,6 @@ export class CodeInterpreterDriverFactory extends DriverFactoryBase<CodeInterpre
 
         return new E2BDriver({
           apiKey,
-          template: this.twentyConfigService.get('E2B_TEMPLATE'),
           timeoutMs,
           idleTimeoutMs: this.twentyConfigService.get(
             'CODE_INTERPRETER_IDLE_TIMEOUT_MS',

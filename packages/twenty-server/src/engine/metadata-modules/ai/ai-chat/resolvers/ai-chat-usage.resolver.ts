@@ -13,24 +13,23 @@ import { UsageResourceType } from 'src/engine/core-modules/usage/enums/usage-res
 import { type WorkspaceEntity } from 'src/engine/core-modules/workspace/workspace.entity';
 import { AuthUserWorkspaceId } from 'src/engine/decorators/auth/auth-user-workspace-id.decorator';
 import { AuthWorkspace } from 'src/engine/decorators/auth/auth-workspace.decorator';
-import { AccessPolicyGuard } from 'src/engine/guards/access-policy.guard';
+import { SettingsPermissionGuard } from 'src/engine/guards/settings-permission.guard';
+import { AuthPrincipalGuard } from 'src/engine/guards/auth-principal.guard';
 
 @MetadataResolver(() => AiChatUsageDTO)
 @UseGuards(
-  AccessPolicyGuard({
-    authPrincipals: {
-      userSession: {
-        standard: true,
-        impersonated: true,
-        playground: true,
-        workspaceAgnostic: false,
-      },
-      apiKey: true,
-      oauthClient: true,
-      application: true,
+  AuthPrincipalGuard({
+    userSession: {
+      standard: true,
+      impersonated: true,
+      playground: true,
+      workspaceAgnostic: false,
     },
-    requiredPermissionFlags: [PermissionFlagType.AI],
+    apiKey: true,
+    oauthClient: true,
+    application: true,
   }),
+  SettingsPermissionGuard(PermissionFlagType.AI),
 )
 @UseFilters(PreventNestToAutoLogGraphqlErrorsFilter)
 export class AiChatUsageResolver {

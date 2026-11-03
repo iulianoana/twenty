@@ -1,3 +1,4 @@
+import { t } from '@lingui/core/macro';
 import { styled } from '@linaria/react';
 import { useState } from 'react';
 
@@ -6,7 +7,6 @@ import { RATING_VALUES } from 'twenty-shared/constants';
 import { type FieldRatingValue } from 'twenty-shared/types';
 import { IconTwentyStarFilled } from 'twenty-ui/icon';
 import { useTheme, themeCssVariables } from 'twenty-ui/theme';
-import { useLingui } from '@lingui/react/macro';
 
 const StyledContainer = styled.div`
   align-items: center;
@@ -31,7 +31,6 @@ export const RatingInput = ({
   value,
   readonly,
 }: RatingInputProps) => {
-  const { t } = useLingui();
   const clearField = useClearField();
   const theme = useTheme();
 

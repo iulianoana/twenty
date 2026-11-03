@@ -11,7 +11,6 @@ export type FlatApplicationHeader = Pick<
   | 'logo'
   | 'billing'
   | 'grantedCapabilities'
-  | 'grantedIframeMediaPermissions'
   | 'packageJsonChecksum'
   | 'yarnLockChecksum'
 >;
@@ -38,12 +37,6 @@ export const fromFlatApplicationToApplicationManifest = ({
     : {}),
   ...(isNonEmptyArray(flatApplication.grantedCapabilities)
     ? { requestedCapabilities: flatApplication.grantedCapabilities }
-    : {}),
-  ...(isNonEmptyArray(flatApplication.grantedIframeMediaPermissions)
-    ? {
-        requestedIframeMediaPermissions:
-          flatApplication.grantedIframeMediaPermissions,
-      }
     : {}),
   ...(isDefined(settingsFrontComponentUniversalIdentifier)
     ? {

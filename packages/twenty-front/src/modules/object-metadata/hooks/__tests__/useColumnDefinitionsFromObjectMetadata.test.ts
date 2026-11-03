@@ -6,7 +6,6 @@ import { useColumnDefinitionsFromObjectMetadata } from '@/object-metadata/hooks/
 import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
 import { jotaiStore } from '@/ui/utilities/state/jotai/jotaiStore';
 import {
-  AiChatAssistantMode,
   AiModelTier,
   SubscriptionInterval,
   SubscriptionStatus,
@@ -37,6 +36,7 @@ describe('useColumnDefinitionsFromObjectMetadata', () => {
       hasValidSignedEnterpriseKey: false,
       hasValidEnterpriseValidityToken: false,
       isTrialAvailable: true,
+      metadataVersion: 1,
       isPublicInviteLinkEnabled: false,
       isCampaignClickTrackingEnabled: false,
       isCampaignOpenTrackingEnabled: false,
@@ -73,8 +73,6 @@ describe('useColumnDefinitionsFromObjectMetadata', () => {
       trashRetentionDays: 14,
       eventLogRetentionDays: 365 * 3,
       aiChatModelTier: AiModelTier.fast,
-      aiChatDirectMessageAssistantMode: AiChatAssistantMode.MENTION_ONLY,
-      aiChatInboxAssistantMode: AiChatAssistantMode.AUTOMATIC,
       aiAgentModelTier: AiModelTier.fast,
       isAutoModelSelectionEnabled: true,
       aiModelIdByTier: {},

@@ -27,4 +27,3 @@ export { getSafeUrl } from './utils/getSafeUrl';
 export { isDefined } from './utils/isDefined';
 export { normalizeSearchText } from './utils/normalizeSearchText';
 export { preventDismissingClickActivation } from './utils/preventDismissingClickActivation';
-export { isPageZoomGesture } from './zoom/utils/isPageZoomGesture';

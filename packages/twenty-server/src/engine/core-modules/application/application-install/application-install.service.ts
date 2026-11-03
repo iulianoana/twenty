@@ -8,16 +8,12 @@ import {
   type ApplicationCapability,
   Manifest,
 } from 'twenty-shared/application';
-import { FileFolder, type IframeMediaPermission } from 'twenty-shared/types';
-import {
-  intersectIframeMediaPermissions,
-  isDefined,
-} from 'twenty-shared/utils';
+import { FileFolder } from 'twenty-shared/types';
+import { isDefined } from 'twenty-shared/utils';
 import { Repository } from 'typeorm';
 
 import { buildApplicationFileList } from 'src/engine/core-modules/application/application-install/utils/build-application-file-list.util';
 import { toApplicationCapabilities } from 'src/engine/core-modules/application/utils/to-application-capabilities.util';
-import { toRequestedIframeMediaPermissionsOrThrow } from 'src/engine/core-modules/application/utils/to-requested-iframe-media-permissions-or-throw.util';
 import { ApplicationManifestApplyService } from 'src/engine/core-modules/application/application-manifest/application-manifest-apply.service';
 import { ApplicationSyncService } from 'src/engine/core-modules/application/application-manifest/application-sync.service';
 import {
@@ -413,14 +409,6 @@ export class ApplicationInstallService {
     const grantedCapabilities = toApplicationCapabilities(
       resolvedPackage.manifest.application.requestedCapabilities,
     ).filter((capability) => approvedCapabilities.includes(capability));
-    const grantedIframeMediaPermissions = intersectIframeMediaPermissions({
-      permissions: toRequestedIframeMediaPermissionsOrThrow(
-        resolvedPackage.manifest.application.requestedIframeMediaPermissions,
-      ),
-      allowedPermissions: toRequestedIframeMediaPermissionsOrThrow(
-        appRegistration.manifest?.application?.requestedIframeMediaPermissions,
-      ),
-    });
     const shouldApplyApprovedCapabilities =
       params.hasUserApprovedCapabilities && isDefined(appRegistration.manifest);
 
@@ -429,7 +417,6 @@ export class ApplicationInstallService {
       universalIdentifier,
       name: resolvedPackage.manifest.application.displayName,
       grantedCapabilities,
-      grantedIframeMediaPermissions,
       workspaceId: params.workspaceId,
       applicationRegistrationId: appRegistration.id,
       sourceType: appRegistration.sourceType,
@@ -482,7 +469,6 @@ export class ApplicationInstallService {
       if (isVersionUpgrade && shouldApplyApprovedCapabilities) {
         await this.applicationService.update(application.id, {
           grantedCapabilities,
-          grantedIframeMediaPermissions,
           workspaceId: params.workspaceId,
         });
       }
@@ -977,7 +963,6 @@ export class ApplicationInstallService {
     universalIdentifier,
     name,
     grantedCapabilities,
-    grantedIframeMediaPermissions,
     workspaceId,
     applicationRegistrationId,
     sourceType,
@@ -987,7 +972,6 @@ export class ApplicationInstallService {
     universalIdentifier: string;
     name: string;
     grantedCapabilities: ApplicationCapability[];
-    grantedIframeMediaPermissions: IframeMediaPermission[];
     workspaceId: string;
     applicationRegistrationId: string;
     sourceType: ApplicationRegistrationSourceType;
@@ -1001,7 +985,6 @@ export class ApplicationInstallService {
       universalIdentifier,
       name,
       grantedCapabilities,
-      grantedIframeMediaPermissions,
       sourcePath: universalIdentifier,
       sourceType,
       applicationRegistrationId,

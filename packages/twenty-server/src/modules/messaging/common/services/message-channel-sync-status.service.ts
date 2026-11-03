@@ -453,8 +453,9 @@ export class MessageChannelSyncStatusService {
     });
 
     const workspaceMemberRepository =
-      this.workspaceOrmManager.getRepositoryWithoutPermissionChecks<WorkspaceMemberWorkspaceEntity>(
+      this.workspaceOrmManager.getRepository<WorkspaceMemberWorkspaceEntity>(
         'workspaceMember',
+        { shouldBypassPermissionChecks: true },
       );
 
     for (const messageChannel of messageChannels) {

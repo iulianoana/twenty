@@ -1,6 +1,7 @@
 import { flattenedFieldMetadataItemsSelector } from '@/object-metadata/states/flattenedFieldMetadataItemsSelector';
 import { objectMetadataItemsSelector } from '@/object-metadata/states/objectMetadataItemsSelector';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
+import { t } from '@lingui/core/macro';
 import { useParams } from 'react-router-dom';
 import { isDefined } from 'twenty-shared/utils';
 import { useApplicationManifest } from '~/pages/settings/layout/hooks/useApplicationManifest';
@@ -9,7 +10,6 @@ import {
   SettingsLayoutDetailScaffold,
 } from '~/pages/settings/layout/components/SettingsLayoutDetailScaffold';
 import { SettingsLayoutItemTable } from '~/pages/settings/layout/components/SettingsLayoutItemTable';
-import { useLingui } from '@lingui/react/macro';
 
 const formatFilterValue = (value: unknown): string => {
   if (typeof value === 'string') return value;
@@ -20,7 +20,6 @@ const formatFilterValue = (value: unknown): string => {
 };
 
 export const SettingsLayoutViewDetail = () => {
-  const { t } = useLingui();
   const { applicationId = '', viewUniversalIdentifier = '' } = useParams<{
     applicationId: string;
     viewUniversalIdentifier: string;

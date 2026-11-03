@@ -28,8 +28,7 @@ const StyledHint = styled.span`
 
 type LabelledSettingsFieldProps = {
   label: string;
-  inputId?: string;
-  labelId?: string;
+  inputId: string;
   hint?: string;
   errorMessage?: string;
   children: ReactNode;
@@ -38,15 +37,12 @@ type LabelledSettingsFieldProps = {
 export const LabelledSettingsField = ({
   label,
   inputId,
-  labelId,
   hint,
   errorMessage,
   children,
 }: LabelledSettingsFieldProps) => (
   <StyledField>
-    <StyledLabel id={labelId} htmlFor={inputId}>
-      {label}
-    </StyledLabel>
+    <StyledLabel htmlFor={inputId}>{label}</StyledLabel>
     {children}
     {isNonEmptyString(errorMessage) && (
       <StyledSettingsError>{errorMessage}</StyledSettingsError>

@@ -1,4 +1,5 @@
 import { putFileToUploadTarget } from '@/file/utils/putFileToUploadTarget';
+import { t } from '@lingui/core/macro';
 import { useMutation } from '@apollo/client/react';
 import { isDefined } from 'twenty-shared/utils';
 import {
@@ -6,10 +7,8 @@ import {
   CreateNewWorkspaceLogoUploadDocument,
   type FileWithSignedUrl,
 } from '~/generated-metadata/graphql';
-import { useLingui } from '@lingui/react/macro';
 
 export const useUploadNewWorkspaceLogo = () => {
-  const { t } = useLingui();
   const [createNewWorkspaceLogoUpload] = useMutation(
     CreateNewWorkspaceLogoUploadDocument,
   );

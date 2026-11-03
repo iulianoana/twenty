@@ -1,4 +1,5 @@
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
 import { isDefined, isNonEmptyArray } from 'twenty-shared/utils';
 import { Section } from 'twenty-ui/components/layout';
 import { IconHash } from 'twenty-ui/icon';
@@ -17,7 +18,6 @@ import { TableHeader } from '@/ui/layout/table/components/TableHeader';
 import { TableRow } from '@/ui/layout/table/components/TableRow';
 import { useAtomFamilyStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomFamilyStateValue';
 import { useSetAtomFamilyState } from '@/ui/utilities/state/jotai/hooks/useSetAtomFamilyState';
-import { useLingui } from '@lingui/react/macro';
 
 const StyledCardContainer = styled.div`
   margin-bottom: ${themeCssVariables.spacing[4]};
@@ -41,7 +41,6 @@ export const SettingsRolePermissionsAgentChatChannelsSection = ({
   roleId,
   isEditable,
 }: SettingsRolePermissionsAgentChatChannelsSectionProps) => {
-  const { t } = useLingui();
   const settingsDraftRole = useAtomFamilyStateValue(
     settingsDraftRoleFamilyState,
     roleId,

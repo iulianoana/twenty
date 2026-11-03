@@ -121,8 +121,6 @@ export const USER_QUERY_FRAGMENT = gql`
         ...RoleFragment
       }
       aiChatModelTier
-      aiChatDirectMessageAssistantMode
-      aiChatInboxAssistantMode
       aiAgentModelTier
       isAutoModelSelectionEnabled
       aiModelIdByTier

@@ -347,6 +347,7 @@ export class CodeInterpreterTool implements Tool {
 
     const applicationId =
       authContext.application?.id ??
+      authContext.viaApplication?.id ??
       (await this.findWorkspaceCustomApplicationId(workspaceId));
 
     return {

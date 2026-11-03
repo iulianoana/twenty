@@ -24,7 +24,6 @@ import {
 import { type UnipileChat } from 'src/unipile/types/unipile-chat.type';
 import { listUnipileChats } from 'src/unipile/utils/list-unipile-chats.util';
 import { UnipileRateLimitError } from 'src/unipile/utils/request-unipile.util';
-import { listMostRecentUnipileChats } from 'src/unipile/utils/list-most-recent-unipile-chats.util';
 import { listUnipileInboxIds } from 'src/unipile/utils/list-unipile-inbox-ids.util';
 import { sortUnipileChatsByLastMessage } from 'src/unipile/utils/sort-unipile-chats-by-last-message.util';
 
@@ -160,54 +159,9 @@ const finishPlanning = async ({
   return { status: 'PLANNED', chunkCount };
 };
 
-const planLimitedHistoryImport = async ({
-  payload,
-  chats,
-}: {
-  payload: LinkedinPlanHistoryImportJobPayload;
-  chats: UnipileChat[];
-}): Promise<LinkedinPlanHistoryImportResult> => {
-  let chunkCount = 0;
-
-  for (
-    let chunkStart = 0;
-    chunkStart < chats.length;
-    chunkStart += LINKEDIN_HISTORY_IMPORT_CHATS_PER_JOB
-  ) {
-    const chunkChats = chats.slice(
-      chunkStart,
-      chunkStart + LINKEDIN_HISTORY_IMPORT_CHATS_PER_JOB,
-    );
-
-    if (
-      !(await planChunk({
-        payload,
-        chunkIndex: chunkCount,
-        chats: chunkChats,
-        conversationCount: chunkStart + chunkChats.length,
-        reportedConversationCount: chats.length,
-      }))
-    ) {
-      return { status: 'CANCELLED' };
-    }
-
-    chunkCount += 1;
-  }
-
-  return finishPlanning({
-    payload,
-    chunkCount,
-    conversationCount: chats.length,
-  });
-};
-
-const planHistoryImport = async ({
-  payload,
-  conversationLimit,
-}: {
-  payload: LinkedinPlanHistoryImportJobPayload;
-  conversationLimit: number | undefined;
-}): Promise<LinkedinPlanHistoryImportResult> => {
+const planHistoryImport = async (
+  payload: LinkedinPlanHistoryImportJobPayload,
+): Promise<LinkedinPlanHistoryImportResult> => {
   const { connectedAccountId, runId } = payload;
   const startedAt = Date.now();
   const connection = await getConnection(connectedAccountId);
@@ -264,22 +218,6 @@ const planHistoryImport = async ({
 
   if (!Array.isArray(inboxIds)) {
     return inboxIds;
-  }
-
-  if (isDefined(conversationLimit)) {
-    const chats = await pauseOnRateLimit(() =>
-      listMostRecentUnipileChats({
-        accountId: unipileAccountId,
-        inboxIds,
-        limit: conversationLimit,
-        deadlineAtMs:
-          startedAt + LINKEDIN_PLAN_HISTORY_IMPORT_TIME_BUDGET_MILLISECONDS,
-      }),
-    );
-
-    return Array.isArray(chats)
-      ? planLimitedHistoryImport({ payload, chats })
-      : chats;
   }
 
   while (inboxIndex < inboxIds.length) {
@@ -354,17 +292,12 @@ export const linkedinPlanHistoryImportHandler = async (
   payload: LinkedinPlanHistoryImportJobPayload,
   context?: Pick<LogicFunctionExecutionContext, 'retryCount' | 'maxRetries'>,
 ): Promise<LinkedinPlanHistoryImportResult> => {
-  const state = await getActiveLinkedinHistoryImportState(payload);
-
-  if (state === null) {
+  if ((await getActiveLinkedinHistoryImportState(payload)) === null) {
     return { status: 'CANCELLED' };
   }
 
   try {
-    return await planHistoryImport({
-      payload,
-      conversationLimit: state.conversationLimit,
-    });
+    return await planHistoryImport(payload);
   } catch (error) {
     return failLinkedinHistoryImportJob({
       error,
@@ -390,7 +323,7 @@ export default defineLogicFunction({
   universalIdentifier: LINKEDIN_PLAN_HISTORY_IMPORT_UNIVERSAL_IDENTIFIER,
   name: 'linkedin-plan-history-import',
   description:
-    'Lists the most recent past LinkedIn conversations of a connection across its inboxes, up to the limit of the run, stores them page by page for the import jobs and starts the import chain; hands over to a new planning job when its time runs out.',
+    'Lists the past LinkedIn conversations of a connection, most recent first, stores them page by page for the import jobs and starts the import chain; hands over to a new planning job when its time runs out.',
   timeoutSeconds: LINKEDIN_IMPORT_HISTORY_TIMEOUT_SECONDS,
   handler: linkedinPlanHistoryImportHandler,
 });

@@ -10,7 +10,6 @@ import { buildThemeConstants } from '../design-tokens/pipeline/buildThemeConstan
 import { buildThemeCss } from '../design-tokens/pipeline/buildThemeCss';
 import { buildThemeCommon } from '../design-tokens/pipeline/buildThemeCommon';
 import { buildThemeCssVariables } from '../design-tokens/pipeline/buildThemeCssVariables';
-import { buildThemeNumericValueByCssVariable } from '../design-tokens/pipeline/buildThemeNumericValueByCssVariable';
 import { buildThemeSpacing } from '../design-tokens/pipeline/buildThemeSpacing';
 import { buildThemeSubtreeConstant } from '../design-tokens/pipeline/buildThemeSubtreeConstant';
 import { buildThemeTypes } from '../design-tokens/pipeline/buildThemeTypes';
@@ -43,10 +42,6 @@ const sourceOutputs = [
   {
     path: resolve(themeDirectory, 'internal/themeSpacing.ts'),
     content: buildThemeSpacing(leaves),
-  },
-  {
-    path: resolve(themeDirectory, 'internal/ThemeNumericValueByCssVariable.ts'),
-    content: buildThemeNumericValueByCssVariable(leaves),
   },
   {
     path: resolve(themeDirectory, 'constants/ThemeLight.ts'),

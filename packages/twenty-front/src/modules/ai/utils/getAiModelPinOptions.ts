@@ -1,20 +1,19 @@
 import { t } from '@lingui/core/macro';
-import { isNonEmptyString } from '@sniptt/guards';
 import { isDefined } from 'twenty-shared/utils';
-import { type SelectOption } from 'twenty-ui/primitives/input';
 
 import { type PinnableAiModel } from '@/ai/types/PinnableAiModel';
 import { getDataResidencyDisplay } from '@/ai/utils/getDataResidencyDisplay';
 import { getModelIcon } from '@/ai/utils/getModelIcon';
 
+// Effort variants are picked via their base model; a deprecated current pin stays listed.
 export const getAiModelPinOptions = ({
   aiModels,
   keepModelId,
 }: {
   aiModels: PinnableAiModel[];
   keepModelId?: string;
-}): SelectOption<string>[] => {
-  const options = aiModels
+}) =>
+  aiModels
     .filter(
       (model) =>
         !isDefined(model.effort) &&
@@ -34,21 +33,3 @@ export const getAiModelPinOptions = ({
       };
     })
     .sort((first, second) => first.label.localeCompare(second.label));
-
-  const isCurrentModelMissing =
-    isNonEmptyString(keepModelId) &&
-    !options.some((option) => option.value === keepModelId);
-
-  if (!isCurrentModelMissing) {
-    return options;
-  }
-
-  return [
-    {
-      value: keepModelId,
-      label: t`${keepModelId} (unavailable)`,
-      disabled: true,
-    },
-    ...options,
-  ];
-};

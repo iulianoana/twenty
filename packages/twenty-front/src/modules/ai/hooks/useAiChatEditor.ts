@@ -1,3 +1,4 @@
+import { t } from '@lingui/core/macro';
 import { useCallback } from 'react';
 import { isDefined, isNonEmptyArray } from 'twenty-shared/utils';
 
@@ -29,10 +30,8 @@ import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomState
 import { useIsFeatureEnabled } from '@/workspace/hooks/useIsFeatureEnabled';
 import { FeatureFlagKey } from '~/generated-metadata/graphql';
 import { turnIntoEmptyStringIfWhitespacesOnly } from '~/utils/string/turnIntoEmptyStringIfWhitespacesOnly';
-import { useLingui } from '@lingui/react/macro';
 
 export const useAiChatEditor = () => {
-  const { t } = useLingui();
   const currentAiChatThread = useAtomStateValue(currentAiChatThreadState);
   const aiModels = useAtomStateValue(aiModelsState);
   const newAiChatThreadId = useAtomStateValue(newAiChatThreadIdState);

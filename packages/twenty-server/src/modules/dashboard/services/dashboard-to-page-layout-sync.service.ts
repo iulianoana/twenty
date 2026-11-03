@@ -58,8 +58,9 @@ export class DashboardToPageLayoutSyncService {
 
     await this.workspaceOrmManager.executeInWorkspaceContext(async () => {
       const dashboardRepository =
-        this.workspaceOrmManager.getRepositoryWithoutPermissionChecks<DashboardWorkspaceEntity>(
+        this.workspaceOrmManager.getRepository<DashboardWorkspaceEntity>(
           'dashboard',
+          { shouldBypassPermissionChecks: true },
         );
 
       const dashboards = await dashboardRepository.find({

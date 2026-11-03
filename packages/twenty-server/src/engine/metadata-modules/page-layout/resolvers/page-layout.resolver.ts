@@ -12,6 +12,9 @@ import {
   Query,
   ResolveField,
 } from '@nestjs/graphql';
+
+import { PermissionFlagType } from 'twenty-shared/constants';
+
 import { ResolverValidationPipe } from 'src/engine/core-modules/graphql/pipes/resolver-validation.pipe';
 import { type I18nContext } from 'src/engine/core-modules/i18n/types/i18n-context.type';
 import { WorkspaceEntity } from 'src/engine/core-modules/workspace/workspace.entity';
@@ -19,6 +22,9 @@ import { type IDataloaders } from 'src/engine/dataloaders/dataloader.interface';
 import { AuthWorkspace } from 'src/engine/decorators/auth/auth-workspace.decorator';
 import { AllowSuspendedWorkspace } from 'src/engine/decorators/auth/allow-suspended-workspace.decorator';
 import { MetadataResolver } from 'src/engine/api/graphql/graphql-config/decorators/metadata-resolver.decorator';
+import { NoPermissionGuard } from 'src/engine/guards/no-permission.guard';
+import { SettingsPermissionGuard } from 'src/engine/guards/settings-permission.guard';
+import { AuthPrincipalGuard } from 'src/engine/guards/auth-principal.guard';
 import { PageLayoutTabDTO } from 'src/engine/metadata-modules/page-layout-tab/dtos/page-layout-tab.dto';
 import { PageLayoutWidgetDTO } from 'src/engine/metadata-modules/page-layout-widget/dtos/page-layout-widget.dto';
 import { CreatePageLayoutInput } from 'src/engine/metadata-modules/page-layout/dtos/inputs/create-page-layout.input';
@@ -34,13 +40,23 @@ import { resolveEffectiveEntityProperty } from 'src/engine/metadata-modules/over
 import { WorkspaceMigrationGraphqlApiExceptionInterceptor } from 'src/engine/workspace-manager/workspace-migration/interceptors/workspace-migration-graphql-api-exception.interceptor';
 import { ApplicationTranslationCatalogService } from 'src/engine/metadata-modules/application-translation-catalog/services/application-translation-catalog.service';
 import { AuthGraphqlApiExceptionFilter } from 'src/engine/core-modules/auth/filters/auth-graphql-api-exception.filter';
-import { PAGE_LAYOUT_READ_ACCESS_POLICY } from 'src/engine/metadata-modules/page-layout/constants/page-layout-read-access-policy.constant';
-import { PAGE_LAYOUT_WRITE_ACCESS_POLICY } from 'src/engine/metadata-modules/page-layout/constants/page-layout-write-access-policy.constant';
-import { AccessPolicyGuard } from 'src/engine/guards/access-policy.guard';
 
 @MetadataResolver(() => PageLayoutDTO)
 @UseInterceptors(WorkspaceMigrationGraphqlApiExceptionInterceptor)
 @UseFilters(PageLayoutGraphqlApiExceptionFilter, AuthGraphqlApiExceptionFilter)
+@UseGuards(
+  AuthPrincipalGuard({
+    userSession: {
+      standard: true,
+      impersonated: true,
+      playground: true,
+      workspaceAgnostic: false,
+    },
+    apiKey: true,
+    oauthClient: true,
+    application: true,
+  }),
+)
 @UsePipes(ResolverValidationPipe)
 export class PageLayoutResolver {
   constructor(
@@ -77,7 +93,7 @@ export class PageLayoutResolver {
   }
 
   @Query(() => [PageLayoutDTO])
-  @UseGuards(AccessPolicyGuard(PAGE_LAYOUT_READ_ACCESS_POLICY))
+  @UseGuards(NoPermissionGuard)
   @AllowSuspendedWorkspace()
   async getPageLayouts(
     @AuthWorkspace() workspace: WorkspaceEntity,
@@ -100,7 +116,7 @@ export class PageLayoutResolver {
   }
 
   @Query(() => PageLayoutDTO, { nullable: true })
-  @UseGuards(AccessPolicyGuard(PAGE_LAYOUT_READ_ACCESS_POLICY))
+  @UseGuards(NoPermissionGuard)
   async getPageLayout(
     @Args('id', { type: () => String }) id: string,
     @AuthWorkspace() workspace: WorkspaceEntity,
@@ -112,7 +128,7 @@ export class PageLayoutResolver {
   }
 
   @Mutation(() => PageLayoutDTO)
-  @UseGuards(AccessPolicyGuard(PAGE_LAYOUT_WRITE_ACCESS_POLICY))
+  @UseGuards(SettingsPermissionGuard(PermissionFlagType.LAYOUTS))
   async createPageLayout(
     @Args('input') input: CreatePageLayoutInput,
     @AuthWorkspace() workspace: WorkspaceEntity,
@@ -124,7 +140,7 @@ export class PageLayoutResolver {
   }
 
   @Mutation(() => PageLayoutDTO)
-  @UseGuards(AccessPolicyGuard(PAGE_LAYOUT_WRITE_ACCESS_POLICY))
+  @UseGuards(SettingsPermissionGuard(PermissionFlagType.LAYOUTS))
   async updatePageLayout(
     @Args('id', { type: () => String }) id: string,
     @Args('input') input: UpdatePageLayoutInput,
@@ -138,7 +154,7 @@ export class PageLayoutResolver {
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(AccessPolicyGuard(PAGE_LAYOUT_WRITE_ACCESS_POLICY))
+  @UseGuards(SettingsPermissionGuard(PermissionFlagType.LAYOUTS))
   async destroyPageLayout(
     @Args('id', { type: () => String }) id: string,
     @AuthWorkspace() workspace: WorkspaceEntity,
@@ -150,7 +166,7 @@ export class PageLayoutResolver {
   }
 
   @Mutation(() => PageLayoutDTO)
-  @UseGuards(AccessPolicyGuard(PAGE_LAYOUT_WRITE_ACCESS_POLICY))
+  @UseGuards(SettingsPermissionGuard(PermissionFlagType.LAYOUTS))
   async updatePageLayoutWithTabsAndWidgets(
     @Args('id', { type: () => String }) id: string,
     @Args('input') input: UpdatePageLayoutWithTabsInput,
@@ -164,7 +180,7 @@ export class PageLayoutResolver {
   }
 
   @Mutation(() => PageLayoutDTO)
-  @UseGuards(AccessPolicyGuard(PAGE_LAYOUT_WRITE_ACCESS_POLICY))
+  @UseGuards(SettingsPermissionGuard(PermissionFlagType.LAYOUTS))
   async resetPageLayoutToDefault(
     @Args('id', { type: () => String }) id: string,
     @AuthWorkspace() workspace: WorkspaceEntity,
@@ -176,7 +192,7 @@ export class PageLayoutResolver {
   }
 
   @Mutation(() => PageLayoutWidgetDTO)
-  @UseGuards(AccessPolicyGuard(PAGE_LAYOUT_WRITE_ACCESS_POLICY))
+  @UseGuards(SettingsPermissionGuard(PermissionFlagType.LAYOUTS))
   async resetPageLayoutWidgetToDefault(
     @Args('id', { type: () => String }) id: string,
     @AuthWorkspace() workspace: WorkspaceEntity,
@@ -188,7 +204,7 @@ export class PageLayoutResolver {
   }
 
   @Mutation(() => PageLayoutTabDTO)
-  @UseGuards(AccessPolicyGuard(PAGE_LAYOUT_WRITE_ACCESS_POLICY))
+  @UseGuards(SettingsPermissionGuard(PermissionFlagType.LAYOUTS))
   async resetPageLayoutTabToDefault(
     @Args('id', { type: () => String }) id: string,
     @AuthWorkspace() workspace: WorkspaceEntity,

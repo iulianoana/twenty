@@ -1,8 +1,8 @@
 import { InformationBanner } from '@/information-banner/components/InformationBanner';
 import { useRestoreManyRecords } from '@/object-record/hooks/useRestoreManyRecords';
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
 import { IconRefresh } from 'twenty-ui/icon';
-import { useLingui } from '@lingui/react/macro';
 
 const StyledInformationBannerDeletedRecord = styled.div`
   height: 40px;
@@ -20,7 +20,6 @@ export const InformationBannerDeletedRecord = ({
   recordId: string;
   objectNameSingular: string;
 }) => {
-  const { t } = useLingui();
   const { restoreManyRecords } = useRestoreManyRecords({
     objectNameSingular,
   });

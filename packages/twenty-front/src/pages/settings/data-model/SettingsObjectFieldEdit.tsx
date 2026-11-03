@@ -26,9 +26,6 @@ import { useDialog } from '@/ui/layout/dialog/hooks/useDialog';
 import { useWorkspaceSurface } from '@/ui/layout/hooks/useWorkspaceSurface';
 import { navigationMemorizedUrlState } from '@/ui/navigation/states/navigationMemorizedUrlState';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
-import { useValidationRulesReadingField } from '@/validation-rules/hooks/useValidationRulesReadingField';
-import { getFieldDeletionConfirmationSubtitle } from '@/validation-rules/utils/getFieldDeletionConfirmationSubtitle';
-import { getFieldRemovalValidationRulesWarning } from '@/validation-rules/utils/getFieldRemovalValidationRulesWarning';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { styled } from '@linaria/react';
 import { useLingui } from '@lingui/react/macro';
@@ -37,12 +34,7 @@ import { useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { AppPath, SettingsPath } from 'twenty-shared/types';
-import {
-  getSettingsPath,
-  isDefined,
-  isEmptyObject,
-  isMorphRelationHead,
-} from 'twenty-shared/utils';
+import { getSettingsPath, isDefined, isEmptyObject } from 'twenty-shared/utils';
 import { useToast } from 'twenty-ui/components/feedback';
 import { Section } from 'twenty-ui/components/layout';
 import { IconArchive, IconArchiveOff, IconTrash } from 'twenty-ui/icon';
@@ -54,7 +46,6 @@ import { useNavigateSettings } from '~/hooks/useNavigateSettings';
 import { getFieldMetadataItemInitialValues } from '@/settings/data-model/fields/forms/utils/getFieldMetadataItemInitialValues';
 
 const DELETE_FIELD_MODAL_ID = 'delete-field-confirmation-modal';
-const DEACTIVATE_FIELD_MODAL_ID = 'deactivate-field-confirmation-modal';
 const StyledDangerButtons = styled.div`
   display: flex;
   gap: ${themeCssVariables.spacing[2]};
@@ -119,20 +110,6 @@ export const SettingsObjectFieldEdit = () => {
       fieldMetadataItem.name === newNameDuringSave,
   );
 
-  const deactivateFieldModalId = `${DEACTIVATE_FIELD_MODAL_ID}-${workspaceSurface.type}`;
-
-  const {
-    validationRulesReadingField,
-    loading: isLoadingValidationRules,
-    hasFailedToLoad: hasValidationRulesFailedToLoad,
-  } = useValidationRulesReadingField({
-    fieldMetadataId: fieldMetadataItem?.id ?? '',
-  });
-  const validationRulesWarning = getFieldRemovalValidationRulesWarning({
-    validationRulesReadingField,
-    hasFailedToLoad: hasValidationRulesFailedToLoad,
-  });
-
   const isReverseJunctionRelation =
     resolveJunctionConfig({
       settings: fieldMetadataItem?.settings,
@@ -195,12 +172,6 @@ export const SettingsObjectFieldEdit = () => {
 
   const isCustomField = getIsMetadataItemCustom(fieldMetadataItem);
 
-  // Mirrors the server guard: system-managed fields only accept activation changes
-  const isFieldPropertiesReadonly =
-    readonly ||
-    (fieldMetadataItem.isSystemSideEffect === true &&
-      !isMorphRelationHead(fieldMetadataItem));
-
   const fieldLabel = fieldMetadataItem.label;
   const objectLabel = objectMetadataItem.labelPlural;
 
@@ -223,7 +194,7 @@ export const SettingsObjectFieldEdit = () => {
   const handleSave = async (
     formValues: SettingsDataModelFieldEditFormValues,
   ) => {
-    if (isFieldPropertiesReadonly) {
+    if (readonly) {
       return;
     }
 
@@ -289,21 +260,11 @@ export const SettingsObjectFieldEdit = () => {
     navigateBackOrToSettings();
   };
 
-  const handleDeactivate = () => {
+  const handleDeactivate = async () => {
     if (readonly) {
       return;
     }
 
-    if (isDefined(validationRulesWarning)) {
-      openDialog(deactivateFieldModalId);
-
-      return;
-    }
-
-    void confirmDeactivate();
-  };
-
-  const confirmDeactivate = async () => {
     const deactivationResult = await deactivateMetadataField(
       fieldMetadataItem.id,
       objectMetadataItem.id,
@@ -392,7 +353,7 @@ export const SettingsObjectFieldEdit = () => {
           actionButton={
             <SaveAndCancelButtons
               isLoading={isSubmitting}
-              isSaveDisabled={!canSave || isFieldPropertiesReadonly}
+              isSaveDisabled={!canSave || readonly}
               isCancelDisabled={isSubmitting || readonly}
               onCancel={handleCancel}
               onSave={formConfig.handleSubmit(handleSave)}
@@ -409,7 +370,7 @@ export const SettingsObjectFieldEdit = () => {
                 fieldMetadataItem={fieldMetadataItem}
                 maxLength={FIELD_NAME_MAXIMUM_LENGTH}
                 isCreationMode={false}
-                readonly={isFieldPropertiesReadonly}
+                readonly={readonly}
               />
             </Section.Root>
             {!isReverseJunctionRelation && (
@@ -429,7 +390,7 @@ export const SettingsObjectFieldEdit = () => {
                   fieldType={fieldMetadataItem.type}
                   existingFieldMetadataId={fieldMetadataItem.id}
                   objectNameSingular={objectMetadataItem.nameSingular}
-                  disabled={isFieldPropertiesReadonly}
+                  disabled={readonly}
                 />
               </Section.Root>
             )}
@@ -440,7 +401,7 @@ export const SettingsObjectFieldEdit = () => {
               />
               <SettingsDataModelFieldDescriptionForm
                 fieldMetadataItem={fieldMetadataItem}
-                disabled={isFieldPropertiesReadonly}
+                disabled={readonly}
               />
             </Section.Root>
 
@@ -472,7 +433,6 @@ export const SettingsObjectFieldEdit = () => {
                       )
                     }
                     size="sm"
-                    disabled={isLoadingValidationRules}
                     onClick={
                       fieldMetadataItem.isActive
                         ? handleDeactivate
@@ -486,7 +446,6 @@ export const SettingsObjectFieldEdit = () => {
                     <Button
                       startIcon={<IconTrash />}
                       size="sm"
-                      disabled={isLoadingValidationRules}
                       onClick={handleDelete}
                       variant="outline"
                       color="danger"
@@ -498,23 +457,11 @@ export const SettingsObjectFieldEdit = () => {
           </SettingsPageContainer>
         </SettingsPageLayout>
       </FormProvider>
-      <ConfirmationDialog
-        dialogId={deactivateFieldModalId}
-        title={t`Deactivate ${fieldLabel} field?`}
-        subtitle={validationRulesWarning ?? ''}
-        confirmButtonText={t`Deactivate`}
-        onConfirmClick={confirmDeactivate}
-        onClose={() => closeDialog(deactivateFieldModalId)}
-      />
       {isCustomField && (
         <ConfirmationDialog
           dialogId={DELETE_FIELD_MODAL_ID}
           title={t`Delete ${fieldLabel} field?`}
-          subtitle={getFieldDeletionConfirmationSubtitle({
-            objectLabel,
-            validationRulesWarning,
-            validationRulesReadingField,
-          })}
+          subtitle={t`This will permanently delete the field and all its data from ${objectLabel}. Type "yes" to confirm.`}
           confirmButtonText={t`Delete`}
           confirmationValue="yes"
           confirmationPlaceholder="yes"

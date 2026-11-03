@@ -35,8 +35,9 @@ export class MessagingMessageFolderAssociationService {
     await this.workspaceOrmManager.executeInWorkspaceContext(
       async () => {
         const repository =
-          transactionScope.getRepositoryWithoutPermissionChecks<MessageChannelMessageAssociationMessageFolderWorkspaceEntity>(
+          transactionScope.getRepository<MessageChannelMessageAssociationMessageFolderWorkspaceEntity>(
             'messageChannelMessageAssociationMessageFolder',
+            { shouldBypassPermissionChecks: true },
           );
 
         const existingRecords = await repository.find({

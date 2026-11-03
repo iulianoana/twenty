@@ -9,6 +9,7 @@ import { useDialog } from '@/ui/layout/dialog/hooks/useDialog';
 import { CombinedGraphQLErrors } from '@apollo/client/errors';
 import { useMutation, useQuery } from '@apollo/client/react';
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
 import { OTPInput } from 'input-otp';
 import { useState } from 'react';
 import { useToast } from 'twenty-ui/components/feedback';
@@ -21,7 +22,6 @@ import {
   GetServerAdminsDocument,
   UpdateServerAdminAccessDocument,
 } from '~/generated-admin/graphql';
-import { useLingui } from '@lingui/react/macro';
 
 type ServerAdminAccessUpdate = {
   canAccessFullAdminPanel?: boolean;
@@ -74,7 +74,6 @@ export const SettingsAdminServerAdminAccess = ({
   userId: string;
   userLabel: string;
 }) => {
-  const { t } = useLingui();
   const dropdownId = `server-admin-access-${userId}`;
   const apolloAdminClient = useApolloAdminClient();
   const { openDialog } = useDialog();

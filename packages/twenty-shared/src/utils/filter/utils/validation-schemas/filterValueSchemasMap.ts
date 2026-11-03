@@ -68,12 +68,6 @@ const containsOperandsSchemas = {
   [ViewFilterOperand.DOES_NOT_CONTAIN]: nonEmptyStringFilterValueSchema,
 };
 
-const textOperandsSchemas = {
-  ...containsOperandsSchemas,
-  [ViewFilterOperand.IS]: nonEmptyStringFilterValueSchema,
-  [ViewFilterOperand.IS_NOT]: nonEmptyStringFilterValueSchema,
-};
-
 const numericOperandsSchemas = {
   [ViewFilterOperand.IS]: numericFilterValueSchema,
   [ViewFilterOperand.IS_NOT]: numericFilterValueSchema,
@@ -82,7 +76,7 @@ const numericOperandsSchemas = {
 };
 
 export const FILTER_VALUE_SCHEMAS_MAP = {
-  TEXT: textOperandsSchemas,
+  TEXT: containsOperandsSchemas,
   EMAILS: containsOperandsSchemas,
   FULL_NAME: containsOperandsSchemas,
   ADDRESS: containsOperandsSchemas,

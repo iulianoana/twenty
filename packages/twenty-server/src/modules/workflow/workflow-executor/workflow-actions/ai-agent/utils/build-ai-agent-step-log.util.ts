@@ -1,5 +1,4 @@
 import { type AgentRunSummary } from 'twenty-shared/ai';
-import { isDefined } from 'twenty-shared/utils';
 import { type WorkflowRunStepLog } from 'twenty-shared/workflow';
 
 export const buildAiAgentStepLog = ({
@@ -7,13 +6,9 @@ export const buildAiAgentStepLog = ({
   threadId,
 }: {
   summary: AgentRunSummary;
-  threadId: string | null;
+  threadId: string;
 }): WorkflowRunStepLog => ({
-  details: {
-    type: 'AI_AGENT',
-    ...summary,
-    ...(isDefined(threadId) ? { threadId } : {}),
-  },
+  details: { type: 'AI_AGENT', ...summary, threadId },
   entries: [],
   sizeBytes: 0,
 });

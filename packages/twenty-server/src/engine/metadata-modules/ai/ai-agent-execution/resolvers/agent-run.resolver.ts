@@ -20,31 +20,27 @@ import { AuthApplication } from 'src/engine/decorators/auth/auth-application.dec
 import { AuthUserWorkspaceId } from 'src/engine/decorators/auth/auth-user-workspace-id.decorator';
 import { AuthWorkspaceMemberId } from 'src/engine/decorators/auth/auth-workspace-member-id.decorator';
 import { AuthWorkspace } from 'src/engine/decorators/auth/auth-workspace.decorator';
-import { GenerateInputDTO } from 'src/engine/metadata-modules/ai/ai-agent-execution/dtos/generate.input';
-import { GenerateResultDTO } from 'src/engine/metadata-modules/ai/ai-agent-execution/dtos/generate-result.dto';
+import { SettingsPermissionGuard } from 'src/engine/guards/settings-permission.guard';
+import { AuthPrincipalGuard } from 'src/engine/guards/auth-principal.guard';
 import { RunAgentInputDTO } from 'src/engine/metadata-modules/ai/ai-agent-execution/dtos/run-agent.input';
 import { RunAgentResultDTO } from 'src/engine/metadata-modules/ai/ai-agent-execution/dtos/run-agent-result.dto';
 import { AgentRunService } from 'src/engine/metadata-modules/ai/ai-agent-execution/services/agent-run.service';
-import { AiGenerateService } from 'src/engine/metadata-modules/ai/ai-agent-execution/services/ai-generate.service';
 import { AiGraphqlApiExceptionInterceptor } from 'src/engine/metadata-modules/ai/interceptors/ai-graphql-api-exception.interceptor';
 import { AuthGraphqlApiExceptionFilter } from 'src/engine/core-modules/auth/filters/auth-graphql-api-exception.filter';
-import { AccessPolicyGuard } from 'src/engine/guards/access-policy.guard';
 
 @UseGuards(
-  AccessPolicyGuard({
-    authPrincipals: {
-      userSession: {
-        standard: true,
-        impersonated: true,
-        playground: true,
-        workspaceAgnostic: false,
-      },
-      apiKey: true,
-      oauthClient: true,
-      application: true,
+  AuthPrincipalGuard({
+    userSession: {
+      standard: true,
+      impersonated: true,
+      playground: true,
+      workspaceAgnostic: false,
     },
-    requiredPermissionFlags: [PermissionFlagType.AI],
+    apiKey: true,
+    oauthClient: true,
+    application: true,
   }),
+  SettingsPermissionGuard(PermissionFlagType.AI),
 )
 @UseInterceptors(AiGraphqlApiExceptionInterceptor)
 @UseFilters(
@@ -55,10 +51,7 @@ import { AccessPolicyGuard } from 'src/engine/guards/access-policy.guard';
 @UsePipes(ResolverValidationPipe)
 @MetadataResolver()
 export class AgentRunResolver {
-  constructor(
-    private readonly agentRunService: AgentRunService,
-    private readonly aiGenerateService: AiGenerateService,
-  ) {}
+  constructor(private readonly agentRunService: AgentRunService) {}
 
   @Mutation(() => RunAgentResultDTO)
   async runAgent(
@@ -73,28 +66,6 @@ export class AgentRunResolver {
     workspaceMemberId: string | undefined,
   ): Promise<RunAgentResultDTO> {
     return this.agentRunService.run({
-      workspace,
-      requestUserWorkspaceId: userWorkspaceId ?? null,
-      requestWorkspaceMemberId: workspaceMemberId ?? null,
-      callerApplication,
-      callerApiKey,
-      input,
-    });
-  }
-
-  @Mutation(() => GenerateResultDTO)
-  async generate(
-    @Args('input') input: GenerateInputDTO,
-    @AuthWorkspace() workspace: FlatWorkspace,
-    @AuthUserWorkspaceId({ allowUndefined: true })
-    userWorkspaceId: string | undefined,
-    @AuthApplication({ allowUndefined: true })
-    callerApplication: FlatApplication | undefined,
-    @AuthApiKey() callerApiKey: FlatApiKey | undefined,
-    @AuthWorkspaceMemberId()
-    workspaceMemberId: string | undefined,
-  ): Promise<GenerateResultDTO> {
-    return this.aiGenerateService.generate({
       workspace,
       requestUserWorkspaceId: userWorkspaceId ?? null,
       requestWorkspaceMemberId: workspaceMemberId ?? null,

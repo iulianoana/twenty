@@ -1,4 +1,5 @@
 import { useQuery } from '@apollo/client/react';
+import { t } from '@lingui/core/macro';
 import { useParams } from 'react-router-dom';
 import { isDefined } from 'twenty-shared/utils';
 import { Section } from 'twenty-ui/components/layout';
@@ -12,10 +13,8 @@ import { FindOneSkillDocument } from '~/generated-metadata/graphql';
 import { SettingsSkillFormContent } from '~/pages/settings/ai/components/SettingsSkillFormContent';
 import { useNavigateToNotFoundOnLoadFailure } from '~/pages/settings/ai/hooks/useNavigateToNotFoundOnLoadFailure';
 import { getSettingsAiBreadcrumbLinks } from '~/pages/settings/ai/utils/getSettingsAiBreadcrumbLinks';
-import { useLingui } from '@lingui/react/macro';
 
 export const SettingsSkillForm = ({ mode }: { mode: 'create' | 'edit' }) => {
-  const { t } = useLingui();
   const theme = useTheme();
   const { getIcon } = useIcons();
   const { skillId = '' } = useParams<{ skillId: string }>();

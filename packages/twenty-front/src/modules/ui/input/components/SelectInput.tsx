@@ -1,3 +1,4 @@
+import { t } from '@lingui/core/macro';
 import { isNonEmptyString } from '@sniptt/guards';
 import { createElement, useState } from 'react';
 import { isDefined, isNonEmptyArray } from 'twenty-shared/utils';
@@ -7,7 +8,6 @@ import { type SelectOption } from 'twenty-ui/primitives/input';
 import { AddSelectOptionDropdownSection } from '@/ui/input/components/AddSelectOptionDropdownSection';
 import { filterSelectOptionsBySearch } from '@/ui/input/utils/filterSelectOptionsBySearch';
 import { normalizeSearchText } from 'twenty-ui/utilities';
-import { useLingui } from '@lingui/react/macro';
 
 type SelectInputProps = {
   onOptionSelected: (selectedOption: SelectOption) => void;
@@ -26,7 +26,6 @@ export const SelectInput = ({
   value,
   onAddSelectOption,
 }: SelectInputProps) => {
-  const { t } = useLingui();
   const [searchFilter, setSearchFilter] = useState('');
   const isSearching = isNonEmptyString(searchFilter.trim());
   const filteredOptions = filterSelectOptionsBySearch({

@@ -11,6 +11,7 @@ import { canCreateRecordsForObjectMetadataItem } from '@/object-record/utils/can
 import { useUserTimezone } from '@/ui/input/components/internal/date/hooks/useUserTimezone';
 import { useAtomComponentSelectorValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentSelectorValue';
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
 import { useContext } from 'react';
 import { type Temporal } from 'temporal-polyfill';
 import { FieldMetadataType } from 'twenty-shared/types';
@@ -18,7 +19,6 @@ import { isDefined } from 'twenty-shared/utils';
 import { IconPlus } from 'twenty-ui/icon';
 import { Button } from 'twenty-ui/primitives/input';
 import { useTheme, themeCssVariables } from 'twenty-ui/theme';
-import { useLingui } from '@lingui/react/macro';
 
 const StyledButtonContainer = styled.div`
   height: auto;
@@ -33,7 +33,6 @@ type RecordCalendarAddNewProps = {
 export const RecordCalendarAddNew = ({
   cardDate,
 }: RecordCalendarAddNewProps) => {
-  const { t } = useLingui();
   const isRecordCalendarReadOnly = useAtomComponentStateValue(
     isRecordCalendarReadOnlyComponentState,
   );

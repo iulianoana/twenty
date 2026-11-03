@@ -6,6 +6,7 @@ import { type VariablePickerComponent } from '@/ui/input/types/VariablePickerCom
 import { StyledTextInput } from '@/ui/field/input/components/TextInput';
 import { Field } from 'twenty-ui/primitives/input';
 import { isStandaloneVariableString } from 'twenty-shared/workflow';
+import { t } from '@lingui/core/macro';
 import isEmpty from 'lodash.isempty';
 import { useId, useState } from 'react';
 import { isDefined } from 'twenty-shared/utils';
@@ -13,7 +14,6 @@ import {
   canBeCastAsNumberOrNull,
   castAsNumberOrNull,
 } from '~/utils/cast-as-number-or-null';
-import { useLingui } from '@lingui/react/macro';
 
 type FormNumberFieldInputProps = {
   label?: string;
@@ -50,7 +50,6 @@ export const FormNumberFieldInput = ({
   readonly,
   error: errorFromProps,
 }: FormNumberFieldInputProps) => {
-  const { t } = useLingui();
   const instanceId = useId();
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
     undefined,

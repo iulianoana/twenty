@@ -5,7 +5,6 @@ import { DefineTool } from 'src/engine/core-modules/tool-provider/decorators/def
 import { BaseTool } from 'src/engine/core-modules/tool-provider/interfaces/base-tool.interface';
 import { type ToolExecuteArgs } from 'src/engine/core-modules/tool-provider/types/tool-execute-args.type';
 import { type ToolOutput } from 'src/engine/core-modules/tool/types/tool-output.type';
-import { VIEW_READ_ACCESS_POLICY } from 'src/engine/metadata-modules/view/constants/view-read-access-policy.constant';
 import { ViewQueryParamsService } from 'src/engine/metadata-modules/view/services/view-query-params.service';
 
 const getViewQueryParamsInputSchema = z.object({
@@ -18,7 +17,7 @@ const getViewQueryParamsInputSchema = z.object({
 @DefineTool({
   name: 'get_view_query_parameters',
   category: ToolCategory.VIEW,
-  accessPolicy: VIEW_READ_ACCESS_POLICY,
+  requiredPermissionFlags: [],
   description:
     'Get filter and sort parameters from a view. Use these parameters with find_* tools to query records matching the view.',
 })

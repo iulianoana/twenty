@@ -78,8 +78,9 @@ const sumPetColumn = ({
       featureFlagsMap: {},
     } as unknown as WorkspaceInternalContext,
     authContext: {} as WorkspaceAuthContext,
+    objectPermissionsByRoleId: {},
   })
-    .getRepositoryWithoutPermissionChecks('pet')
+    .getRepository('pet', { shouldBypassPermissionChecks: true })
     .sum(columnName);
 
 const expectSingleQueryContaining = (pool: Pool, sqlFragment: string) => {

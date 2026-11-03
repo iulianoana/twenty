@@ -1,5 +1,3 @@
-import { isString } from '@sniptt/guards';
-import { type AiRunScope } from 'twenty-shared/ai';
 import { isDefined, isPlainObject } from 'twenty-shared/utils';
 
 import { type WorkflowManifestReferences } from 'src/engine/core-modules/application/application-manifest/types/workflow-manifest-references.type';
@@ -96,55 +94,23 @@ export const buildWorkflowManifestInverseReferenceResolvers = (
     reason: string;
   }): string => universalIdentifier ?? markUnsupported(reason);
 
-  const exportedUniversalIdentifier = ({
-    universalIdentifier,
-    exportedByUniversalIdentifier,
-    reason,
-  }: {
-    universalIdentifier: string | undefined;
-    exportedByUniversalIdentifier: ReadonlyMap<string, unknown> | undefined;
-    reason: string;
-  }): string =>
+  const objectUniversalIdentifier = (nameSingular: unknown): string =>
     resolveOrMarkUnsupported({
       universalIdentifier:
-        isDefined(universalIdentifier) &&
-        exportedByUniversalIdentifier?.has(universalIdentifier)
-          ? universalIdentifier
+        typeof nameSingular === 'string'
+          ? objectUniversalIdentifierByNameSingular.get(nameSingular)
           : undefined,
-      reason,
-    });
-
-  const exportedObjectUniversalIdentifier = (
-    universalIdentifier: string | undefined,
-  ): string =>
-    exportedUniversalIdentifier({
-      universalIdentifier,
-      exportedByUniversalIdentifier: references.objectByUniversalIdentifier,
       reason: 'workflow referencing an object that is not exported',
     });
 
-  const exportedFieldUniversalIdentifier = (
-    universalIdentifier: string | undefined,
-  ): string =>
-    exportedUniversalIdentifier({
-      universalIdentifier,
-      exportedByUniversalIdentifier: references.fieldByUniversalIdentifier,
+  const fieldUniversalIdentifier = (fieldMetadataId: unknown): string =>
+    resolveOrMarkUnsupported({
+      universalIdentifier:
+        typeof fieldMetadataId === 'string'
+          ? fieldUniversalIdentifierById.get(fieldMetadataId)
+          : undefined,
       reason: 'workflow referencing a field that is not exported',
     });
-
-  const objectUniversalIdentifier = (nameSingular: unknown): string =>
-    exportedObjectUniversalIdentifier(
-      isString(nameSingular)
-        ? objectUniversalIdentifierByNameSingular.get(nameSingular)
-        : undefined,
-    );
-
-  const fieldUniversalIdentifier = (fieldMetadataId: unknown): string =>
-    exportedFieldUniversalIdentifier(
-      isString(fieldMetadataId)
-        ? fieldUniversalIdentifierById.get(fieldMetadataId)
-        : undefined,
-    );
 
   const fieldUniversalIdentifierByName = ({
     objectUniversalIdentifier,
@@ -153,34 +119,15 @@ export const buildWorkflowManifestInverseReferenceResolvers = (
     objectUniversalIdentifier: string;
     fieldName: unknown;
   }): string =>
-    exportedFieldUniversalIdentifier(
-      isString(fieldName)
-        ? fieldUniversalIdentifierByObjectFieldName.get(
-            toObjectFieldKey({ objectUniversalIdentifier, name: fieldName }),
-          )
-        : undefined,
-    );
-
-  // The scope already names objects and fields by universal identifier, but only exported ones can be applied
-  const checkAiRunScopeReferences = (
-    scope:
-      | Pick<AiRunScope, 'objectPermissions' | 'fieldPermissions'>
-      | null
-      | undefined,
-  ): void => {
-    for (const { objectUniversalIdentifier } of scope?.objectPermissions ??
-      []) {
-      exportedObjectUniversalIdentifier(objectUniversalIdentifier);
-    }
-
-    for (const {
-      objectUniversalIdentifier,
-      fieldUniversalIdentifier,
-    } of scope?.fieldPermissions ?? []) {
-      exportedObjectUniversalIdentifier(objectUniversalIdentifier);
-      exportedFieldUniversalIdentifier(fieldUniversalIdentifier);
-    }
-  };
+    resolveOrMarkUnsupported({
+      universalIdentifier:
+        typeof fieldName === 'string'
+          ? fieldUniversalIdentifierByObjectFieldName.get(
+              toObjectFieldKey({ objectUniversalIdentifier, name: fieldName }),
+            )
+          : undefined,
+      reason: 'workflow referencing a field that is not exported',
+    });
 
   const watchedFieldUniversalIdentifier = ({
     objectUniversalIdentifier,
@@ -190,31 +137,34 @@ export const buildWorkflowManifestInverseReferenceResolvers = (
     watchedFieldName: unknown;
   }): string =>
     resolveOrMarkUnsupported({
-      universalIdentifier: isString(watchedFieldName)
-        ? fieldUniversalIdentifierByWatchedFieldName.get(
-            toObjectFieldKey({
-              objectUniversalIdentifier,
-              name: watchedFieldName,
-            }),
-          )
-        : undefined,
+      universalIdentifier:
+        typeof watchedFieldName === 'string'
+          ? fieldUniversalIdentifierByWatchedFieldName.get(
+              toObjectFieldKey({
+                objectUniversalIdentifier,
+                name: watchedFieldName,
+              }),
+            )
+          : undefined,
       reason: 'workflow watching a field that is not exported',
     });
 
   const logicFunctionUniversalIdentifier = (logicFunctionId: unknown): string =>
     resolveOrMarkUnsupported({
-      universalIdentifier: isString(logicFunctionId)
-        ? logicFunctionUniversalIdentifierById.get(logicFunctionId)
-        : undefined,
+      universalIdentifier:
+        typeof logicFunctionId === 'string'
+          ? logicFunctionUniversalIdentifierById.get(logicFunctionId)
+          : undefined,
       reason:
         'workflow step on a logic function that is not a workflow action of this application',
     });
 
   const agentUniversalIdentifier = (agentId: unknown): string =>
     resolveOrMarkUnsupported({
-      universalIdentifier: isString(agentId)
-        ? agentUniversalIdentifierById.get(agentId)
-        : undefined,
+      universalIdentifier:
+        typeof agentId === 'string'
+          ? agentUniversalIdentifierById.get(agentId)
+          : undefined,
       reason: 'workflow step on an agent the application does not export',
     });
 
@@ -226,9 +176,10 @@ export const buildWorkflowManifestInverseReferenceResolvers = (
     stepType: WorkflowConnectedAccountStepType;
     connectedAccountId: unknown;
   }): { connectedAccountId: unknown } | { connectedAccountHandle: string } => {
-    const connectedAccount = isString(connectedAccountId)
-      ? connectedAccountById.get(connectedAccountId)
-      : undefined;
+    const connectedAccount =
+      typeof connectedAccountId === 'string'
+        ? connectedAccountById.get(connectedAccountId)
+        : undefined;
 
     if (
       !isDefined(connectedAccount) ||
@@ -289,7 +240,6 @@ export const buildWorkflowManifestInverseReferenceResolvers = (
     watchedFieldUniversalIdentifier,
     logicFunctionUniversalIdentifier,
     agentUniversalIdentifier,
-    checkAiRunScopeReferences,
     connectedAccountReference,
     markUnsupported,
     getUnsupportedReason: (): string | undefined => unsupportedReasons[0],

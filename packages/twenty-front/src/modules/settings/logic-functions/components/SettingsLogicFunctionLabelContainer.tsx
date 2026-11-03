@@ -1,5 +1,5 @@
 import { SettingsEditableTitle } from '@/settings/components/SettingsEditableTitle';
-import { useLingui } from '@lingui/react/macro';
+import { t } from '@lingui/core/macro';
 
 type SettingsLogicFunctionLabelContainerProps = {
   value: string;
@@ -12,7 +12,6 @@ export const SettingsLogicFunctionLabelContainer = ({
   onChange,
   readonly = false,
 }: SettingsLogicFunctionLabelContainerProps) => {
-  const { t } = useLingui();
   return (
     <SettingsEditableTitle
       instanceId="logic-function-name-input"

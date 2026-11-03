@@ -10,7 +10,6 @@ const WORKSPACE_BOUND_PROPERTIES = [
   'userWorkspaceId',
   'apiKeyId',
   'webhookId',
-  'targetApplicationId',
   'workflowVersionId',
   'coreWorkflowVersionId',
   'targetRecordId',

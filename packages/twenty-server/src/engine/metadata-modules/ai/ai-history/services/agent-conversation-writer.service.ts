@@ -84,7 +84,7 @@ export class AgentConversationWriterService {
     scope,
   }: {
     workspaceId: string;
-    threadId: string | null;
+    threadId: string;
     agentId: string | null;
     status: AgentTurnStatus;
     createdBy?: ActorMetadata;

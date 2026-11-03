@@ -191,7 +191,7 @@ describe('View Filter Resolver', () => {
         input: {
           fieldMetadataId: testFieldMetadataId,
           viewId: testViewId,
-          operand: ViewFilterOperand.GREATER_THAN_OR_EQUAL,
+          operand: ViewFilterOperand.IS,
           value: 'test',
         },
         expectToFail: true,

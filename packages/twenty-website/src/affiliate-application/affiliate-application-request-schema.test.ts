@@ -4,7 +4,6 @@ const VALID_REQUEST = {
   name: 'Ada Lovelace',
   email: 'ada@example.com',
   partnerType: 'CONTENT_CREATOR',
-  mainChannel: 'https://youtube.com/@ada',
   acceptsTerms: true,
 } as const;
 
@@ -33,45 +32,10 @@ describe('affiliateApplicationRequestSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('rejects an application without a main channel', () => {
-    expect(
-      affiliateApplicationRequestSchema.safeParse({
-        ...VALID_REQUEST,
-        mainChannel: undefined,
-      }).success,
-    ).toBe(false);
-    expect(
-      affiliateApplicationRequestSchema.safeParse({
-        ...VALID_REQUEST,
-        mainChannel: '  ',
-      }).success,
-    ).toBe(false);
-  });
-
-  it('adds https:// to a main channel typed without it', () => {
+  it('rejects a main channel that is not an http URL', () => {
     const result = affiliateApplicationRequestSchema.safeParse({
       ...VALID_REQUEST,
-      mainChannel: 'youtube.com/@ada',
-    });
-
-    expect(result.success && result.data.mainChannel).toBe(
-      'https://youtube.com/@ada',
-    );
-  });
-
-  it('rejects an email typed as the main channel', () => {
-    const result = affiliateApplicationRequestSchema.safeParse({
-      ...VALID_REQUEST,
-      mainChannel: 'john@gmail.com',
-    });
-
-    expect(result.success).toBe(false);
-  });
-
-  it('rejects a main channel that is not a URL', () => {
-    const result = affiliateApplicationRequestSchema.safeParse({
-      ...VALID_REQUEST,
-      mainChannel: 'my newsletter',
+      mainChannel: 'twenty.com',
     });
 
     expect(result.success).toBe(false);

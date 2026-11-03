@@ -80,7 +80,6 @@ export class AgentRunConversationService {
     workspaceId,
     threadId,
     agentId,
-    turnId: requestedTurnId,
     senderUserWorkspaceId,
     senderApplicationId,
     createdBy,
@@ -89,7 +88,6 @@ export class AgentRunConversationService {
     workspaceId: string;
     threadId: string;
     agentId: string | null;
-    turnId?: string;
     senderUserWorkspaceId: string | null;
     senderApplicationId: string | null;
     createdBy: ActorMetadata;
@@ -106,7 +104,6 @@ export class AgentRunConversationService {
           workspaceId,
           threadId,
           agentId,
-          id: requestedTurnId,
           status: AgentTurnStatus.RUNNING,
           createdBy,
           scope,

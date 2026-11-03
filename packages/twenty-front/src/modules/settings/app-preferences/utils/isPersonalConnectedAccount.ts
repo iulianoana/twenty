@@ -5,9 +5,7 @@ export const isPersonalConnectedAccount = ({
   account,
   userWorkspaceId,
 }: {
-  account: Pick<ConnectedAccount, 'scope' | 'userWorkspaceId'> & {
-    provider: string;
-  };
+  account: Pick<ConnectedAccount, 'provider' | 'scope' | 'userWorkspaceId'>;
   userWorkspaceId: string;
 }) =>
   account.userWorkspaceId === userWorkspaceId &&

@@ -93,14 +93,14 @@ describe('agentChatFirstUnreadMessageIdSelector', () => {
     ).toBe('reply');
   });
 
-  it('hides the unread divider when the member never read the thread', () => {
+  it('starts from the first message of others when the member never read the thread', () => {
     expect(
       getFirstUnreadMessageId({
         threadId: THREAD_ID,
         isUnread: true,
         lastReadAt: null,
       }),
-    ).toBeNull();
+    ).toBe('read');
   });
 
   it('shows nothing when the thread was read when opened', () => {
@@ -154,7 +154,6 @@ describe('agentChatFirstUnreadMessageIdSelector', () => {
           lastReadAt: null,
         },
         [
-          buildMessage('mine', 'user', '2026-10-01T10:05:00.000Z', ME),
           buildMessage('legacy', 'user', '2026-10-01T10:06:00.000Z'),
           buildMessage('reply', 'assistant', '2026-10-01T10:08:00.000Z'),
         ],
@@ -162,7 +161,7 @@ describe('agentChatFirstUnreadMessageIdSelector', () => {
     ).toBe('legacy');
   });
 
-  it('hides the unread divider above the first visible message after a silent reply', () => {
+  it('skips a reply Ada chose not to send', () => {
     expect(
       getFirstUnreadMessageId(
         {
@@ -191,6 +190,6 @@ describe('agentChatFirstUnreadMessageIdSelector', () => {
           ),
         ],
       ),
-    ).toBeNull();
+    ).toBe('teammate');
   });
 });

@@ -8,6 +8,7 @@ import { configVariableGroupFilterState } from '@/settings/admin-panel/config-va
 import { configVariableSourceFilterState } from '@/settings/admin-panel/config-variables/states/configVariableSourceFilterState';
 import { showHiddenGroupVariablesState } from '@/settings/admin-panel/config-variables/states/showHiddenGroupVariablesState';
 import { styled } from '@linaria/react';
+import { t } from '@lingui/core/macro';
 import { useLingui } from '@lingui/react/macro';
 import { useMemo, useState } from 'react';
 import { useQuery } from '@apollo/client/react';
@@ -31,7 +32,6 @@ const StyledTableContainer = styled.div`
 `;
 
 export const SettingsAdminConfigVariables = () => {
-  const { t } = useLingui();
   const { i18n } = useLingui();
   const apolloAdminClient = useApolloAdminClient();
   const { data: configVariables, loading: configVariablesLoading } = useQuery(
@@ -64,7 +64,7 @@ export const SettingsAdminConfigVariables = () => {
         label: group.name,
       })),
     ],
-    [allGroups, t],
+    [allGroups],
   );
 
   const allVariables = useMemo(

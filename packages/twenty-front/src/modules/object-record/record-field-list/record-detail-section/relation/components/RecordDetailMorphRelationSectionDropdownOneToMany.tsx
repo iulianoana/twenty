@@ -1,4 +1,6 @@
 import { type ReactElement, useContext } from 'react';
+import { t } from '@lingui/core/macro';
+
 import { useObjectMetadataItems } from '@/object-metadata/hooks/useObjectMetadataItems';
 import { useRecordFieldsScopeContextOrThrow } from '@/object-record/record-field-list/contexts/RecordFieldsScopeContext';
 import { useGetMorphRelationRelatedRecordsWithObjectNameSingular } from '@/object-record/record-field-list/record-detail-section/relation/components/hooks/useGetMorphRelationRelatedRecordsWithObjectNameSingular';
@@ -20,7 +22,6 @@ import { useSetAtomComponentState } from '@/ui/utilities/state/jotai/hooks/useSe
 import { FieldMetadataType } from 'twenty-shared/types';
 import { CustomError, isDefined } from 'twenty-shared/utils';
 import { doNotTranslate } from 'twenty-shared/i18n';
-import { useLingui } from '@lingui/react/macro';
 
 type RecordDetailMorphRelationSectionDropdownOneToManyProps = {
   dropdownTriggerClickableComponent: ReactElement;
@@ -29,7 +30,6 @@ type RecordDetailMorphRelationSectionDropdownOneToManyProps = {
 export const RecordDetailMorphRelationSectionDropdownOneToMany = ({
   dropdownTriggerClickableComponent,
 }: RecordDetailMorphRelationSectionDropdownOneToManyProps) => {
-  const { t } = useLingui();
   const { scopeInstanceId } = useRecordFieldsScopeContextOrThrow();
   const { recordId, fieldDefinition } = useContext(FieldContext);
 

@@ -36,7 +36,9 @@ export class BackfillWorkflowVersionToCoreCommand extends ProvisionedWorkspaceCo
         await this.workspaceOrmManager.executeInWorkspaceContext(
           async () => {
             const workflowVersionRepository =
-              this.workspaceOrmManager.getRepositoryWithoutPermissionChecks<WorkflowVersionWorkspaceEntity>('workflowVersion');
+              this.workspaceOrmManager.getRepository<WorkflowVersionWorkspaceEntity>('workflowVersion',
+                { shouldBypassPermissionChecks: true },
+              );
 
             return workflowVersionRepository.find();
           },

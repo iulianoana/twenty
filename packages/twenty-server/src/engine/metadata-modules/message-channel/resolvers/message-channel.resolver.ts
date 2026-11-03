@@ -23,6 +23,9 @@ import { AuthUserWorkspaceId } from 'src/engine/decorators/auth/auth-user-worksp
 import { AuthWorkspace } from 'src/engine/decorators/auth/auth-workspace.decorator';
 import { AllowSuspendedWorkspace } from 'src/engine/decorators/auth/allow-suspended-workspace.decorator';
 import { CustomPermissionGuard } from 'src/engine/guards/custom-permission.guard';
+import { NoPermissionGuard } from 'src/engine/guards/no-permission.guard';
+import { SettingsPermissionGuard } from 'src/engine/guards/settings-permission.guard';
+import { AuthPrincipalGuard } from 'src/engine/guards/auth-principal.guard';
 import { ConnectedAccountMetadataService } from 'src/engine/metadata-modules/connected-account/connected-account-metadata.service';
 import { ConnectedAccountPublicDTO } from 'src/engine/metadata-modules/connected-account/dtos/connected-account-public.dto';
 import { CreateEmailGroupChannelInput } from 'src/engine/metadata-modules/message-channel/dtos/create-email-group-channel.input';
@@ -49,11 +52,9 @@ import {
   MessageChannelType,
   MessageFolderPendingSyncAction,
 } from 'twenty-shared/types';
-import { AccessPolicyGuard } from 'src/engine/guards/access-policy.guard';
-import { type AccessPolicy } from 'src/engine/guards/types/access-policy.type';
 
-const MESSAGE_CHANNEL_ACCESS_POLICY: AccessPolicy = {
-  authPrincipals: {
+@UseGuards(
+  AuthPrincipalGuard({
     userSession: {
       standard: true,
       impersonated: true,
@@ -63,25 +64,8 @@ const MESSAGE_CHANNEL_ACCESS_POLICY: AccessPolicy = {
     apiKey: true,
     oauthClient: true,
     application: true,
-  },
-  requiredPermissionFlags: [],
-};
-
-const EMAIL_GROUP_CHANNEL_ACCESS_POLICY: AccessPolicy = {
-  authPrincipals: {
-    userSession: {
-      standard: true,
-      impersonated: true,
-      playground: true,
-      workspaceAgnostic: false,
-    },
-    apiKey: true,
-    oauthClient: true,
-    application: true,
-  },
-  requiredPermissionFlags: [PermissionFlagType.WORKSPACE],
-};
-
+  }),
+)
 @UseInterceptors(MessageChannelGraphqlApiExceptionInterceptor)
 @MetadataResolver(() => MessageChannelDTO)
 @UseFilters(AuthGraphqlApiExceptionFilter)
@@ -158,7 +142,7 @@ export class MessageChannelResolver {
   }
 
   @Query(() => [MessageChannelDTO])
-  @UseGuards(AccessPolicyGuard(MESSAGE_CHANNEL_ACCESS_POLICY))
+  @UseGuards(NoPermissionGuard)
   @AllowSuspendedWorkspace()
   async myMessageChannels(
     @AuthWorkspace() workspace: WorkspaceEntity,
@@ -186,10 +170,7 @@ export class MessageChannelResolver {
   }
 
   @Mutation(() => MessageChannelDTO)
-  @UseGuards(
-    AccessPolicyGuard(MESSAGE_CHANNEL_ACCESS_POLICY),
-    CustomPermissionGuard,
-  )
+  @UseGuards(CustomPermissionGuard)
   async updateMessageChannel(
     @Args('input') input: UpdateMessageChannelInput,
     @AuthWorkspace() workspace: WorkspaceEntity,
@@ -265,7 +246,7 @@ export class MessageChannelResolver {
   }
 
   @Mutation(() => CreateEmailGroupChannelOutput)
-  @UseGuards(AccessPolicyGuard(EMAIL_GROUP_CHANNEL_ACCESS_POLICY))
+  @UseGuards(SettingsPermissionGuard(PermissionFlagType.WORKSPACE))
   async createEmailGroupChannel(
     @Args('input') input: CreateEmailGroupChannelInput,
     @AuthWorkspace() workspace: WorkspaceEntity,
@@ -280,7 +261,7 @@ export class MessageChannelResolver {
   }
 
   @Mutation(() => MessageChannelDTO)
-  @UseGuards(AccessPolicyGuard(EMAIL_GROUP_CHANNEL_ACCESS_POLICY))
+  @UseGuards(SettingsPermissionGuard(PermissionFlagType.WORKSPACE))
   async updateEmailGroupChannel(
     @Args('input') input: UpdateEmailGroupChannelInput,
     @AuthWorkspace() workspace: WorkspaceEntity,
@@ -295,7 +276,7 @@ export class MessageChannelResolver {
   }
 
   @Mutation(() => MessageChannelDTO)
-  @UseGuards(AccessPolicyGuard(EMAIL_GROUP_CHANNEL_ACCESS_POLICY))
+  @UseGuards(SettingsPermissionGuard(PermissionFlagType.WORKSPACE))
   async deleteEmailGroupChannel(
     @Args('id', { type: () => UUIDScalarType }) id: string,
     @AuthWorkspace() workspace: WorkspaceEntity,

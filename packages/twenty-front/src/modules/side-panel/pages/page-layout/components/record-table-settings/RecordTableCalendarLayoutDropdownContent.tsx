@@ -1,6 +1,7 @@
 import { ChartSettingsDropdownSection } from '@/side-panel/pages/page-layout/components/chart-settings/ChartSettingsDropdownSection';
 import { SelectOptionIcon } from '@/ui/input/components/SelectOptionIcon';
 import { useRecordTableWidgetLayoutCallbacks } from '@/page-layout/widgets/record-table/hooks/useRecordTableWidgetLayoutCallbacks';
+import { t } from '@lingui/core/macro';
 import {
   IconCalendarEvent,
   IconCalendarMonth,
@@ -8,7 +9,6 @@ import {
 } from 'twenty-ui/icon';
 import { Dropdown } from 'twenty-ui/components/navigation';
 import { ViewCalendarLayout } from '~/generated-metadata/graphql';
-import { useLingui } from '@lingui/react/macro';
 
 type RecordTableCalendarLayoutDropdownContentProps = {
   pageLayoutId: string;
@@ -21,7 +21,6 @@ export const RecordTableCalendarLayoutDropdownContent = ({
   widgetId,
   currentCalendarLayout,
 }: RecordTableCalendarLayoutDropdownContentProps) => {
-  const { t } = useLingui();
   const { handleCalendarLayoutChange } = useRecordTableWidgetLayoutCallbacks({
     pageLayoutId,
     widgetId,

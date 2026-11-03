@@ -91,8 +91,9 @@ export class CalendarEventsImportService {
           });
 
           const workspaceMemberRepository =
-            this.workspaceOrmManager.getRepositoryWithoutPermissionChecks<WorkspaceMemberWorkspaceEntity>(
+            this.workspaceOrmManager.getRepository<WorkspaceMemberWorkspaceEntity>(
               'workspaceMember',
+              { shouldBypassPermissionChecks: true },
             );
 
           const workspaceMember = userWorkspace
@@ -155,8 +156,9 @@ export class CalendarEventsImportService {
           }
           if (eventExternalIdsToRemove.length > 0) {
             const calendarChannelEventAssociationRepository =
-              this.workspaceOrmManager.getRepositoryWithoutPermissionChecks<CalendarChannelEventAssociationWorkspaceEntity>(
+              this.workspaceOrmManager.getRepository<CalendarChannelEventAssociationWorkspaceEntity>(
                 'calendarChannelEventAssociation',
+                { shouldBypassPermissionChecks: true },
               );
 
             const associationsToDelete =

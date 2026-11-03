@@ -1,3 +1,4 @@
+import { t } from '@lingui/core/macro';
 import { TabListRoot } from '@/ui/layout/tab-list/components/TabListRoot';
 import { Tabs } from 'twenty-ui/primitives/navigation';
 import { styled } from '@linaria/react';
@@ -20,7 +21,6 @@ import { MergePreviewTab } from './MergePreviewTab';
 import { MergeRecordTab } from './MergeRecordTab';
 import { MergeRecordsFooter } from './MergeRecordsFooter';
 import { MergeSettingsTab } from './MergeSettingsTab';
-import { useLingui } from '@lingui/react/macro';
 
 const StyledShowPageRightContainer = styled.div`
   display: flex;
@@ -48,7 +48,6 @@ type MergeRecordsContainerProps = {
 export const MergeRecordsContainer = ({
   objectNameSingular,
 }: MergeRecordsContainerProps) => {
-  const { t } = useLingui();
   const { selectedRecords } = useMergeRecordsSelectedRecords();
 
   const { tabs } = useMergeRecordsContainerTabs(selectedRecords);

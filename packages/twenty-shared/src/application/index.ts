@@ -15,7 +15,6 @@ export type {
   AgentTrigger,
   AgentTriggerManifest,
 } from './agentTriggerType';
-export type { AiRunUsage } from './aiRunUsageType';
 export type { AppConnection } from './appConnectionType';
 export type { AppKeyValueScope } from './appKeyValueScopeType';
 export type { AppKeyValue } from './appKeyValueType';
@@ -191,8 +190,6 @@ export type {
   FrontComponentManifest,
 } from './frontComponentManifestType';
 export type { FrontComponentSharedDependenciesManifest } from './frontComponentSharedDependenciesManifestType';
-export { generateJsonFieldsSchema } from './generateJsonFieldsSchema';
-export type { GenerateResult } from './generateType';
 export type { HealthCheckLogicFunctionApplicationManifest } from './healthCheckLogicFunctionApplicationType';
 export type {
   IdentifyAccountPayload,
@@ -244,16 +241,6 @@ export type {
   RowLevelPermissionPredicateManifest,
   RoleManifest,
 } from './roleManifestType';
-export type {
-  ObjectPermissionGrant,
-  FieldPermissionGrant,
-  RolePermissionGrants,
-} from './rolePermissionGrantsSchema';
-export {
-  objectPermissionGrantSchema,
-  fieldPermissionGrantSchema,
-  rolePermissionGrantsSchema,
-} from './rolePermissionGrantsSchema';
 export type { RunAgentMessageAttachment } from './runAgentMessageAttachmentType';
 export type {
   RunAgentMessageRole,
@@ -306,17 +293,13 @@ export {
 } from './utils/applicationVariableValueSerialization';
 export { computeDependencyFileChecksum } from './utils/computeDependencyFileChecksum';
 export { computePackageJsonChecksum } from './utils/computePackageJsonChecksum';
-export type {
-  EffectiveObjectPermissions,
-  ObjectRecordsPermissionGrants,
-} from './utils/getEffectiveObjectPermissionsFromRoleManifest';
+export type { EffectiveObjectPermissions } from './utils/getEffectiveObjectPermissionsFromRoleManifest';
 export {
   ROLE_LEVEL_FLAG_BY_OBJECT_PERMISSION_ACTION,
   getEffectiveObjectPermissionsFromRoleManifest,
 } from './utils/getEffectiveObjectPermissionsFromRoleManifest';
 export { getRoleManifestGrantsNotCoveredBy } from './utils/getRoleManifestGrantsNotCoveredBy';
 export { getRowLevelRestrictionSignature } from './utils/getRowLevelRestrictionSignature';
-export { hasRunAgentMessageContentOrAttachments } from './utils/hasRunAgentMessageContentOrAttachments';
 export { isConnectionProviderScope } from './utils/isConnectionProviderScope';
 export { isFrontComponentWidgetPageLayoutType } from './utils/isFrontComponentWidgetPageLayoutType';
 export { isReservedSettingsMenuItemSlug } from './utils/isReservedSettingsMenuItemSlug';
@@ -326,8 +309,6 @@ export {
 } from './utils/isReservedSettingsMenuItemTitle';
 export { isValidSettingsMenuItemSlug } from './utils/isValidSettingsMenuItemSlug';
 export { isValidUniversalIdentifier } from './utils/isValidUniversalIdentifier';
-export { resolveObjectPermissionValue } from './utils/resolveObjectPermissionValue';
-export type { ValidationRuleManifest } from './validationRuleManifestType';
 export type {
   ViewManifestFilterValue,
   ViewFieldManifest,

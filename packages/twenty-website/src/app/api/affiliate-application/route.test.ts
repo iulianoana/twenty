@@ -8,7 +8,6 @@ const VALID_PAYLOAD = {
   name: 'Ada Lovelace',
   email: 'Ada@Example.com',
   partnerType: 'CONTENT_CREATOR',
-  mainChannel: 'https://youtube.com/@ada',
   acceptsTerms: true,
 };
 
@@ -70,7 +69,7 @@ describe('POST /api/affiliate-application', () => {
       name: 'Ada Lovelace',
       email: 'ada@example.com',
       partnerType: 'CONTENT_CREATOR',
-      mainChannelUrl: 'https://youtube.com/@ada',
+      mainChannelUrl: '',
       audienceSize: '',
       country: '',
       promotionPlan: '',

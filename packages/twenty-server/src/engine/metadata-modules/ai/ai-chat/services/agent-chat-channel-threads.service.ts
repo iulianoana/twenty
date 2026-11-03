@@ -214,7 +214,9 @@ export class AgentChatChannelThreadsService {
 
     return this.workspaceOrmManager.executeInWorkspaceContext(async () => {
       const repository =
-        this.workspaceOrmManager.getRepository('agentChatThread');
+        this.workspaceOrmManager.getRepositoryWithContextPermissions(
+          'agentChatThread',
+        );
       const readableThreadQueryBuilder = repository
         .createQueryBuilder('readableThread')
         .select('"readableThread"."id"', 'id')

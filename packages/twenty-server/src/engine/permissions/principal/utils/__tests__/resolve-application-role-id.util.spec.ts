@@ -10,7 +10,7 @@ describe('resolveApplicationRoleId', () => {
       resolveApplicationRoleId({
         application: { defaultRoleId: 'application-role-id', sourceType },
       }),
-    ).toBe('application-role-id');
+    ).toEqual({ applicationRoleId: 'application-role-id' });
   });
 
   it.each([
@@ -22,7 +22,7 @@ describe('resolveApplicationRoleId', () => {
       resolveApplicationRoleId({
         application: { defaultRoleId: null, sourceType },
       }),
-    ).toBeUndefined();
+    ).toEqual({ applicationRoleId: null });
   });
 
   it('lends the member role to an OAuth-only application without a role', () => {
@@ -34,17 +34,25 @@ describe('resolveApplicationRoleId', () => {
         },
         userRoleId: 'user-role-id',
       }),
-    ).toBe('user-role-id');
+    ).toEqual({ applicationRoleId: 'user-role-id' });
   });
 
-  it('denies an OAuth-only application without a role when no member role backs it', () => {
-    expect(
-      resolveApplicationRoleId({
-        application: {
-          defaultRoleId: null,
-          sourceType: ApplicationRegistrationSourceType.OAUTH_ONLY,
-        },
-      }),
-    ).toBeUndefined();
+  it.each([undefined, null])(
+    'denies an OAuth-only application without a role when no member role backs it (member role: %s)',
+    (userRoleId) => {
+      expect(
+        resolveApplicationRoleId({
+          application: {
+            defaultRoleId: null,
+            sourceType: ApplicationRegistrationSourceType.OAUTH_ONLY,
+          },
+          userRoleId,
+        }),
+      ).toEqual({ applicationRoleId: null });
+    },
+  );
+
+  it('adds no restriction without an application', () => {
+    expect(resolveApplicationRoleId({ application: undefined })).toEqual({});
   });
 });

@@ -49,7 +49,7 @@ describe('registerTeamsConnection', () => {
     releaseFlags.IS_CHAT_ASSISTANT_RELEASED = true;
     process.env[CHAT_ENABLED_APPLICATION_VARIABLE_KEY] = 'true';
     getConnectionMock.mockResolvedValue({
-      scope: 'WORKSPACE',
+      visibility: 'workspace',
       accessToken: 'graph-token',
     });
     fetchGraphJsonMock.mockResolvedValue({ value: [{ id: TENANT_ID }] });
@@ -97,7 +97,7 @@ describe('registerTeamsConnection', () => {
 
   it('should release the claim instead of claiming when the connection is personal', async () => {
     getConnectionMock.mockResolvedValue({
-      scope: 'USER',
+      visibility: 'user',
       accessToken: 'graph-token',
     });
 

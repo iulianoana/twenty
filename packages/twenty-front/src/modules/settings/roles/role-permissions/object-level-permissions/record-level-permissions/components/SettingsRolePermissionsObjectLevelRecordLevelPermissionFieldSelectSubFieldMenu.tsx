@@ -1,4 +1,6 @@
 /* @license Enterprise */
+
+import { t } from '@lingui/core/macro';
 import {
   FieldMetadataType,
   compositeTypeDefinitions,
@@ -15,7 +17,6 @@ import { ICON_NAME_BY_SUB_FIELD } from '@/object-record/record-filter/constants/
 import { SETTINGS_COMPOSITE_FIELD_TYPE_CONFIGS } from '@/settings/data-model/constants/SettingsCompositeFieldTypeConfigs';
 import { type CompositeFieldSubFieldName } from '@/settings/data-model/types/CompositeFieldSubFieldName';
 import { SelectOptionIcon } from '@/ui/input/components/SelectOptionIcon';
-import { useLingui } from '@lingui/react/macro';
 
 type SettingsRolePermissionsObjectLevelRecordLevelPermissionFieldSelectSubFieldMenuProps =
   {
@@ -28,7 +29,6 @@ export const SettingsRolePermissionsObjectLevelRecordLevelPermissionFieldSelectS
     recordFilterId,
     fieldMetadataItem,
   }: SettingsRolePermissionsObjectLevelRecordLevelPermissionFieldSelectSubFieldMenuProps) => {
-    const { t } = useLingui();
     const { getIcon } = useIcons();
     const { applyAdvancedFilterCompositeSubField } =
       useApplyAdvancedFilterCompositeSubField();
