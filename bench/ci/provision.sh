@@ -97,10 +97,10 @@ cmd_inventory() {
   ips=$(hcloud GET '/primary_ips?per_page=50')
   snapshots=$(hcloud GET '/images?type=snapshot&per_page=50')
   echo "== servers"
-  jq -r '.servers[] | "server name=\(.name) id=\(.id) type=\(.server_type.name) cpu=\(.server_type.cpu_type) cores=\(.server_type.cores) status=\(.status) ipv4=\(.public_net.ipv4.ip // "none") location=\(.datacenter.location.name) created=\(.created) labels=\(.labels|tojson)"' <<<"$servers"
+  jq -r '.servers[] | "server name=\(.name) id=\(.id) type=\(.server_type.name) cpu=\(.server_type.cpu_type) cores=\(.server_type.cores) status=\(.status) has_ipv4=\(.public_net.ipv4 != null) location=\(.datacenter.location.name) created=\(.created) labels=\(.labels|tojson)"' <<<"$servers"
   echo "== primary IPs"
   jq -r --argjson s "$servers" '($s.servers | map({key: (.id|tostring), value: .name}) | from_entries) as $names
-    | .primary_ips[] | "primary_ip name=\(.name) id=\(.id) type=\(.type) ip=\(.ip) assigned=\(.assignee_id != null) server=\(if .assignee_id then ($names[(.assignee_id|tostring)] // (.assignee_id|tostring)) else "-" end) auto_delete=\(.auto_delete) location=\(.datacenter.location.name // .location.name // "?") created=\(.created) labels=\(.labels|tojson)"' <<<"$ips"
+    | .primary_ips[] | "primary_ip name=\(.name) id=\(.id) type=\(.type) assigned=\(.assignee_id != null) server=\(if .assignee_id then ($names[(.assignee_id|tostring)] // (.assignee_id|tostring)) else "-" end) auto_delete=\(.auto_delete) location=\(.datacenter.location.name // .location.name // "?") created=\(.created) labels=\(.labels|tojson)"' <<<"$ips"
   echo "== snapshots by label"
   jq -r '[.images[] | (.labels | to_entries | map("\(.key)=\(.value)") | join(",")) | if . == "" then "(no labels)" else . end] | group_by(.) | .[] | "snapshots \(length) labels=\(.[0])"' <<<"$snapshots"
   echo "== totals"
