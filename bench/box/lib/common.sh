@@ -116,7 +116,7 @@ yarn_in() {
 nx_in() {
   local tree=$1
   shift
-  (cd "$tree" && as_bench node "$tree/node_modules/nx/bin/nx.js" "$@")
+  (cd "$tree" && as_bench node "$tree/node_modules/.bin/nx" "$@")
 }
 
 psql_admin() {
