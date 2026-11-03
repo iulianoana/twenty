@@ -47,7 +47,7 @@ provision_system() {
   mem_gb=$(awk '/MemTotal/ {printf "%d", $2 / 1048576}' /proc/meminfo)
   local slots=2 previews=4 heap=7168
   if ((mem_gb < 28)); then slots=1 previews=3 heap=6144; fi
-  if ((mem_gb < 14)); then slots=1 previews=1 heap=6144; fi
+  if ((mem_gb < 20)); then slots=1 previews=2 heap=6144; fi
   [[ -n $public_ip ]] || public_ip=$(ip -4 route get 1.1.1.1 | awk '{for (i = 1; i < NF; i++) if ($i == "src") print $(i + 1)}')
   cat >"$CONFIG_FILE" <<EOF
 PUBLIC_IP=$public_ip

@@ -8,9 +8,9 @@ on:
         options: [provision, list, destroy]
         default: provision
       server_type:
-        description: Hetzner server type, used only when the server has to be created
+        description: Hetzner server types to try in order (comma-separated), used only when the server has to be created
         type: string
-        default: cx53
+        default: cx53,cpx52,cx43
       location:
         type: string
         default: fsn1

@@ -17,26 +17,33 @@ ssh_key_id() {
   echo "$id"
 }
 
+# Tries each comma-separated server type once, in order; a limit error moves on to the next type.
 create_server() {
-  local server_type=$1 first_location=$2 key_id location body resp code
+  local server_types=$1 first_location=$2 key_id server_type location body resp code
   key_id=$(ssh_key_id)
-  for location in "$first_location" fsn1 nbg1 hel1; do
-    body=$(jq -nc --arg n "$TWENTY_SERVER_NAME" --arg t "$server_type" --arg l "$location" --argjson k "$key_id" \
-      '{name:$n,server_type:$t,image:"ubuntu-24.04",location:$l,ssh_keys:[$k],start_after_create:true,
-        labels:{"outqube-bench":"true",role:"twenty"},public_net:{enable_ipv4:true,enable_ipv6:true}}')
-    log "creating $server_type in $location"
-    resp=$(hcloud POST /servers "$body")
-    if jq -e '.server.id' <<<"$resp" >/dev/null; then
-      CREATED_ID=$(jq -r '.server.id' <<<"$resp")
-      echo "::notice::created server $CREATED_ID type=$server_type location=$location"
-      return 0
-    fi
-    code=$(jq -r '.error.code // "unknown"' <<<"$resp")
-    log "create failed: $code: $(jq -r '.error.message // ""' <<<"$resp" | cut -c1-300)"
-    # Only a location without capacity is worth another location; quota and input errors are reported.
-    [[ $code == resource_unavailable ]] || die "server creation failed ($code); not retrying. Quotas are shared with production evals."
+  IFS=, read -ra types <<<"$server_types"
+  for server_type in "${types[@]}"; do
+    for location in "$first_location" fsn1 nbg1 hel1; do
+      body=$(jq -nc --arg n "$TWENTY_SERVER_NAME" --arg t "$server_type" --arg l "$location" --argjson k "$key_id" \
+        '{name:$n,server_type:$t,image:"ubuntu-24.04",location:$l,ssh_keys:[$k],start_after_create:true,
+          labels:{"outqube-bench":"true",role:"twenty"},public_net:{enable_ipv4:true,enable_ipv6:true}}')
+      log "creating $server_type in $location"
+      resp=$(hcloud POST /servers "$body")
+      if jq -e '.server.id' <<<"$resp" >/dev/null; then
+        CREATED_ID=$(jq -r '.server.id' <<<"$resp")
+        echo "::notice::created server $CREATED_ID type=$server_type location=$location"
+        return 0
+      fi
+      code=$(jq -r '.error.code // "unknown"' <<<"$resp")
+      log "create failed: $code: $(jq -r '.error.message // ""' <<<"$resp" | cut -c1-300)"
+      echo "::warning::$server_type: $code: $(jq -r '.error.message // ""' <<<"$resp" | cut -c1-200)"
+      # A location without capacity is worth another location; a quota error moves to the next type.
+      [[ $code == resource_unavailable ]] && continue
+      [[ $code == resource_limit_exceeded ]] && break
+      die "server creation failed ($code); not retrying"
+    done
   done
-  die "server type $server_type unavailable in every location tried"
+  die "no server created: every type in '$server_types' hit a limit (quotas are shared with production evals)"
 }
 
 wait_running() {
@@ -50,7 +57,7 @@ wait_running() {
 }
 
 cmd_provision() {
-  local server_type=${1:-cx53} location=${2:-fsn1} servers count id ip start
+  local server_type=${1:-cx53,cpx52,cx43} location=${2:-fsn1} servers count id ip start
   require_secrets
   start=$SECONDS
   setup_ssh 0.0.0.0
