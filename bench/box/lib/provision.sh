@@ -79,6 +79,7 @@ EOF
   load_bench_secrets
 
   install_node
+  install_yarn_shim
   setup_postgres
   install -m 644 "$INFRA_DIR"/box/systemd/*.service /etc/systemd/system/
   systemctl daemon-reload
@@ -100,6 +101,17 @@ install_node() {
   mkdir -p "$NODE_DIR"
   tar -xJf "$tmp/node.tar.xz" -C "$NODE_DIR" --strip-components=1
   rm -rf "$tmp"
+}
+
+# Node 26 ships without Yarn; package scripts call `yarn`, so run the release pinned in the nearest .yarnrc.yml.
+install_yarn_shim() {
+  cat >/usr/local/bin/yarn <<'EOF'
+#!/bin/sh
+dir=$PWD
+while [ "$dir" != / ] && [ ! -f "$dir/.yarnrc.yml" ]; do dir=$(dirname "$dir"); done
+exec node "$dir/$(sed -n 's/^yarnPath: //p' "$dir/.yarnrc.yml")" "$@"
+EOF
+  chmod 755 /usr/local/bin/yarn
 }
 
 setup_postgres() {
