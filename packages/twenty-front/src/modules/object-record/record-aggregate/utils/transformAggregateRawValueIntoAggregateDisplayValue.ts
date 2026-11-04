@@ -18,6 +18,8 @@ import { formatNumber } from '@/localization/utils/formatNumber';
 import { formatDateString } from '@/object-record/record-field/ui/utils/formatDateString';
 import { formatDateTimeString } from '@/object-record/record-field/ui/utils/formatDateTimeString';
 
+const MICROS_PER_CURRENCY_UNIT = 1_000;
+
 export const transformAggregateRawValueIntoAggregateDisplayValue = ({
   aggregateFieldMetadataItem,
   aggregateOperation,
@@ -62,10 +64,11 @@ export const transformAggregateRawValueIntoAggregateDisplayValue = ({
   } else {
     switch (aggregateFieldMetadataItem.type) {
       case FieldMetadataType.CURRENCY: {
-        const amount = Number(aggregateRawValue) / 1_000_000;
-        return chartNumberFormat === ChartNumberFormat.FULL
-          ? formatNumber(amount, { decimals: 2, format: numberFormat })
-          : formatToShortNumber(amount);
+        const amount = Number(aggregateRawValue) / MICROS_PER_CURRENCY_UNIT;
+        // Totals are money: show them in full unless a chart asks for short numbers
+        return chartNumberFormat === ChartNumberFormat.SHORT
+          ? formatToShortNumber(amount)
+          : formatNumber(amount, { decimals: 2, format: numberFormat });
       }
 
       case FieldMetadataType.NUMBER: {
