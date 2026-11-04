@@ -14,10 +14,12 @@ export const isObjectMetadataReadOnly = ({
   objectPermissions,
   objectMetadataItem,
 }: IsObjectMetadataReadOnlyParams) => {
-  return (
-    (isDefined(objectPermissions) &&
-      !objectPermissions.canUpdateObjectRecords) ||
-    (isDefined(objectMetadataItem) &&
-      (!objectMetadataItem.isUIEditable || objectMetadataItem.isRemote))
-  );
+  const isReadOnlyForUser =
+    isDefined(objectPermissions) && !objectPermissions.canUpdateObjectRecords;
+
+  const isReadOnlyObject =
+    isDefined(objectMetadataItem) &&
+    (objectMetadataItem.isUIEditable || objectMetadataItem.isRemote);
+
+  return isReadOnlyForUser || isReadOnlyObject;
 };

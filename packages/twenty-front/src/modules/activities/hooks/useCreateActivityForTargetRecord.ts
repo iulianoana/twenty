@@ -37,7 +37,7 @@ export const useCreateActivityForTargetRecord = ({
   });
 
   return {
-    canCreateActivity: isTargetReadOnly,
+    canCreateActivity: !isTargetReadOnly,
     createActivity,
   };
 };
