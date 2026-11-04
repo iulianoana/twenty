@@ -153,11 +153,6 @@ export const useUpdateDroppedRecordOnBoard = () => {
           recordIndexRecordIdsByGroupCallbackFamilyState(targetRecordGroupId),
           newTargetRecordGroupWithIds.map((record) => record.id),
         );
-      } else {
-        store.set(
-          recordIndexRecordIdsByGroupCallbackFamilyState(targetRecordGroupId),
-          [...currentRecordIdsInTargetRecordGroup, recordId],
-        );
       }
 
       upsertRecordsInStore({
