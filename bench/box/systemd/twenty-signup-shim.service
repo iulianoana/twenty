@@ -1,0 +1,13 @@
+[Unit]
+Description=Twenty bench sign-up shim (POST /metadata)
+After=network.target
+
+[Service]
+User=twenty
+EnvironmentFile=/opt/twenty-bench/signup-shim.env
+ExecStart=/opt/twenty-bench/node/bin/node /opt/twenty-bench/infra/box/signup-shim.mjs
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

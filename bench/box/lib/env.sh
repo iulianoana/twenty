@@ -117,7 +117,9 @@ regen_caddy() {
       (
         # shellcheck disable=SC1090
         source "$meta"
-        printf '%s {\n\treverse_proxy 127.0.0.1:%s\n}\n' "$HOST" "$PORT"
+        # POST /metadata goes through the sign-up shim; everything else straight to the server.
+        printf '%s {\n\t@metadata {\n\t\tmethod POST\n\t\tpath /metadata\n\t}\n\thandle @metadata {\n\t\treverse_proxy 127.0.0.1:%s {\n\t\t\theader_up X-Bench-Upstream 127.0.0.1:%s\n\t\t}\n\t}\n\thandle {\n\t\treverse_proxy 127.0.0.1:%s\n\t}\n}\n' \
+          "$HOST" "$SIGNUP_SHIM_PORT" "$PORT" "$PORT"
       )
     done
   } >"$out"

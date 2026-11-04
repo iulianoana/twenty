@@ -234,11 +234,48 @@ EOF
     printf "\\\\set admin_hash '%s'\n\\\\set member_hash '%s'\n\\\\set other_hash '%s'\n" "$admin_hash" "$member_hash" "$other_hash"
     cat "$INFRA_DIR/box/sql/template-tweaks.sql"
   } | psql_db "$TEMPLATE_DB" -f - >/dev/null
+  psql_db "$TEMPLATE_DB" -f "$INFRA_DIR/box/sql/workspace-settings.sql" >/dev/null
   systemctl stop "twenty-redis@$TEMPLATE_ENV"
   psql_db "$TEMPLATE_DB" -f "$INFRA_DIR/box/sql/seed-report.sql" 2>&1 | sed 's/^/[seed] /' >&2
   psql_admin -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '$TEMPLATE_DB' AND pid <> pg_backend_pid()" >/dev/null
   date -u +%Y-%m-%dT%H:%M:%SZ >"$STATE_DIR/template.ok"
   timing template_total $(($(now_s) - start))
+}
+
+# Re-applies workspace-settings.sql to the template and every environment (idempotent), then drops
+# each environment's cached workspace so the change is seen without a reseed.
+apply_workspace_settings() {
+  local meta
+  load_bench_secrets
+  psql_db "$TEMPLATE_DB" -f "$INFRA_DIR/box/sql/workspace-settings.sql" >/dev/null
+  for meta in "$ENVS_DIR"/*/meta; do
+    [[ -f $meta ]] || continue
+    (
+      # shellcheck disable=SC1090
+      source "$meta"
+      psql_db "$DB_NAME" -f "$INFRA_DIR/box/sql/workspace-settings.sql" >/dev/null
+      if systemctl is-active --quiet "twenty-redis@$NAME"; then
+        redis-cli -p "$REDIS_PORT" FLUSHALL >/dev/null
+        systemctl restart "twenty-server@$NAME" "twenty-worker@$NAME"
+      fi
+    )
+  done
+}
+
+# The shim needs the seeded workspace's invite hash, which every clone shares with the template.
+install_signup_shim() {
+  local invite_hash
+  load_bench_secrets
+  invite_hash=$(psql_db "$TEMPLATE_DB" -c "SELECT \"inviteHash\" FROM core.workspace WHERE id = '20202020-1c25-4d02-bf25-6aeccf7ea419'")
+  [[ -n $invite_hash ]] || die "seeded workspace has no invite hash"
+  printf 'SHIM_PORT=%s\nBENCH_INVITE_HASH=%s\n' "$SIGNUP_SHIM_PORT" "$invite_hash" >"$SIGNUP_SHIM_ENV"
+  systemctl enable --quiet twenty-signup-shim
+  systemctl restart twenty-signup-shim
+  local i
+  for ((i = 0; i < 20; i++)); do
+    curl -s -o /dev/null --max-time 2 "http://127.0.0.1:$SIGNUP_SHIM_PORT/" && break
+    sleep 0.5
+  done
 }
 
 flush_redis_port() {

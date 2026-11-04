@@ -45,6 +45,8 @@ cmd_provision() {
   provision_system "$ip"
   provision_base "$main_sha"
   provision_template "$reseed"
+  apply_workspace_settings
+  install_signup_shim
   main_sha=$(cat "$STATE_DIR/base.sha")
   if [[ $reseed == 1 ]] && env_exists main; then
     (
@@ -57,6 +59,7 @@ cmd_provision() {
     )
   fi
   deploy_env main main "$main_sha"
+  regen_caddy
   write_logins
   probe_login main
   timing provision_total $(($(now_s) - start))

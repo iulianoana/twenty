@@ -22,6 +22,8 @@ BENCH_USER=twenty
 TEMPLATE_DB=twenty_template
 TEMPLATE_ENV=template
 TEMPLATE_SLOT=99
+SIGNUP_SHIM_PORT=3090
+SIGNUP_SHIM_ENV="$BENCH_ROOT/signup-shim.env"
 
 # Packages the bench builds, in dependency order (see bench/README.md).
 BUILD_ORDER=(

@@ -46,3 +46,14 @@ every clone by `clone-tweaks.sql`).
 - `rotate-auth-secret`: new `APP_SECRET` (the bench-wide `ENCRYPTION_KEY` is kept), revoke every
   `core."userSession"` and refresh token, retire the signing keys, flush Redis, restart. The action signs in
   before and after, and fails unless the earlier refresh token is rejected and a new one renews.
+
+## Sign-up
+
+Twenty v2.55 lets a new email join an existing workspace only through its public invite link
+(`auth.service.ts` `checkAccessForSignIn`); approved access domains are exact-match and need email
+verification. The `/welcome` sign-up sends no invite hash, so every new address was refused with
+"User does not have access to this workspace". `box/signup-shim.mjs` (systemd `twenty-signup-shim`)
+sits on `POST /metadata` only and adds the seeded workspace's invite hash to `signUpInWorkspace` calls
+that carry no invitation; `sql/workspace-settings.sql` keeps the public invite link on. Any new address
+then signs up from the normal page and joins the seeded workspace with the default (Member) role.
+Nothing under `packages/` changes.
