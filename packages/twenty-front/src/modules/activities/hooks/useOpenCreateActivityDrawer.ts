@@ -34,9 +34,9 @@ export const useOpenCreateActivityDrawer = ({
     objectNameSingular: activityObjectNameSingular,
   });
 
+  // Matching every cached root query on each new target was most of the time spent opening the editor
   const { createManyRecords: createActivityTargets } = useCreateManyRecords({
     objectNameSingular: morphJunctionConfig.junctionObjectMetadata.nameSingular,
-    shouldMatchRootQueryFilter: true,
   });
 
   const setActivityTargetableEntityArray = useSetAtomState(
