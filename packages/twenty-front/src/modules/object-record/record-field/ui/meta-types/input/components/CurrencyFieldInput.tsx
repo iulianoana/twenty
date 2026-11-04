@@ -18,6 +18,15 @@ import {
   isDefined,
 } from 'twenty-shared/utils';
 
+// Strip thousands separators and symbols pasted with the amount (1,500 or $1 500)
+const parseAmountText = (amountText: string) =>
+  parseFloat(
+    amountText
+      .replace(/[^\d.,-]/g, '')
+      .replace(/,(?=\d{3}(?!\d))/g, '')
+      .replace(',', '.'),
+  );
+
 export const CurrencyFieldInput = () => {
   const { fieldValue, draftValue, setDraftValue, defaultValue } =
     useCurrencyField();
@@ -63,12 +72,7 @@ export const CurrencyFieldInput = () => {
     amountText: string;
     currencyCode: string;
   }) => {
-    // Strip thousands separators and symbols pasted with the amount (1,500 or $1 500)
-    const normalizedAmountText = amountText
-      .replace(/[^\d.,-]/g, '')
-      .replace(/,(?=\d{3}(?!\d))/g, '')
-      .replace(',', '.');
-    const amount = parseFloat(normalizedAmountText);
+    const amount = parseAmountText(amountText);
 
     const newCurrencyValue = {
       amountMicros: isNaN(amount)
