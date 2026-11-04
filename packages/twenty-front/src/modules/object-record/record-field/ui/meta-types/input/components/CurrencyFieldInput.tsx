@@ -63,7 +63,8 @@ export const CurrencyFieldInput = () => {
     amountText: string;
     currencyCode: string;
   }) => {
-    const normalizedAmountText = amountText.replace(',', '.');
+    // Strip thousands separators and symbols pasted with the amount (1,500 or $1 500)
+    const normalizedAmountText = amountText.replace(/[^\d-]/g, '');
     const amount = parseFloat(normalizedAmountText);
 
     const newCurrencyValue = {
