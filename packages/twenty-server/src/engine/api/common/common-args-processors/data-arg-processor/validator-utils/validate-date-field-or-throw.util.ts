@@ -11,7 +11,7 @@ import {
 } from 'src/engine/api/common/common-query-runners/errors/common-query-runner.exception';
 
 // Postgres reads ambiguous strings like 03/11/2026 with its own DateStyle, so store ISO dates only
-const DATE_FIELD_STORAGE_FORMAT = 'yyyy-dd-MM';
+const DATE_FIELD_STORAGE_FORMAT = 'yyyy-MM-dd';
 
 const parseDateInput = (value: string): Date | null => {
   for (const acceptedFormat of ACCEPTED_DATE_FORMATS) {
