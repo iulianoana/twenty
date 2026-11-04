@@ -120,3 +120,7 @@ Database indexes are managed automatically — adding your own is rarely necessa
 - **Each object has one main display field**: This field appears in the leftmost column and represents the record when linked to other objects. It must be a text field. For example, People uses `Name` as the main field, so when you link a person to a company, you'll see their name in the company's view.
 
 <PageBanner illustration="section-apps-data" />
+
+## Date fields
+
+Date fields accept ISO dates (`2026-11-03`) and common regional formats through the API and imports. Twenty always stores them as ISO dates, so `03/11/2026` and `2026-11-03` can never be confused.
