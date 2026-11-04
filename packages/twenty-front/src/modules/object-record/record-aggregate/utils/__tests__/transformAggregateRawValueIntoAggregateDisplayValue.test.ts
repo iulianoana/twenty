@@ -237,6 +237,25 @@ describe('transformAggregateRawValueIntoAggregateDisplayValue', () => {
     ).toBe('230,440');
   });
 
+  it('should return full currency formatted value by default', () => {
+    const mockCurrencyFieldMetadataItem = {
+      ...mockCompanyEmployeesFieldMetadataItem,
+      type: FieldMetadataType.CURRENCY,
+    } as FieldMetadataItem;
+
+    expect(
+      transformAggregateRawValueIntoAggregateDisplayValue({
+        aggregateFieldMetadataItem: mockCurrencyFieldMetadataItem,
+        aggregateOperation: AggregateOperations.SUM,
+        aggregateRawValue: 230440000000,
+        dateFormat: DateFormat.DAY_FIRST,
+        timeFormat: TimeFormat.HOUR_24,
+        localeCatalog: enUS,
+        timeZone: 'UTC',
+      }),
+    ).toBe('230,440');
+  });
+
   it('should return short currency formatted value with SHORT number format', () => {
     const mockCurrencyFieldMetadataItem = {
       ...mockCompanyEmployeesFieldMetadataItem,
