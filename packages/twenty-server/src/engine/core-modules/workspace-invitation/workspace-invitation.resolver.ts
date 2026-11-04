@@ -150,6 +150,7 @@ export class WorkspaceInvitationResolver {
       oauthClient: { withUser: true, withoutUser: false },
       application: false,
     }),
+    SettingsPermissionGuard(PermissionFlagType.WORKSPACE_MEMBERS),
   )
   @AllowSuspendedWorkspace()
   async sendInvitations(
