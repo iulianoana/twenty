@@ -178,7 +178,7 @@ export const useUpdateDroppedRecordOnBoard = () => {
       updateOneRecord({
         idToUpdate: recordId,
         updateOneRecordInput: {
-          ...(movingInsideSameRecordGroup && {
+          ...(!movingInsideSameRecordGroup && {
             [recordGroupColumnName]: targetRecordGroupValue,
           }),
           ...(isDefined(newPosition) && { position: newPosition }),
