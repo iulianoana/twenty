@@ -10,9 +10,12 @@ export const formatSearchTerms = (
     .trim()
     .split(/[\s-]+/)
     .filter((word) => word.length > 0);
-  const formattedWords = words.map((word) =>
-    word.replace(/[\\:'&|!()@<>]/g, '\\$&'),
-  );
+  const formattedWords = words.map((word) => {
+    const escapedWord = word.replace(/[\\:'&|!()@<>]/g, '\\$&');
+
+    // One- and two-letter prefixes match most of the index and slow search down
+    return escapedWord.length >= 3 ? `${escapedWord}:*` : escapedWord;
+  });
 
   return formattedWords.join(` ${operator === 'and' ? '&' : '|'} `);
 };
