@@ -43,7 +43,8 @@ const StyledConsentRow = styled.label`
   display: flex;
   font-size: ${themeCssVariables.font.size.sm};
   gap: ${themeCssVariables.spacing[2]};
-  margin-bottom: ${themeCssVariables.spacing[3]};
+  margin-bottom: ${themeCssVariables.spacing[4]};
+  user-select: none;
   width: 100%;
 `;
 
