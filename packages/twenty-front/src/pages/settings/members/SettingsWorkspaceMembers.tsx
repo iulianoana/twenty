@@ -34,10 +34,15 @@ export const SettingsWorkspaceMembers = () => {
   const { t } = useLingui();
 
   const hasRolesPermission = useHasPermissionFlag(PermissionFlagType.ROLES);
+  const hasMembersPermission = useHasPermissionFlag(
+    PermissionFlagType.WORKSPACE_MEMBERS,
+  );
 
   const tabs = [
     { id: MEMBERS_TAB_TEAM_ID, title: t`Team`, Icon: IconUsers },
-    { id: MEMBERS_TAB_INVITE_ID, title: t`Invite`, Icon: IconUserPlus },
+    ...(hasMembersPermission
+      ? [{ id: MEMBERS_TAB_INVITE_ID, title: t`Invite`, Icon: IconUserPlus }]
+      : []),
     ...(hasRolesPermission
       ? [{ id: MEMBERS_TAB_ROLES_ID, title: t`Roles`, Icon: IconLock }]
       : []),
@@ -51,7 +56,11 @@ export const SettingsWorkspaceMembers = () => {
   const renderActiveTabContent = () => {
     switch (activeTabId) {
       case MEMBERS_TAB_INVITE_ID:
-        return <SettingsWorkspaceMembersInviteTab />;
+        return hasMembersPermission ? (
+          <SettingsWorkspaceMembersInviteTab />
+        ) : (
+          <SettingsWorkspaceMembersTeamTab />
+        );
       case MEMBERS_TAB_ROLES_ID:
         return hasRolesPermission ? (
           <SettingsWorkspaceMembersRolesTab />
