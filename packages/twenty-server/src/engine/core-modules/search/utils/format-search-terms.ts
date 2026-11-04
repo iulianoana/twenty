@@ -13,8 +13,7 @@ export const formatSearchTerms = (
   const formattedWords = words.map((word) => {
     const escapedWord = word.replace(/[\\:'&|!()@<>]/g, '\\$&');
 
-    // One- and two-letter prefixes match most of the index and slow search down
-    return escapedWord.length >= 3 ? `${escapedWord}:*` : escapedWord;
+    return `${escapedWord}:*`;
   });
 
   return formattedWords.join(` ${operator === 'and' ? '&' : '|'} `);
