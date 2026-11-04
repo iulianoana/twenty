@@ -169,13 +169,33 @@ provision_base() {
   else
     BUILD_SET=("${BUILD_ORDER[@]}")
   fi
-  build_tree "$REPO_DIR" "$main_sha" extract "${BUILD_SET[@]}"
-  save_catalog_overlay "$REPO_DIR"
-  local changed_catalogs
-  changed_catalogs=$(git -C "$REPO_DIR" status --porcelain -- '*locales*' | wc -l)
-  log "lingui extraction changed $changed_catalogs catalog files versus the committed ones"
+  # The checkout reset the catalogs to the committed ones: extract again when a catalog package changed
+  # (or no overlay was ever saved), else put the saved extraction back, so base outputs stay consistent.
+  local pkg extract=0
+  [[ -f "$LINGUI_OVERLAY_DIR/.extracted-at" ]] || extract=1
+  for pkg in "${BUILD_SET[@]}"; do [[ -v "LINGUI_LOCALE_DIRS[$pkg]" ]] && extract=1; done
+  if [[ $extract == 1 ]]; then
+    for pkg in twenty-emails twenty-server twenty-front; do prepare_catalogs_in_base "$pkg" "$main_sha"; done
+    save_catalog_overlay "$REPO_DIR"
+    echo "$main_sha" >"$LINGUI_OVERLAY_DIR/.extracted-at"
+    log "lingui extraction changed $(git -C "$REPO_DIR" status --porcelain -- '*locales*' | wc -l) catalog files versus the committed ones"
+    # Outputs built from other catalogs are stale; nx rebuilds only what the catalogs changed.
+    [[ ${#BUILD_SET[@]} -gt 0 ]] || BUILD_SET=(twenty-server twenty-front)
+  else
+    for pkg in "${!LINGUI_LOCALE_DIRS[@]}"; do
+      as_bench cp -a "$LINGUI_OVERLAY_DIR/$pkg/." "$REPO_DIR/${LINGUI_LOCALE_DIRS[$pkg]}/"
+    done
+  fi
+  build_tree "$REPO_DIR" "$main_sha" incremental "${BUILD_SET[@]}"
   echo "$main_sha" >"$STATE_DIR/base.sha"
   timing base_build $(($(now_s) - start))
+}
+
+prepare_catalogs_in_base() {
+  BUILD_LOG_DIR="$LOG_DIR/build/base"
+  mkdir -p "$BUILD_LOG_DIR"
+  chown -R "$BENCH_USER" "$BUILD_LOG_DIR"
+  prepare_catalogs "$REPO_DIR" "$1" "$2" extract
 }
 
 # Seeds twenty_template once from the base build. Previews and main are cloned from it.
