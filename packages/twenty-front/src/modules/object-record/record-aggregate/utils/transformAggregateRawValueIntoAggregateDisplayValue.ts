@@ -9,7 +9,11 @@ import { PERCENT_AGGREGATE_OPERATION_OPTIONS } from '@/object-record/record-tabl
 import { type ExtendedAggregateOperations } from '@/object-record/record-table/types/ExtendedAggregateOperations';
 
 import { FieldMetadataType, type Nullable } from 'twenty-shared/types';
-import { formatToShortNumber, isDefined } from 'twenty-shared/utils';
+import {
+  convertCurrencyMicrosToCurrencyAmount,
+  formatToShortNumber,
+  isDefined,
+} from 'twenty-shared/utils';
 import {
   type AggregateOperations,
   ChartNumberFormat,
@@ -17,8 +21,6 @@ import {
 import { formatNumber } from '@/localization/utils/formatNumber';
 import { formatDateString } from '@/object-record/record-field/ui/utils/formatDateString';
 import { formatDateTimeString } from '@/object-record/record-field/ui/utils/formatDateTimeString';
-
-const MICROS_PER_CURRENCY_UNIT = 1_000;
 
 export const transformAggregateRawValueIntoAggregateDisplayValue = ({
   aggregateFieldMetadataItem,
@@ -64,7 +66,9 @@ export const transformAggregateRawValueIntoAggregateDisplayValue = ({
   } else {
     switch (aggregateFieldMetadataItem.type) {
       case FieldMetadataType.CURRENCY: {
-        const amount = Number(aggregateRawValue) / MICROS_PER_CURRENCY_UNIT;
+        const amount = convertCurrencyMicrosToCurrencyAmount(
+          Number(aggregateRawValue),
+        );
         // Totals are money: show them in full unless a chart asks for short numbers
         return chartNumberFormat === ChartNumberFormat.SHORT
           ? formatToShortNumber(amount)
