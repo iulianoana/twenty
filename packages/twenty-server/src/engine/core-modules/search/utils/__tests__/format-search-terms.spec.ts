@@ -4,12 +4,18 @@ describe('formatSearchTerms', () => {
   it('should format the search terms', () => {
     const formattedTerms = formatSearchTerms('my search input', 'and');
 
-    expect(formattedTerms).toBe('my:* & search:* & input:*');
+    expect(formattedTerms).toBe('my & search & input');
   });
 
   it('should format the search terms with or', () => {
     const formattedTerms = formatSearchTerms('my search input', 'or');
 
-    expect(formattedTerms).toBe('my:* | search:* | input:*');
+    expect(formattedTerms).toBe('my | search | input');
+  });
+
+  it('should split hyphenated words', () => {
+    const formattedTerms = formatSearchTerms('Jean-Luc Picard', 'and');
+
+    expect(formattedTerms).toBe('Jean & Luc & Picard');
   });
 });
