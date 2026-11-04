@@ -153,6 +153,12 @@ export const useUpdateDroppedRecordOnBoard = () => {
           recordIndexRecordIdsByGroupCallbackFamilyState(targetRecordGroupId),
           newTargetRecordGroupWithIds.map((record) => record.id),
         );
+      } else {
+        // Sorted boards drop without a position: the card goes to the end of the column
+        store.set(
+          recordIndexRecordIdsByGroupCallbackFamilyState(targetRecordGroupId),
+          [...currentRecordIdsInTargetRecordGroup, recordId],
+        );
       }
 
       upsertRecordsInStore({
