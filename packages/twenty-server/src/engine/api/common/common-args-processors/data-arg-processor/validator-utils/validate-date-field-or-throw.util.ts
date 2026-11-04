@@ -38,8 +38,8 @@ export const validateDateFieldOrThrow = (
   if (isString(value)) {
     const parsedDate = parseDateInput(value);
 
-    // Dates before 1970 come from broken spreadsheet exports (serial numbers read as dates)
-    if (parsedDate !== null && parsedDate.getTime() >= 0) {
+    // Years below 1000 come from broken spreadsheet exports (serial numbers read as dates)
+    if (parsedDate !== null && parsedDate.getFullYear() >= 1000) {
       return format(parsedDate, DATE_FIELD_STORAGE_FORMAT);
     }
   }
