@@ -77,7 +77,7 @@ export const RecordBoardColumnNewRecordButton = () => {
         });
       }}
     >
-      {t`New`}
+      {t`Add card`}
     </LightButton>
   );
 };
