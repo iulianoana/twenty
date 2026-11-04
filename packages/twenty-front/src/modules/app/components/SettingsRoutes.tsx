@@ -1013,17 +1013,17 @@ const createSettingsRouteElements = ({
       <Route path={SettingsPath.Layout} element={<SettingsLayout />} />
     </Route>
     <Route
+      path={SettingsPath.WorkspaceMembersPage}
+      element={<SettingsWorkspaceMembers />}
+      handle={MEMBERS_LIST_SETTINGS_ROUTE_HANDLE}
+    />
+    <Route
       element={
         <SettingsProtectedRouteWrapper
           settingsPermission={PermissionFlagType.WORKSPACE_MEMBERS}
         />
       }
     >
-      <Route
-        path={SettingsPath.WorkspaceMembersPage}
-        element={<SettingsWorkspaceMembers />}
-        handle={MEMBERS_LIST_SETTINGS_ROUTE_HANDLE}
-      />
       <Route
         path={SettingsPath.WorkspaceMemberPage}
         element={<SettingsWorkspaceMember />}

@@ -146,7 +146,6 @@ const useSettingsNavigationItems = (): SettingsNavigationSection[] => {
           label: t`Members`,
           path: SettingsPath.WorkspaceMembersPage,
           Icon: IconUsers,
-          isHidden: !permissionFlagMap[PermissionFlagType.WORKSPACE_MEMBERS],
         },
         {
           label: t`Billing`,

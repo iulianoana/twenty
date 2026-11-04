@@ -3,6 +3,7 @@ import { DropdownContent } from '@/ui/layout/dropdown/components/DropdownContent
 import { DROPDOWN_OFFSET_Y } from '@/ui/layout/dropdown/constants/DropdownOffsetY';
 import { currentWorkspaceMemberState } from '@/auth/states/currentWorkspaceMemberState';
 import { useFindManyRecords } from '@/object-record/hooks/useFindManyRecords';
+import { useHasPermissionFlag } from '@/settings/roles/hooks/useHasPermissionFlag';
 import { Table } from '@/ui/layout/table/components/Table';
 import { TableCell } from '@/ui/layout/table/components/TableCell';
 import { TableHeader } from '@/ui/layout/table/components/TableHeader';
@@ -20,6 +21,7 @@ import {
   SettingsPath,
 } from 'twenty-shared/types';
 import { generateILikeFiltersForCompositeFields } from 'twenty-shared/utils';
+import { PermissionFlagType } from '~/generated-metadata/graphql';
 import { SearchInput } from 'twenty-ui/components/input';
 import { Section } from 'twenty-ui/components/layout';
 import { Dropdown } from 'twenty-ui/components/navigation';
@@ -88,6 +90,9 @@ export const SettingsWorkspaceMembersTeamTab = () => {
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [searchFilter, setSearchFilter] = useState('');
   const currentWorkspaceMember = useAtomStateValue(currentWorkspaceMemberState);
+  const canManageMembers = useHasPermissionFlag(
+    PermissionFlagType.WORKSPACE_MEMBERS,
+  );
 
   const [debouncedSearchFilter] = useDebounce(searchFilter, 300);
 
@@ -225,9 +230,12 @@ export const SettingsWorkspaceMembersTeamTab = () => {
                   gridAutoColumns="150px 1fr 40px"
                   mobileGridAutoColumns="100px 1fr 32px"
                   key={workspaceMember.id}
-                  cursor="pointer"
+                  cursor={canManageMembers ? 'pointer' : 'default'}
                   onClick={() => {
-                    if (currentWorkspaceMember?.id === workspaceMember.id) {
+                    if (
+                      !canManageMembers ||
+                      currentWorkspaceMember?.id === workspaceMember.id
+                    ) {
                       return;
                     }
                     navigateSettings(SettingsPath.WorkspaceMemberPage, {
