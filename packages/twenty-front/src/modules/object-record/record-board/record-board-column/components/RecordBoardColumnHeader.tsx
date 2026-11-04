@@ -43,6 +43,7 @@ const StyledHeader = styled.div<{ isReadOnly: boolean }>`
   flex-direction: row;
   height: 100%;
   justify-content: left;
+  user-select: none;
   width: 100%;
 `;
 
