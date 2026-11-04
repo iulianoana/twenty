@@ -94,7 +94,12 @@ export const useUpdateDroppedRecordOnBoard = () => {
       const movingInsideSameRecordGroup =
         initialRecordGroupId === targetRecordGroupId;
 
-      if (!isDefined(newPosition) || initialRecord.position === newPosition) {
+      const isSamePosition = initialRecord.position === newPosition;
+
+      if (
+        movingInsideSameRecordGroup &&
+        (!isDefined(newPosition) || isSamePosition)
+      ) {
         return;
       }
 
@@ -128,15 +133,33 @@ export const useUpdateDroppedRecordOnBoard = () => {
         );
       }
 
-      const newTargetRecordGroupWithIds = [
-        ...extractRecordPositions(currentRecordIdsInTargetRecordGroup, store),
-        { id: recordId, position: newPosition },
-      ].sort(sortByProperty('position', 'asc'));
+      if (isDefined(newPosition)) {
+        const targetGroupRecordsWithIds = extractRecordPositions(
+          currentRecordIdsInTargetRecordGroup,
+          store,
+        );
 
-      store.set(
-        recordIndexRecordIdsByGroupCallbackFamilyState(targetRecordGroupId),
-        newTargetRecordGroupWithIds.map((record) => record.id),
-      );
+        const newTargetRecordGroupWithIds = [
+          ...targetGroupRecordsWithIds,
+          {
+            id: recordId,
+            position: newPosition,
+          },
+        ];
+
+        newTargetRecordGroupWithIds.sort(sortByProperty('position', 'asc'));
+
+        store.set(
+          recordIndexRecordIdsByGroupCallbackFamilyState(targetRecordGroupId),
+          newTargetRecordGroupWithIds.map((record) => record.id),
+        );
+      } else {
+        // Sorted boards drop without a position: the card goes to the end of the column
+        store.set(
+          recordIndexRecordIdsByGroupCallbackFamilyState(targetRecordGroupId),
+          [...currentRecordIdsInTargetRecordGroup, recordId],
+        );
+      }
 
       upsertRecordsInStore({
         partialRecords: [
@@ -147,7 +170,7 @@ export const useUpdateDroppedRecordOnBoard = () => {
               (initialRecord as { __typename?: string })?.__typename ??
               'Record',
             [recordGroupColumnName]: targetRecordGroupValue,
-            position: newPosition,
+            ...(isDefined(newPosition) && { position: newPosition }),
           } as ObjectRecord,
         ],
       });
@@ -156,7 +179,7 @@ export const useUpdateDroppedRecordOnBoard = () => {
         idToUpdate: recordId,
         updateOneRecordInput: {
           [recordGroupColumnName]: targetRecordGroupValue,
-          position: newPosition,
+          ...(isDefined(newPosition) && { position: newPosition }),
         },
       });
     },
