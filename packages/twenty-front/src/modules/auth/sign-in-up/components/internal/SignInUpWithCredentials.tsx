@@ -134,6 +134,9 @@ export const SignInUpWithCredentials = ({
     isDefined(captcha?.provider) &&
     isRequestingCaptchaToken;
 
+  const isSignUpConsentMissing =
+    signInUpMode === SignInUpMode.SignUp && !termsAccepted;
+
   const isEmailStepSubmitButtonDisabledCondition =
     signInUpStep === SignInUpStep.Email &&
     (isDefined(form.formState.errors['email']) || shouldWaitForCaptchaToken);
@@ -145,7 +148,7 @@ export const SignInUpWithCredentials = ({
     (!form.formState.isValid ||
       form.formState.isSubmitting ||
       shouldWaitForCaptchaToken ||
-      (signInUpMode === SignInUpMode.SignUp && !termsAccepted));
+      isSignUpConsentMissing);
 
   const isSignUpBlockedByDDLLock =
     isDDLLocked &&
