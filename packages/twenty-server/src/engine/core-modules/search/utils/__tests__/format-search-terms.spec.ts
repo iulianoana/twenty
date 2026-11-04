@@ -19,3 +19,13 @@ describe('formatSearchTerms', () => {
     expect(formattedTerms).toBe('Jean:* & Luc:* & Picard:*');
   });
 });
+
+describe('formatSearchTerms edge cases', () => {
+  it('should return an empty string for blank input', () => {
+    expect(formatSearchTerms('   ', 'and')).toBe('');
+  });
+
+  it('should escape tsquery operators', () => {
+    expect(formatSearchTerms("O'Brien", 'and')).toBe("O\\'Brien:*");
+  });
+});
