@@ -25,12 +25,25 @@ import { useMemo, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { isDefined } from 'twenty-shared/utils';
 import { MainButton } from 'twenty-ui/components/input';
+import { Checkbox } from 'twenty-ui/primitives/input';
+import { themeCssVariables } from 'twenty-ui/theme';
 
 const StyledForm = styled.form`
   align-items: center;
   display: flex;
   flex-direction: column;
   max-width: 100%;
+  width: 100%;
+`;
+
+const StyledConsentRow = styled.label`
+  align-items: center;
+  color: ${themeCssVariables.font.color.secondary};
+  cursor: pointer;
+  display: flex;
+  font-size: ${themeCssVariables.font.size.sm};
+  gap: ${themeCssVariables.spacing[2]};
+  margin-bottom: ${themeCssVariables.spacing[3]};
   width: 100%;
 `;
 
@@ -44,6 +57,7 @@ export const SignInUpWithCredentials = ({
 
   const [signInUpStep, setSignInUpStep] = useAtomState(signInUpStepState);
   const [showErrors, setShowErrors] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const captcha = useAtomStateValue(captchaState);
   const isDDLLocked = useAtomStateValue(isDDLLockedState);
   const isRequestingCaptchaToken = useAtomStateValue(
@@ -112,7 +126,7 @@ export const SignInUpWithCredentials = ({
       return t`Sign up`;
     }
 
-    return t`Continue`;
+    return t`Next`;
   }, [signInUpMode, signInUpStep, t]);
 
   const shouldWaitForCaptchaToken =
@@ -130,7 +144,8 @@ export const SignInUpWithCredentials = ({
     signInUpStep === SignInUpStep.Password &&
     (!form.formState.isValid ||
       form.formState.isSubmitting ||
-      shouldWaitForCaptchaToken);
+      shouldWaitForCaptchaToken ||
+      !termsAccepted);
 
   const isSignUpBlockedByDDLLock =
     isDDLLocked &&
@@ -160,6 +175,16 @@ export const SignInUpWithCredentials = ({
               signInUpMode={signInUpMode}
             />
           )}
+          {signInUpStep === SignInUpStep.Password &&
+            signInUpMode === SignInUpMode.SignUp && (
+              <StyledConsentRow>
+                <Checkbox
+                  checked={termsAccepted}
+                  onCheckedChange={() => setTermsAccepted(!termsAccepted)}
+                />
+                {t`I agree to the Terms of Service and Privacy Policy`}
+              </StyledConsentRow>
+            )}
           <StyledSsoButtonContainer>
             <MainButton
               type="submit"
