@@ -10,8 +10,9 @@ import { IDENTIFIER_MIN_CHAR_LENGTH } from 'src/engine/metadata-modules/utils/co
 import { isCallerTwentyStandardApp } from 'src/engine/metadata-modules/utils/is-caller-twenty-standard-app.util';
 import { type WorkspaceMigrationBuilderOptions } from 'src/engine/workspace-manager/workspace-migration/workspace-migration-builder/types/workspace-migration-builder-options.type';
 
+// Reserved names get a 6-character "Custom" suffix, which must still fit Postgres' 63-character identifier limit
 const STARTS_WITH_LOWER_CASE_AND_CONTAINS_ONLY_CAPS_AND_LOWER_LETTERS_AND_NUMBER_STRING_REGEX =
-  /^[a-z][a-zA-Z0-9]*$/;
+  /^[a-z][a-z0-9]{0,56}$/;
 
 export const validateFlatFieldMetadataName = ({
   buildOptions,
