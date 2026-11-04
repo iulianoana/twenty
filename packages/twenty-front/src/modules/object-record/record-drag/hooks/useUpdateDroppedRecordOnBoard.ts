@@ -174,10 +174,13 @@ export const useUpdateDroppedRecordOnBoard = () => {
         ],
       });
 
+      // Re-sending an unchanged stage re-triggers stage-change workflows
       updateOneRecord({
         idToUpdate: recordId,
         updateOneRecordInput: {
-          [recordGroupColumnName]: targetRecordGroupValue,
+          ...(movingInsideSameRecordGroup && {
+            [recordGroupColumnName]: targetRecordGroupValue,
+          }),
           ...(isDefined(newPosition) && { position: newPosition }),
         },
       });
