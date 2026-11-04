@@ -188,4 +188,12 @@ describe('validateDateFieldOrThrow', () => {
       );
     });
   });
+
+  describe('normalisation', () => {
+    it('should store a day-first date as an ISO date', () => {
+      expect(validateDateFieldOrThrow('2024-01-15', 'testField')).toBe(
+        '2024-01-15',
+      );
+    });
+  });
 });
