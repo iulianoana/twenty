@@ -42,6 +42,7 @@ const StyledCardDetailsContainer = styled.div`
 const StyledNoteTitle = styled.div`
   color: ${themeCssVariables.font.color.primary};
   font-weight: ${themeCssVariables.font.weight.medium};
+  overflow-wrap: anywhere;
 `;
 
 const StyledCardContent = styled.div`
