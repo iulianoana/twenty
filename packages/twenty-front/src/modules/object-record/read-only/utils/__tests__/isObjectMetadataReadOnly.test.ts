@@ -67,4 +67,16 @@ describe('isObjectMetadataReadOnly', () => {
 
     expect(result).toBe(false);
   });
+
+  it('should return false for an editable object when the user can update records', () => {
+    const result = isObjectMetadataReadOnly({
+      objectPermissions: { canUpdateObjectRecords: true },
+      objectMetadataItem: {
+        isUIEditable: true,
+        isRemote: false,
+      },
+    });
+
+    expect(result).toBe(false);
+  });
 });
