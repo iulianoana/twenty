@@ -31,10 +31,13 @@ export const useCreateActivityForTargetRecord = ({
   const createActivity = () =>
     openCreateActivityDrawer({ targetableObjects: [targetRecord] });
 
+  const isTargetReadOnly = isObjectMetadataReadOnly({
+    objectPermissions: { canUpdateObjectRecords },
+    objectMetadataItem,
+  });
+
   return {
-    canCreateActivity:
-      canUpdateObjectRecords &&
-      !isObjectMetadataReadOnly({ objectMetadataItem }),
+    canCreateActivity: isTargetReadOnly,
     createActivity,
   };
 };
