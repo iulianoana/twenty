@@ -145,7 +145,7 @@ export const SignInUpWithCredentials = ({
     (!form.formState.isValid ||
       form.formState.isSubmitting ||
       shouldWaitForCaptchaToken ||
-      !termsAccepted);
+      (signInUpMode === SignInUpMode.SignUp && !termsAccepted));
 
   const isSignUpBlockedByDDLLock =
     isDDLLocked &&
