@@ -47,7 +47,6 @@ import { SendInvitationsInput } from './dtos/send-invitations.input';
     oauthClient: true,
     application: true,
   }),
-  SettingsPermissionGuard(PermissionFlagType.WORKSPACE_MEMBERS),
 )
 @UsePipes(ResolverValidationPipe)
 @UseFilters(
@@ -76,6 +75,7 @@ export class WorkspaceInvitationResolver {
       oauthClient: true,
       application: false,
     }),
+    SettingsPermissionGuard(PermissionFlagType.WORKSPACE_MEMBERS),
   )
   async deleteWorkspaceInvitation(
     @Args('appTokenId') appTokenId: string,
@@ -100,6 +100,7 @@ export class WorkspaceInvitationResolver {
       oauthClient: { withUser: true, withoutUser: false },
       application: false,
     }),
+    SettingsPermissionGuard(PermissionFlagType.WORKSPACE_MEMBERS),
   )
   async resendWorkspaceInvitation(
     @Args('appTokenId') appTokenId: string,
@@ -131,6 +132,7 @@ export class WorkspaceInvitationResolver {
   }
 
   @Query(() => [WorkspaceInvitation])
+  @UseGuards(SettingsPermissionGuard(PermissionFlagType.WORKSPACE_MEMBERS))
   async findWorkspaceInvitations(@AuthWorkspace() workspace: WorkspaceEntity) {
     return this.workspaceInvitationService.loadWorkspaceInvitations(workspace);
   }
