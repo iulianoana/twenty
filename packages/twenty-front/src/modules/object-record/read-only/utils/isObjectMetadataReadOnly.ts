@@ -19,7 +19,7 @@ export const isObjectMetadataReadOnly = ({
 
   const isReadOnlyObject =
     isDefined(objectMetadataItem) &&
-    (objectMetadataItem.isUIEditable || objectMetadataItem.isRemote);
+    (!objectMetadataItem.isUIEditable || objectMetadataItem.isRemote);
 
   return isReadOnlyForUser || isReadOnlyObject;
 };
