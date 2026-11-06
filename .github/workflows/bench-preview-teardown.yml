@@ -1,7 +1,12 @@
 name: bench-preview-teardown
 
+# pull_request_target, not pull_request: GitHub starts no pull_request run for a PR whose test
+# merge commit it never computed (mergeable null) or that conflicts, and fleet PRs the runner
+# opens and closes through the API often have none, so 11 of 17 closes on 2026-11-05/06 tore
+# nothing down. pull_request_target runs this file from main and needs no merge commit. It never
+# checks out the PR's code, and runs only for branches of this repository.
 on:
-  pull_request:
+  pull_request_target:
     types: [closed]
     branches: [main]
   workflow_dispatch:
@@ -10,10 +15,10 @@ on:
         type: string
         required: true
 
-run-name: "bench-preview-teardown ${{ github.event_name == 'pull_request' && github.head_ref || inputs.pr_branch }}"
+run-name: "bench-preview-teardown ${{ github.event.pull_request.head.ref || inputs.pr_branch }}"
 
 concurrency:
-  group: bench-preview-${{ github.event_name == 'pull_request' && github.head_ref || inputs.pr_branch }}
+  group: bench-preview-${{ github.event.pull_request.head.ref || inputs.pr_branch }}
   cancel-in-progress: false
 
 permissions:
@@ -24,7 +29,8 @@ jobs:
   teardown:
     if: >-
       github.event_name == 'workflow_dispatch' ||
-      startsWith(github.head_ref, 'baseline/') || startsWith(github.head_ref, 'phase-1/')
+      (github.event.pull_request.head.repo.full_name == github.repository &&
+      (startsWith(github.head_ref, 'baseline/') || startsWith(github.head_ref, 'phase-1/')))
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -38,5 +44,5 @@ jobs:
           HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
           BENCH_SSH_PRIVATE_KEY: ${{ secrets.BENCH_SSH_PRIVATE_KEY }}
           GH_TOKEN: ${{ github.token }}
-          PR_BRANCH: ${{ github.event_name == 'pull_request' && github.head_ref || inputs.pr_branch }}
+          PR_BRANCH: ${{ github.event.pull_request.head.ref || inputs.pr_branch }}
         run: bash bench/ci/preview.sh teardown "$PR_BRANCH"
